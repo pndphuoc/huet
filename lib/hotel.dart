@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:hue_t/model/roomTypeModel.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';
 import 'colors.dart' as colors;
 import 'model/hotelModel.dart';
+import 'fade_on_scroll.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:hidable/hidable.dart';
 
 class HotelPage extends StatefulWidget {
   const HotelPage({Key? key}) : super(key: key);
@@ -30,97 +34,74 @@ class MyBehavior extends ScrollBehavior {
 final ScrollController scrollController = ScrollController();
 
 class _HotelPageState extends State<HotelPage> {
+  final ScrollController scrollController = ScrollController();
   String selectedCheckInDate = '';
   String selectedCheckOutDate = '';
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        color: colors.backgroundColor,
-        child: SafeArea(
-            child: Column(
-              children: [
-                Container(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                          width: MediaQuery.of(context).size.width,
-                          child: Stack(children: [
-                            Image(
-                                image: AssetImage("assets/images/hotel/img.png")),
-                            IntrinsicHeight(
-                              child: Container(
-                                margin: EdgeInsets.only(
-                                    left: 20,
-                                    right: 20,
-                                    top: MediaQuery.of(context).size.height / 15),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      "Find the perfect hotel",
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 40),
-                                    ),
-                                    searchBlock(context),
-                                  ],
-                                ),
-                              ),
-                            )
-                          ])),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20,),
-                ConstrainedBox(constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height/2.05
-                ),
-                  child: AnimationLimiter(
-                    child: ScrollConfiguration(
-                      behavior: MyBehavior(),
-                      child: ShaderMask(
-                          shaderCallback: (Rect bounds) {
-                            return LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [
-                                colors.backgroundColor,
-                                Colors.transparent,
-                                Colors.transparent,
-                                colors.backgroundColor
-                              ],
-                              stops: [0, 0.01, 0.9, 1.0],
-                            ).createShader(bounds);
-                          },
-                          blendMode: BlendMode.dstOut,
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                            controller: scrollController,
-                            itemCount: listHotels.length,
-                            itemBuilder: (BuildContext context, int index){
-                              return AnimationConfiguration.staggeredList(position: index,
-                                  duration: const Duration(milliseconds: 1000),
-                                  child: SlideAnimation(
-                                    child: FadeInAnimation(
-                                      child: hotelItem(context, listHotels[index]),
-                                    ),
-                                  ));
-                            },
-                          )
-                      ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: SafeArea(
+          child: NestedScrollView(
+            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              return [
+                SliverAppBar(
+                  flexibleSpace: FlexibleSpaceBar(
+                    centerTitle: true,
+                    title: banner(),
+                    background: Container(
+                      color: colors.backgroundColor,
                     ),
                   ),
+
+                  elevation: 0,
+                  automaticallyImplyLeading: false,
+                  expandedHeight: 170,
+                  floating: false,
+                  backgroundColor: colors.backgroundColor,
                 )
+              ];
+            },
+            body: Column(
+              children: [
+                Container(
+                  margin: EdgeInsets.only(left: 20, right: 20, bottom: 20),
+                  child: searchBlock(context),
+                ),
+                Expanded( child: ListView.builder(
+                  itemCount: listHotels.length,
+                  itemBuilder: (BuildContext context, int index){
+                    return AnimationConfiguration.staggeredList(position: index,
+                        duration: const Duration(milliseconds: 1000),
+                        child: SlideAnimation(
+                          child: FadeInAnimation(
+                            child: hotelItem(context, listHotels[index]),
+                          ),
+                        ));
+                  },
+                ),)
               ],
             ),
-
+          ),
         ),
+
       ),
     );
   }
-
+  banner(){
+    return Container(
+      child: RichText(textAlign: TextAlign.center, text: TextSpan(children: [
+        TextSpan(text: "Find the\n", style: GoogleFonts.montserrat(textStyle: TextStyle(color: Colors.black, fontSize: 25))),
+        TextSpan(text: "PERFECT", style: GoogleFonts.montserrat(textStyle: TextStyle(color: Colors.lightBlue, fontSize: 25, fontWeight: FontWeight.bold))),
+        TextSpan(text: " hotel\n", style: GoogleFonts.montserrat(textStyle: TextStyle(color: Colors.black, fontSize: 25))),
+        TextSpan(text: "for your ", style: GoogleFonts.montserrat(textStyle: TextStyle(color: Colors.black, fontSize: 25))),
+        TextSpan(text: "TRIP ", style: GoogleFonts.montserrat(textStyle: TextStyle(color: Colors.lightBlue, fontSize: 25, fontWeight: FontWeight.bold))),
+        WidgetSpan(child: Icon(Icons.directions_bike_outlined, size: 20, color: Colors.black,))
+      ])),
+    );
+  }
   searchBlock(BuildContext context) {
     return Container(
       width: MediaQuery.of(context).size.width,
@@ -132,7 +113,7 @@ class _HotelPageState extends State<HotelPage> {
             margin: EdgeInsets.only(left: 15, right: 15, top: 15),
             child: TextField(
               decoration: InputDecoration(
-                  hintText: 'Name of hotel/home stay',
+                  hintText: 'Name of hotel/homestay',
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                       borderSide: BorderSide.none),
@@ -258,7 +239,10 @@ class _HotelPageState extends State<HotelPage> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Container(
-                padding: EdgeInsets.only(top: 15, bottom: 15),
+                margin: EdgeInsets.only(top: 15, bottom: 15),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10)
+                ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
                   child: Image.network(model.images.first, fit: BoxFit.cover, height: 100, width: 100,),
@@ -272,26 +256,26 @@ class _HotelPageState extends State<HotelPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(model.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black), maxLines: 1,),
+                      Text(model.name, style: GoogleFonts.notoSans(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black), maxLines: 1,),
                       RichText(text: TextSpan(
                         children: [
-                          WidgetSpan(child: Icon(Icons.location_pin, size: 16, color: Colors.black,)),
+                          WidgetSpan(child: Icon(Icons.pin_drop_outlined, size: 16, color: Colors.grey,)),
                           TextSpan(
-                            text: model.address, style: TextStyle(color: Colors.grey, fontSize: 12)
+                            text: " ${model.address}", style: GoogleFonts.montserrat(color: Colors.black, fontSize: 12)
                           )
                         ]
                       ),),
                       RichText(text: TextSpan(
                         children: [
-                          WidgetSpan(child: Icon(Icons.motorcycle, size: 16, color: Colors.black,)),
-                          TextSpan(text: " 0.2 km", style: TextStyle(fontSize: 12, color: Colors.grey))
+                          WidgetSpan(child: Icon(Icons.map_outlined, size: 16, color: Colors.grey,)),
+                          TextSpan(text: " 0.2 km", style: TextStyle(fontSize: 12, color: Colors.black))
                         ]
                       )),
                       RichText(text: TextSpan(
                         children: [
-                          WidgetSpan(child: Icon(Icons.attach_money_rounded, size: 20, color: Colors.black,)),
-                          TextSpan(text: model.price.toString(), style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20)),
-                          TextSpan(text: "/night", style: TextStyle(fontSize: 12, color: Colors.grey))
+                          WidgetSpan(child: Icon(Icons.attach_money, size: 20, color: Colors.black,)),
+                          TextSpan(text: model.price.toString(), style: GoogleFonts.montserrat(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20,)),
+                          TextSpan(text: "/night", style: GoogleFonts.montserrat(fontSize: 12, color: Colors.grey))
                         ]
                       ))
                     ],
