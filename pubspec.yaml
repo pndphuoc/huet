@@ -39,6 +39,7 @@ dependencies:
   sticky_headers: ^0.3.0
   flutter_sticky_header: ^0.6.4
   hidable: ^1.0.3
+  carousel_slider: ^4.1.1
   flutter:
     sdk: flutter
 
