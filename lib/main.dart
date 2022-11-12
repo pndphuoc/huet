@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hue_t/home.dart';
-import 'package:hue_t/hotel.dart';
 
 void main() {
   runApp(const MyApp());
