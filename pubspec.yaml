@@ -29,6 +29,10 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  geolocator: ^9.0.2
+  permission_handler: ^10.2.0
+  google_maps_flutter:
+  flutter_rating_bar:
   swipeable_page_route: ^0.2.6
   flutter_staggered_grid_view:
   flutter_staggered_animations: ^1.0.0

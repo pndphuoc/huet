@@ -10,6 +10,7 @@ import 'model/hotelModel.dart';
 import 'fade_on_scroll.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/show_up.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class HotelPage extends StatefulWidget {
   const HotelPage({Key? key}) : super(key: key);
@@ -17,13 +18,56 @@ class HotelPage extends StatefulWidget {
   @override
   State<HotelPage> createState() => _HotelPageState();
 }
-List<roomTypeModel> roomTypesOfHuongGiangHotel = [roomTypeModel(id: 1, name: "Single room"), roomTypeModel(id: 2, name: "Double room"), roomTypeModel(id: 3, name: "Triple room"), roomTypeModel(id: 4, name: "VIP room")];
-List<String> imagesOfHuongGiangHotel = ['https://www.huonggianghotel.com.vn/wp-content/uploads/2018/08/DSC_1308-HDR-Custom-1.jpg', 'https://www.huonggianghotel.com.vn/wp-content/uploads/2018/06/DSC_4563-HDR2_1600x1068-1.jpg', 'https://cf.bstatic.com/xdata/images/hotel/max1280x900/185016305.jpg?k=e0510db64b6c0f4b0623cb63a4014b95c677970d880c414c864fbbe094a9211c&o=&hp=1'];
-List<hotelModel> listHotels = [hotelModel(id: 1, name: "Hương Giang", address: "69 Lê Lợi", images: imagesOfHuongGiangHotel, price: 200, types: roomTypesOfHuongGiangHotel, rating: 4.5),
-  hotelModel(id: 2, name: "Hương Giang", address: "69 Lê Lợi", images: imagesOfHuongGiangHotel, price: 200, types: roomTypesOfHuongGiangHotel),
-  hotelModel(id: 3, name: "Hương Giang", address: "69 Lê Lợi", images: imagesOfHuongGiangHotel, price: 200, types: roomTypesOfHuongGiangHotel),
-  hotelModel(id: 1, name: "Hương Giang", address: "69 Lê Lợi", images: imagesOfHuongGiangHotel, price: 200, types: roomTypesOfHuongGiangHotel),
-  hotelModel(id: 1, name: "Hương Giang", address: "69 Lê Lợi", images: imagesOfHuongGiangHotel, price: 200, types: roomTypesOfHuongGiangHotel)];
+
+List<roomTypeModel> roomTypesOfHuongGiangHotel = [
+  roomTypeModel(id: 1, name: "Single room"),
+  roomTypeModel(id: 2, name: "Double room"),
+  roomTypeModel(id: 3, name: "Triple room"),
+  roomTypeModel(id: 4, name: "VIP room")
+];
+List<String> imagesOfHuongGiangHotel = [
+  'https://www.huonggianghotel.com.vn/wp-content/uploads/2018/08/DSC_1308-HDR-Custom-1.jpg',
+  'https://www.huonggianghotel.com.vn/wp-content/uploads/2018/06/DSC_4563-HDR2_1600x1068-1.jpg',
+  'https://cf.bstatic.com/xdata/images/hotel/max1280x900/185016305.jpg?k=e0510db64b6c0f4b0623cb63a4014b95c677970d880c414c864fbbe094a9211c&o=&hp=1'
+];
+List<hotelModel> listHotels = [
+  hotelModel(
+      id: 1,
+      name: "Hương Giang",
+      address: "69 Lê Lợi",
+      images: imagesOfHuongGiangHotel,
+      price: 200,
+      types: roomTypesOfHuongGiangHotel,
+      rating: 4),
+  hotelModel(
+      id: 2,
+      name: "Hương Giang",
+      address: "69 Lê Lợi",
+      images: imagesOfHuongGiangHotel,
+      price: 200,
+      types: roomTypesOfHuongGiangHotel),
+  hotelModel(
+      id: 3,
+      name: "Hương Giang",
+      address: "69 Lê Lợi",
+      images: imagesOfHuongGiangHotel,
+      price: 200,
+      types: roomTypesOfHuongGiangHotel),
+  hotelModel(
+      id: 1,
+      name: "Hương Giang",
+      address: "69 Lê Lợi",
+      images: imagesOfHuongGiangHotel,
+      price: 200,
+      types: roomTypesOfHuongGiangHotel),
+  hotelModel(
+      id: 1,
+      name: "Hương Giang",
+      address: "69 Lê Lợi",
+      images: imagesOfHuongGiangHotel,
+      price: 200,
+      types: roomTypesOfHuongGiangHotel)
+];
 
 class MyBehavior extends ScrollBehavior {
   @override
@@ -32,7 +76,9 @@ class MyBehavior extends ScrollBehavior {
     return child;
   }
 }
+
 final ScrollController scrollController = ScrollController();
+bool isRecommendationHotel = true;
 
 class _HotelPageState extends State<HotelPage> {
   final ScrollController scrollController = ScrollController();
@@ -44,9 +90,11 @@ class _HotelPageState extends State<HotelPage> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
+        resizeToAvoidBottomInset: false,
         body: SafeArea(
           child: NestedScrollView(
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            headerSliverBuilder:
+                (BuildContext context, bool innerBoxIsScrolled) {
               return [
                 SliverAppBar(
                   flexibleSpace: FlexibleSpaceBar(
@@ -56,7 +104,6 @@ class _HotelPageState extends State<HotelPage> {
                       color: colors.backgroundColor,
                     ),
                   ),
-
                   elevation: 0,
                   automaticallyImplyLeading: false,
                   expandedHeight: 170,
@@ -68,41 +115,74 @@ class _HotelPageState extends State<HotelPage> {
             body: Column(
               children: [
                 Container(
-                  margin: EdgeInsets.only(left: 20, right: 20, bottom: 20),
+                  margin: EdgeInsets.only(left: 20, right: 20, bottom: 15),
                   child: searchBlock(context),
                 ),
-                Expanded( child: ListView.builder(
-                  itemCount: listHotels.length,
-                  itemBuilder: (BuildContext context, int index){
-                    return hotelItem(context, listHotels[index]);
-                  },
-                ),)
+                sortBlock(context),
+                SizedBox(height: 5,),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: listHotels.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return hotelItem(context, listHotels[index]);
+                    },
+                  ),
+                )
               ],
             ),
           ),
         ),
-
       ),
     );
   }
-  banner(){
+
+  banner() {
     return ShowUp(
       delay: 0,
       child: Container(
-        child: RichText(textAlign: TextAlign.center, text: TextSpan(children: [
-          TextSpan(text: "Find the\n", style: GoogleFonts.montserrat(textStyle: TextStyle(color: Colors.black, fontSize: 25))),
-          TextSpan(text: "PERFECT", style: GoogleFonts.montserrat(textStyle: TextStyle(color: Colors.lightBlue, fontSize: 25, fontWeight: FontWeight.bold))),
-          TextSpan(text: " hotel\n", style: GoogleFonts.montserrat(textStyle: TextStyle(color: Colors.black, fontSize: 25))),
-          TextSpan(text: "for your ", style: GoogleFonts.montserrat(textStyle: TextStyle(color: Colors.black, fontSize: 25))),
-          TextSpan(text: "TRIP ", style: GoogleFonts.montserrat(textStyle: TextStyle(color: Colors.lightBlue, fontSize: 25, fontWeight: FontWeight.bold))),
-          WidgetSpan(child: Icon(Icons.directions_bike_outlined, size: 20, color: Colors.black,))
-        ])),
+        child: RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(children: [
+              TextSpan(
+                  text: "Find the\n",
+                  style: GoogleFonts.montserrat(
+                      textStyle: TextStyle(color: Colors.black, fontSize: 25))),
+              TextSpan(
+                  text: "PERFECT",
+                  style: GoogleFonts.montserrat(
+                      textStyle: TextStyle(
+                          color: Colors.lightBlue,
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold))),
+              TextSpan(
+                  text: " hotel\n",
+                  style: GoogleFonts.montserrat(
+                      textStyle: TextStyle(color: Colors.black, fontSize: 25))),
+              TextSpan(
+                  text: "for your ",
+                  style: GoogleFonts.montserrat(
+                      textStyle: TextStyle(color: Colors.black, fontSize: 25))),
+              TextSpan(
+                  text: "TRIP ",
+                  style: GoogleFonts.montserrat(
+                      textStyle: TextStyle(
+                          color: Colors.lightBlue,
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold))),
+              WidgetSpan(
+                  child: Icon(
+                Icons.directions_bike_outlined,
+                size: 20,
+                color: Colors.black,
+              ))
+            ])),
       ),
     );
   }
+
   searchBlock(BuildContext context) {
     return ShowUp(
-      delay: 250,
+      delay: 150,
       child: Container(
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
@@ -140,7 +220,10 @@ class _HotelPageState extends State<HotelPage> {
                             elevation: 0.0,
                             shadowColor: Colors.transparent,
                           ),
-                          child: Text( selectedCheckInDate!=''?selectedCheckInDate:"Check-In",
+                          child: Text(
+                            selectedCheckInDate != ''
+                                ? selectedCheckInDate
+                                : "Check-In",
                             style: TextStyle(color: Colors.grey),
                           )),
                     ),
@@ -161,7 +244,9 @@ class _HotelPageState extends State<HotelPage> {
                           shadowColor: Colors.transparent,
                         ),
                         child: Text(
-                          selectedCheckOutDate!=''?selectedCheckOutDate:"Check-Out",
+                          selectedCheckOutDate != ''
+                              ? selectedCheckOutDate
+                              : "Check-Out",
                           style: TextStyle(color: Colors.grey),
                         )),
                   ))
@@ -190,12 +275,92 @@ class _HotelPageState extends State<HotelPage> {
       ),
     );
   }
+
+  sortBlock(BuildContext context) {
+    return ShowUp(
+      delay: 300,
+      child: Container(
+        height: 50,
+        width: MediaQuery.of(context).size.width,
+        margin: EdgeInsets.only(left: 20, right: 20,),
+        decoration: BoxDecoration(
+            color: colors.hotelListViewItem,
+            borderRadius: BorderRadius.circular(25)),
+        child: Stack(children: [
+          /*AnimatedContainer(duration: Duration(milliseconds: 500),
+            margin: EdgeInsets.all(5),
+            decoration: BoxDecoration(
+                color: Colors.green,
+                borderRadius: BorderRadius.circular(25)
+            ),
+            width: double.infinity/2,
+            height: double.infinity,
+
+            child: Container(),
+          ),*/
+          LayoutBuilder(builder: (ctx, constraints) {
+            return AnimatedContainer(
+              duration: Duration(milliseconds: 300),
+              margin: EdgeInsets.only(
+                  left: isRecommendationHotel ? 5 : constraints.maxWidth * 0.5,
+                  top: 5,
+                  bottom: 5,
+                  right: 5),
+              height: constraints.maxHeight,
+              width: constraints.maxWidth * 0.5,
+              child: Container(
+                decoration: BoxDecoration(
+                    color: colors.filterItemColor,
+                    borderRadius: BorderRadius.circular(25)),
+              ),
+            );
+          }),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Expanded(
+                child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    child: TextButton(
+                        style: ButtonStyle(
+                            overlayColor: MaterialStateColor.resolveWith((states) => Colors.transparent)
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            isRecommendationHotel = true;
+                          });
+                        },
+                        child: Text("Recommendation", style: isRecommendationHotel==true?GoogleFonts.montserrat(color: Colors.black, fontWeight: FontWeight.bold):GoogleFonts.montserrat(color: Colors.black),))),
+              ),
+              Expanded(
+                  child: Container(
+                      child: TextButton(
+                        style: ButtonStyle(
+                          overlayColor: MaterialStateColor.resolveWith((states) => Colors.transparent)
+                        ),
+                          onPressed: () {
+                            setState(() {
+                              isRecommendationHotel = false;
+                            });
+                          },
+                          child: Text("Near to you", style: isRecommendationHotel==false?GoogleFonts.montserrat(color: Colors.black, fontWeight: FontWeight.bold):GoogleFonts.montserrat(color: Colors.black),))))
+            ],
+          ),
+        ]),
+      ),
+    );
+  }
+
   _selectCheckInDate(BuildContext context) async {
     DateTime selectedDate = DateTime.now();
     final DateTime picked = await showDialog(
         context: context,
         builder: (BuildContext context) {
-          return DatePickerDialog( initialDate: selectedDate, firstDate: DateTime.now(), lastDate: DateTime(2025),);
+          return DatePickerDialog(
+            initialDate: selectedDate,
+            firstDate: DateTime.now(),
+            lastDate: DateTime(2025),
+          );
         });
     if (picked != null && picked != selectedDate)
       setState(() {
@@ -206,12 +371,17 @@ class _HotelPageState extends State<HotelPage> {
       selectedCheckInDate = formatter.format(selectedDate);
     });
   }
+
   _selectCheckOutDate(BuildContext context) async {
     DateTime selectedDate = DateTime.now();
     final DateTime picked = await showDialog(
         context: context,
         builder: (BuildContext context) {
-          return DatePickerDialog( initialDate: selectedDate, firstDate: DateTime.now(), lastDate: DateTime(2025),);
+          return DatePickerDialog(
+            initialDate: selectedDate,
+            firstDate: DateTime.now(),
+            lastDate: DateTime(2025),
+          );
         });
     if (picked != null && picked != selectedDate)
       setState(() {
@@ -222,71 +392,113 @@ class _HotelPageState extends State<HotelPage> {
       selectedCheckOutDate = formatter.format(selectedDate);
     });
   }
+
   hotelItem(BuildContext context, hotelModel model) {
     return ShowUp(
-      delay: 500,
+      delay: 450,
       child: Container(
         margin: EdgeInsets.only(left: 20, right: 20, bottom: 20),
         child: ElevatedButton(
-          onPressed: (){
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) {
+          onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) {
               // do something
               return HotelDetail(model: model);
             }));
           },
           style: ElevatedButton.styleFrom(
-            elevation: 0.0,
-            shadowColor: Colors.white,
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            )
-          ),
+              elevation: 0.0,
+              shadowColor: Colors.white,
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              )),
           child: Container(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Container(
                   margin: EdgeInsets.only(top: 15, bottom: 15),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10)
-                  ),
+                  decoration:
+                      BoxDecoration(borderRadius: BorderRadius.circular(10)),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.network(model.images.first, fit: BoxFit.cover, height: 100, width: 100,),
+                    child: Image.network(
+                      model.images.first,
+                      fit: BoxFit.cover,
+                      height: 100,
+                      width: 100,
+                    ),
                   ),
                 ),
                 Expanded(
                   child: Container(
-                    padding: EdgeInsets.only(top: 20, right: 20, bottom: 20, left: 10),
+                    padding: EdgeInsets.only(
+                        top: 20, right: 20, bottom: 20, left: 10),
                     height: 130,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(model.name, style: GoogleFonts.notoSans(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black), maxLines: 1,),
+                        Text(
+                          model.name,
+                          style: GoogleFonts.notoSans(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black),
+                          maxLines: 1,
+                        ),
                         RichText(text: TextSpan(
                           children: [
-                            WidgetSpan(child: Icon(Icons.pin_drop_outlined, size: 16, color: Colors.grey,)),
-                            TextSpan(
-                              text: " ${model.address}", style: GoogleFonts.montserrat(color: Colors.black, fontSize: 12)
-                            )
-                          ]
-                        ),),
-                        RichText(text: TextSpan(
-                          children: [
-                            WidgetSpan(child: Icon(Icons.map_outlined, size: 16, color: Colors.grey,)),
-                            TextSpan(text: " 0.2 km", style: TextStyle(fontSize: 12, color: Colors.black))
+                            WidgetSpan(child: RatingBar(
+                              ratingWidget: RatingWidget(
+                                  full: Icon(Icons.star,
+                                    color: Colors.yellow,),
+                                  half: Icon(Icons.star_half,
+                                    color: Colors.yellow,),
+                                  empty: Icon(Icons.star_border,
+                                    color: Colors.yellow,)),
+                              onRatingUpdate: (rating) {},
+                              itemSize: 15,
+                              allowHalfRating: true,
+                              initialRating: model.rating!=null?model.rating!:0,
+                            ),),
+                            TextSpan(text: " "),
+                            TextSpan(text: model.rating!=null?model.rating!.toString():"No review", style: GoogleFonts.montserrat(color: Colors.black, fontSize: 11))
                           ]
                         )),
-                        RichText(text: TextSpan(
-                          children: [
-                            WidgetSpan(child: Icon(Icons.attach_money, size: 20, color: Colors.black,)),
-                            TextSpan(text: model.price.toString(), style: GoogleFonts.montserrat(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20,)),
-                            TextSpan(text: "/night", style: GoogleFonts.montserrat(fontSize: 12, color: Colors.grey))
-                          ]
-                        ))
+                        RichText(
+                            text: TextSpan(children: [
+                          WidgetSpan(
+                              child: Icon(
+                            Icons.map_outlined,
+                            size: 16,
+                            color: Colors.grey,
+                          )),
+                          TextSpan(
+                              text: " 0.2 km",
+                              style:
+                                  TextStyle(fontSize: 12, color: Colors.black))
+                        ])),
+                        RichText(
+                            text: TextSpan(children: [
+                          WidgetSpan(
+                              child: Icon(
+                            Icons.attach_money,
+                            size: 20,
+                            color: Colors.black,
+                          )),
+                          TextSpan(
+                              text: model.price.toString(),
+                              style: GoogleFonts.montserrat(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              )),
+                          TextSpan(
+                              text: "/night",
+                              style: GoogleFonts.montserrat(
+                                  fontSize: 12, color: Colors.grey))
+                        ]))
                       ],
                     ),
                   ),
