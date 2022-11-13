@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:hue_t/hotel_detail.dart';
+import 'package:hue_t/model/locationModel.dart';
 import 'package:hue_t/model/roomTypeModel.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';
@@ -35,6 +36,7 @@ List<hotelModel> listHotels = [
       id: 1,
       name: "Hương Giang",
       address: "69 Lê Lợi",
+      hotelLocaton: location(latitude: 16.470970686019427, longitude: 107.5944807077246),
       images: imagesOfHuongGiangHotel,
       price: 200,
       types: roomTypesOfHuongGiangHotel,
