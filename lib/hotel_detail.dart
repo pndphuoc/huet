@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hue_t/model/hotelModel.dart';
 import 'package:hue_t/show_up.dart';
 import 'package:geolocator/geolocator.dart';
 import 'colors.dart' as colors;
+import 'model/reviewModel.dart';
 
 class HotelDetail extends StatefulWidget {
   const HotelDetail({Key? key, required this.model}) : super(key: key);
@@ -36,7 +38,7 @@ class _HotelDetailState extends State<HotelDetail> {
 
   // on below line we have specified camera position
   static final CameraPosition _kGoogle = const CameraPosition(
-    target: LatLng(20.42796133580664, 80.885749655962),
+    target: LatLng(16.462766512813303, 107.58981951625772),
     zoom: 14.4746,
   );
 
@@ -63,6 +65,12 @@ class _HotelDetailState extends State<HotelDetail> {
     });
     return await Geolocator.getCurrentPosition();
   }
+
+  //reviews data
+  List<reviewModel> reviewsList = [reviewModel(id: 1, rating: 5, review: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ,images: ["https://www.gannett-cdn.com/-mm-/05b227ad5b8ad4e9dcb53af4f31d7fbdb7fa901b/c=0-64-2119-1259/local/-/media/USATODAY/USATODAY/2014/08/13/1407953244000-177513283.jpg"]),
+    reviewModel(id: 2, rating: 4, review: "Normal"),
+    reviewModel(id: 3, rating: 1, review: "Too bad")];
 
   @override
   void initState() {
@@ -255,7 +263,7 @@ class _HotelDetailState extends State<HotelDetail> {
                                 child: Icon(
                               Icons.star_rate_rounded,
                               size: 25,
-                              color: Color.fromARGB(255, 254, 200, 0),
+                              color: colors.starsReviewColor,
                             )),
                             TextSpan(
                                 text: " ${widget.model.rating}/5",
@@ -334,7 +342,32 @@ class _HotelDetailState extends State<HotelDetail> {
                         ),
                       ),
                     ),
-                    delay: 600)
+                    delay: 600),
+                SizedBox(height: 15,),
+                ShowUp(child: Text("Reviews", style: GoogleFonts.montserrat(color: Colors.black, fontSize: 25),), delay: 750),
+                SizedBox(height: 5,),
+                Row(
+                  children: [
+                    RatingBar(
+                      ratingWidget: RatingWidget(
+                          full: Icon(Icons.star,
+                            color: colors.starsReviewColor,),
+                          half: Icon(Icons.star_half,
+                            color: colors.starsReviewColor,),
+                          empty: Icon(Icons.star_border,
+                            color: colors.starsReviewColor,)),
+                      onRatingUpdate: (rating) {},
+                      itemSize: 15,
+                      allowHalfRating: true,
+                      initialRating: widget.model.rating!,
+                    ),
+                    Text(" ${widget.model.rating!}/5",)
+                  ],
+                ),
+                SizedBox(height: 15,),
+                ...reviewsList.map((e) {
+                  return reviewsBlock(context, e);
+                })
               ],
             ),
           ),
@@ -395,6 +428,70 @@ class _HotelDetailState extends State<HotelDetail> {
                     borderRadius: BorderRadius.circular(25)),
               ),
             ))
+          ],
+        ),
+      ),
+    );
+  }
+
+  reviewsBlock(BuildContext context, reviewModel e) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 15),
+      padding: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        color: colors.reviewItemColor
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              margin: EdgeInsets.only(right: 10),
+              height: 30,
+              width: 30,
+                child: CircleAvatar(backgroundImage: AssetImage("assets/images/hotel/avatar.png"), )),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Incognito", style: GoogleFonts.montserrat(color: Colors.black, fontSize: 15, fontWeight: FontWeight.w600),),
+                  RatingBar(
+                    ratingWidget: RatingWidget(
+                        full: Icon(Icons.star,
+                          color: colors.starsReviewColor,),
+                        half: Icon(Icons.star_half,
+                          color: colors.starsReviewColor,),
+                        empty: Icon(Icons.star_border,
+                          color: colors.starsReviewColor,)),
+                    onRatingUpdate: (rating) {},
+                    itemSize: 15,
+                    allowHalfRating: true,
+                    initialRating: e.rating.toDouble(),
+                  ),
+                  SizedBox(height: 10,),
+                  Text(e.review!),
+                  SizedBox(height: 10,),
+                  Wrap(
+                    children: [
+                      if(e.images!=null)
+                        ...e.images!.map((i) =>
+                          Container(
+                            width: 70,
+                            child: AspectRatio(
+                              aspectRatio: 1/1,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                  child: Image.network(i, fit: BoxFit.fitHeight,)
+                              ),
+                            ),
+                          )
+                        )
+                    ],
+                  )
+                ],
+              ),
+            )
           ],
         ),
       ),
