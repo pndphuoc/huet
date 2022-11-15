@@ -6,12 +6,13 @@ class hotelModel {
   int id;
   String name;
   String address;
-  location? hotelLocaton;
+  location hotelLocaton;
   List<String> images;
   int price;
   double? rating;
   List<reviewModel>? reviews;
   List<roomTypeModel> types;
+  double? distance;
 
-  hotelModel({required this.id, required this.name, required this.address, this.hotelLocaton, required this.images, required this.price, this.rating, this.reviews, required this.types});
+  hotelModel({required this.id, required this.name, required this.address, required this.hotelLocaton, required this.images, required this.price, this.rating, this.reviews, required this.types});
 }

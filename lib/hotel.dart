@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:hue_t/hotel_detail.dart';
 import 'package:hue_t/model/locationModel.dart';
 import 'package:hue_t/model/roomTypeModel.dart';
+import 'package:implicitly_animated_reorderable_list/implicitly_animated_reorderable_list.dart';
+import 'package:implicitly_animated_reorderable_list/transitions.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:intl/intl.dart';
 import 'colors.dart' as colors;
@@ -12,6 +16,7 @@ import 'fade_on_scroll.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/show_up.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'dart:math';
 
 class HotelPage extends StatefulWidget {
   const HotelPage({Key? key}) : super(key: key);
@@ -34,41 +39,54 @@ List<String> imagesOfHuongGiangHotel = [
 List<hotelModel> listHotels = [
   hotelModel(
       id: 1,
+      name: "Silk Path Grand Hue Hotel",
+      address: "2 Lê Lợi",
+      hotelLocaton:
+      location(latitude: 16.458015573692116, longitude: 107.57969752805363),
+      images: imagesOfHuongGiangHotel,
+      price: 200,
+      types: roomTypesOfHuongGiangHotel,
+      rating: 5),
+  hotelModel(
+      id: 1,
       name: "Hương Giang",
       address: "69 Lê Lợi",
-      hotelLocaton: location(latitude: 16.470970686019427, longitude: 107.5944807077246),
+      hotelLocaton:
+          location(latitude: 16.470970686019427, longitude: 107.5944807077246),
       images: imagesOfHuongGiangHotel,
       price: 200,
       types: roomTypesOfHuongGiangHotel,
       rating: 4),
   hotelModel(
       id: 2,
-      name: "Hương Giang",
-      address: "69 Lê Lợi",
+      name: "Vinpearl Hue",
+      address: "50A Hùng Vương",
+      hotelLocaton:
+          location(latitude: 16.463430881885497, longitude: 107.59451227529739),
       images: imagesOfHuongGiangHotel,
       price: 200,
-      types: roomTypesOfHuongGiangHotel),
+      types: roomTypesOfHuongGiangHotel,
+      rating: 4.5),
   hotelModel(
       id: 3,
-      name: "Hương Giang",
-      address: "69 Lê Lợi",
+      name: "The Manor Crown Huế",
+      address: "62 Tố Hữu",
+      hotelLocaton:
+          location(latitude: 16.463786394219735, longitude: 107.60703420242594),
       images: imagesOfHuongGiangHotel,
       price: 200,
-      types: roomTypesOfHuongGiangHotel),
+      types: roomTypesOfHuongGiangHotel,
+      rating: 3.5),
   hotelModel(
       id: 1,
-      name: "Hương Giang",
-      address: "69 Lê Lợi",
+      name: "Azerai La Residence, Hue",
+      address: "5 Lê Lợi",
+      hotelLocaton:
+          location(latitude: 16.459255735696967, longitude: 107.5802938520555),
       images: imagesOfHuongGiangHotel,
       price: 200,
-      types: roomTypesOfHuongGiangHotel),
-  hotelModel(
-      id: 1,
-      name: "Hương Giang",
-      address: "69 Lê Lợi",
-      images: imagesOfHuongGiangHotel,
-      price: 200,
-      types: roomTypesOfHuongGiangHotel)
+      types: roomTypesOfHuongGiangHotel,
+      rating: 4.5),
 ];
 
 class MyBehavior extends ScrollBehavior {
@@ -87,97 +105,190 @@ class _HotelPageState extends State<HotelPage> {
   String selectedCheckInDate = '';
   String selectedCheckOutDate = '';
 
+  Future<Position> getUserCurrentLocation() async {
+    await Geolocator.requestPermission()
+        .then((value) {})
+        .onError((error, stackTrace) async {
+      await Geolocator.requestPermission();
+      print("ERROR" + error.toString());
+    });
+    return await Geolocator.getCurrentPosition();
+  }
+
+  Future<void> distanceCaculating(Position value) async {
+    for (int i = 0; i < listHotels.length; i++) {
+      listHotels[i].distance = GeolocatorPlatform.instance.distanceBetween(
+            value.latitude,
+            value.longitude,
+            listHotels[i].hotelLocaton.latitude,
+            listHotels[i].hotelLocaton.longitude,
+          ) /
+          1000;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getUserCurrentLocation().then((value) async {
+      print(value.latitude.toString() + " " + value.longitude.toString());
+    });
+  }
+
+  bool isLoading = true;
+
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      getUserCurrentLocation().then((value) async {
+        print(value.latitude.toString() + " " + value.longitude.toString());
+        await distanceCaculating(value);
+        setState(() {
+          isLoading = false;
+        });
+      });
+    }
+
+    if (isRecommendationHotel)
+    {
+      listHotels.sort((b, a) {
+        return a.rating!.compareTo(b.rating!);
+      },);
+    }
+    else
+    {
+      listHotels.sort((a, b) {
+        return a.distance!.compareTo(b.distance!);
+      },);
+    }
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         resizeToAvoidBottomInset: false,
         body: SafeArea(
-          child: NestedScrollView(
-            headerSliverBuilder:
-                (BuildContext context, bool innerBoxIsScrolled) {
-              return [
-                SliverAppBar(
-                  flexibleSpace: FlexibleSpaceBar(
-                    centerTitle: true,
-                    title: banner(),
-                    background: Container(
-                      color: colors.backgroundColor,
-                    ),
-                  ),
-                  elevation: 0,
-                  automaticallyImplyLeading: false,
-                  expandedHeight: 170,
-                  floating: false,
-                  backgroundColor: colors.backgroundColor,
+          child: isLoading
+              ? Center(
+                  child: LoadingAnimationWidget.staggeredDotsWave(
+                      color: colors.primaryColor, size: 50),
                 )
-              ];
-            },
-            body: Column(
-              children: [
-                Container(
-                  margin: EdgeInsets.only(left: 20, right: 20, bottom: 15),
-                  child: searchBlock(context),
+              : NestedScrollView(
+                  headerSliverBuilder:
+                      (BuildContext context, bool innerBoxIsScrolled) {
+                    return [
+                      SliverAppBar(
+                        flexibleSpace: FlexibleSpaceBar(
+                          centerTitle: true,
+                          title: banner(context),
+                          background: Container(
+                            decoration: BoxDecoration(
+                                image: DecorationImage(
+                                    image: AssetImage(
+                                        "assets/images/hotel/img.png"))),
+                          ),
+                        ),
+                        elevation: 0,
+                        automaticallyImplyLeading: false,
+                        expandedHeight:
+                            MediaQuery.of(context).size.height / 3.33,
+                        floating: false,
+                        backgroundColor: Colors.transparent,
+                      )
+                    ];
+                  },
+                  body: Column(
+                    children: [
+                      Container(
+                        margin:
+                            EdgeInsets.only(left: 20, right: 20, bottom: 15),
+                        child: searchBlock(context),
+                      ),
+                      sortBlock(context),
+                      SizedBox(
+                        height: 5,
+                      ),
+                      Expanded(
+                        child: AnimationLimiter(
+                          child: ShowUp(
+                            delay: 450,
+                            child: ImplicitlyAnimatedList<hotelModel>(
+                              items: listHotels,
+                              itemBuilder: (context, animation, item, index) => SizeFadeTransition(
+                                  animation: animation,
+                                  sizeFraction: 0.7,
+                                key: Key(item.id.toString()),
+                                child: hotelItem(context, item),
+                              ),
+                              areItemsTheSame: (a, b) => a.id == b.id,
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
                 ),
-                sortBlock(context),
-                SizedBox(height: 5,),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: listHotels.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return hotelItem(context, listHotels[index]);
-                    },
-                  ),
-                )
-              ],
-            ),
-          ),
         ),
       ),
     );
   }
 
-  banner() {
+  banner(BuildContext context) {
     return ShowUp(
       delay: 0,
       child: Container(
-        child: RichText(
+        margin: EdgeInsets.only(bottom: 40),
+        child: Text(
+          "Find the perfect \nhotel",
+          style: GoogleFonts.montserrat(color: Colors.white, fontSize: 25),
+        ),
+        /* child: RichText(
             textAlign: TextAlign.center,
             text: TextSpan(children: [
               TextSpan(
-                  text: "Find the\n",
+                  text: "Find the",
                   style: GoogleFonts.montserrat(
-                      textStyle: TextStyle(color: Colors.black, fontSize: 25))),
+                      textStyle: TextStyle(color: Colors.white, fontSize: 25))),
               TextSpan(
-                  text: "PERFECT",
+                  text: "perfect",
                   style: GoogleFonts.montserrat(
                       textStyle: TextStyle(
-                          color: Colors.lightBlue,
+                          color: colors.primaryColor,
                           fontSize: 25,
                           fontWeight: FontWeight.bold))),
               TextSpan(
-                  text: " hotel\n",
+                  text: " hotel ",
                   style: GoogleFonts.montserrat(
-                      textStyle: TextStyle(color: Colors.black, fontSize: 25))),
+                      textStyle: TextStyle(color: Colors.white, fontSize: 25))),
               TextSpan(
                   text: "for your ",
                   style: GoogleFonts.montserrat(
-                      textStyle: TextStyle(color: Colors.black, fontSize: 25))),
+                      textStyle: TextStyle(color: Colors.white, fontSize: 25))),
               TextSpan(
                   text: "TRIP ",
                   style: GoogleFonts.montserrat(
                       textStyle: TextStyle(
-                          color: Colors.lightBlue,
+                          color: colors.primaryColor,
                           fontSize: 25,
                           fontWeight: FontWeight.bold))),
               WidgetSpan(
                   child: Icon(
                 Icons.directions_bike_outlined,
                 size: 20,
-                color: Colors.black,
+                color: Colors.white,
               ))
-            ])),
+            ])),*/
+/*        child: Stack(
+          children: [
+            Image.asset("assets/images/hotel/img.png"),
+            Container(
+              margin: EdgeInsets.all(15),
+              child: Positioned(
+                child: Text("Find the perfect hotel", style: GoogleFonts.montserrat(fontSize: 25),),
+                bottom: 30,
+              ),
+            )
+          ],
+        ),*/
       ),
     );
   }
@@ -196,6 +307,7 @@ class _HotelPageState extends State<HotelPage> {
               child: TextField(
                 decoration: InputDecoration(
                     hintText: 'Name of hotel/homestay',
+                    hintStyle: GoogleFonts.montserrat(),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),
                         borderSide: BorderSide.none),
@@ -203,7 +315,7 @@ class _HotelPageState extends State<HotelPage> {
                     fillColor: colors.filterItemColor),
               ),
             ),
-            Container(
+            /*Container(
               margin: EdgeInsets.only(bottom: 15),
               child: Row(
                 children: [
@@ -254,7 +366,8 @@ class _HotelPageState extends State<HotelPage> {
                   ))
                 ],
               ),
-            ),
+            ),*/
+            SizedBox(height: 15,),
             Container(
               margin: EdgeInsets.only(left: 15, right: 15, bottom: 15),
               height: 60,
@@ -284,7 +397,10 @@ class _HotelPageState extends State<HotelPage> {
       child: Container(
         height: 50,
         width: MediaQuery.of(context).size.width,
-        margin: EdgeInsets.only(left: 20, right: 20,),
+        margin: EdgeInsets.only(
+          left: 20,
+          right: 20,
+        ),
         decoration: BoxDecoration(
             color: colors.hotelListViewItem,
             borderRadius: BorderRadius.circular(25)),
@@ -325,27 +441,42 @@ class _HotelPageState extends State<HotelPage> {
                     width: MediaQuery.of(context).size.width,
                     child: TextButton(
                         style: ButtonStyle(
-                            overlayColor: MaterialStateColor.resolveWith((states) => Colors.transparent)
-                        ),
+                            overlayColor: MaterialStateColor.resolveWith(
+                                (states) => Colors.transparent)),
                         onPressed: () {
                           setState(() {
                             isRecommendationHotel = true;
                           });
                         },
-                        child: Text("Recommendation", style: isRecommendationHotel==true?GoogleFonts.montserrat(color: Colors.black, fontWeight: FontWeight.bold):GoogleFonts.montserrat(color: Colors.black),))),
+                        child: Text(
+                          "Recommendation",
+                          style: isRecommendationHotel == true
+                              ? GoogleFonts.montserrat(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold)
+                              : GoogleFonts.montserrat(color: Colors.black),
+                        ))),
               ),
               Expanded(
                   child: Container(
                       child: TextButton(
-                        style: ButtonStyle(
-                          overlayColor: MaterialStateColor.resolveWith((states) => Colors.transparent)
-                        ),
+                          style: ButtonStyle(
+                              overlayColor: MaterialStateColor.resolveWith(
+                                  (states) => Colors.transparent)),
                           onPressed: () {
                             setState(() {
                               isRecommendationHotel = false;
+
                             });
                           },
-                          child: Text("Near to you", style: isRecommendationHotel==false?GoogleFonts.montserrat(color: Colors.black, fontWeight: FontWeight.bold):GoogleFonts.montserrat(color: Colors.black),))))
+                          child: Text(
+                            "Near to you",
+                            style: isRecommendationHotel == false
+                                ? GoogleFonts.montserrat(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold)
+                                : GoogleFonts.montserrat(color: Colors.black),
+                          ))))
             ],
           ),
         ]),
@@ -396,117 +527,129 @@ class _HotelPageState extends State<HotelPage> {
   }
 
   hotelItem(BuildContext context, hotelModel model) {
-    return ShowUp(
-      delay: 450,
-      child: Container(
-        margin: EdgeInsets.only(left: 20, right: 20, bottom: 20),
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) {
-              // do something
-              return HotelDetail(model: model);
-            }));
-          },
-          style: ElevatedButton.styleFrom(
-              elevation: 0.0,
-              shadowColor: Colors.white,
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              )),
-          child: Container(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Container(
-                  margin: EdgeInsets.only(top: 15, bottom: 15),
-                  decoration:
-                      BoxDecoration(borderRadius: BorderRadius.circular(10)),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      model.images.first,
-                      fit: BoxFit.cover,
-                      height: 100,
-                      width: 100,
-                    ),
+    return Container(
+      margin: EdgeInsets.only(left: 20, right: 20, bottom: 20),
+      child: ElevatedButton(
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) {
+            // do something
+            return HotelDetail(model: model);
+          }));
+        },
+        style: ElevatedButton.styleFrom(
+            elevation: 0.0,
+            shadowColor: Colors.white,
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            )),
+        child: Container(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Container(
+                margin: EdgeInsets.only(top: 15, bottom: 15),
+                decoration:
+                    BoxDecoration(borderRadius: BorderRadius.circular(10)),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.network(
+                    model.images.first,
+                    fit: BoxFit.cover,
+                    height: 100,
+                    width: 100,
                   ),
                 ),
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.only(
-                        top: 20, right: 20, bottom: 20, left: 10),
-                    height: 130,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          model.name,
-                          style: GoogleFonts.notoSans(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black),
-                          maxLines: 1,
+              ),
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.only(
+                      top: 20, right: 20, bottom: 20, left: 10),
+                  height: 130,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        model.name,
+                        style: GoogleFonts.notoSans(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black),
+                        maxLines: 1,
+                      ),
+                      RichText(
+                          text: TextSpan(children: [
+                        WidgetSpan(
+                          child: RatingBar(
+                            ratingWidget: RatingWidget(
+                                full: Icon(
+                                  Icons.star,
+                                  color: Colors.yellow,
+                                ),
+                                half: Icon(
+                                  Icons.star_half,
+                                  color: Colors.yellow,
+                                ),
+                                empty: Icon(
+                                  Icons.star_border,
+                                  color: Colors.yellow,
+                                )),
+                            onRatingUpdate: (rating) {},
+                            itemSize: 15,
+                            allowHalfRating: true,
+                            initialRating:
+                                model.rating != null ? model.rating! : 0,
+                          ),
                         ),
-                        RichText(text: TextSpan(
-                          children: [
-                            WidgetSpan(child: RatingBar(
-                              ratingWidget: RatingWidget(
-                                  full: Icon(Icons.star,
-                                    color: Colors.yellow,),
-                                  half: Icon(Icons.star_half,
-                                    color: Colors.yellow,),
-                                  empty: Icon(Icons.star_border,
-                                    color: Colors.yellow,)),
-                              onRatingUpdate: (rating) {},
-                              itemSize: 15,
-                              allowHalfRating: true,
-                              initialRating: model.rating!=null?model.rating!:0,
-                            ),),
-                            TextSpan(text: " "),
-                            TextSpan(text: model.rating!=null?model.rating!.toString():"No review", style: GoogleFonts.montserrat(color: Colors.black, fontSize: 11))
-                          ]
+                        TextSpan(text: " "),
+                        TextSpan(
+                            text: model.rating != null
+                                ? model.rating!.toString()
+                                : "No review",
+                            style: GoogleFonts.montserrat(
+                                color: Colors.black, fontSize: 11))
+                      ])),
+                      RichText(
+                          text: TextSpan(children: [
+                        WidgetSpan(
+                            child: Icon(
+                          Icons.map_outlined,
+                          size: 16,
+                          color: Colors.grey,
                         )),
-                        RichText(
-                            text: TextSpan(children: [
-                          WidgetSpan(
-                              child: Icon(
-                            Icons.map_outlined,
-                            size: 16,
-                            color: Colors.grey,
-                          )),
-                          TextSpan(
-                              text: " 0.2 km",
-                              style:
-                                  TextStyle(fontSize: 12, color: Colors.black))
-                        ])),
-                        RichText(
-                            text: TextSpan(children: [
-                          WidgetSpan(
-                              child: Icon(
-                            Icons.attach_money,
-                            size: 20,
-                            color: Colors.black,
-                          )),
-                          TextSpan(
-                              text: model.price.toString(),
-                              style: GoogleFonts.montserrat(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                              )),
-                          TextSpan(
-                              text: "/night",
-                              style: GoogleFonts.montserrat(
-                                  fontSize: 12, color: Colors.grey))
-                        ]))
-                      ],
-                    ),
+                        TextSpan(
+                            text: model.distance != null
+                                ? " ${model.distance!.toStringAsFixed(2)} km"
+                                : " km",
+                            style:
+                                TextStyle(fontSize: 12, color: Colors.black))
+                      ])),
+                      RichText(
+                          text: TextSpan(children: [
+                        WidgetSpan(
+                            child: Icon(
+                          Icons.attach_money,
+                          size: 20,
+                          color: Colors.black,
+                        )),
+                        TextSpan(
+                            text: model.price.toString(),
+                            style: GoogleFonts.montserrat(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            )),
+                        TextSpan(
+                            text: "/night",
+                            style: GoogleFonts.montserrat(
+                                fontSize: 12, color: Colors.grey))
+                      ]))
+                    ],
                   ),
-                )
-              ],
-            ),
+                ),
+              )
+            ],
           ),
         ),
       ),
