@@ -63,9 +63,11 @@ class _HotelDetailState extends State<HotelDetail> {
         review: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         images: [
           "https://www.gannett-cdn.com/-mm-/05b227ad5b8ad4e9dcb53af4f31d7fbdb7fa901b/c=0-64-2119-1259/local/-/media/USATODAY/USATODAY/2014/08/13/1407953244000-177513283.jpg"
-        ]),
-    reviewModel(id: 2, rating: 4, review: "Normal"),
-    reviewModel(id: 3, rating: 1, review: "Too bad")
+        ],
+        reviewDate: DateTime(2022, 11, 15, 12, 56)
+    ),
+    reviewModel(id: 2, rating: 4, review: "Normal", reviewDate: DateTime(2022, 11, 15, 12, 56)),
+    reviewModel(id: 3, rating: 1, review: "Too bad", reviewDate: DateTime(2022, 11, 15, 12, 56))
   ];
 
   @override
@@ -625,7 +627,8 @@ class _HotelDetailState extends State<HotelDetail> {
                               ),
                             ))
                     ],
-                  )
+                  ),
+                  Text(e.reviewDate.toString(), style: GoogleFonts.montserrat(color: Colors.grey, fontWeight: FontWeight.w300),)
                 ],
               ),
             )
