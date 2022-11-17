@@ -544,7 +544,7 @@ class _HotelDetailState extends State<HotelDetail> {
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: colors.findButtonColor,
+                backgroundColor: colors.primaryColor,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(25)),
@@ -628,7 +628,8 @@ class _HotelDetailState extends State<HotelDetail> {
                             ))
                     ],
                   ),
-                  Text(e.reviewDate.toString(), style: GoogleFonts.montserrat(color: Colors.grey, fontWeight: FontWeight.w300),)
+                  SizedBox(height: 5,),
+                  Text(e.reviewDate.toString(), style: GoogleFonts.montserrat(color: Colors.grey, fontWeight: FontWeight.w300, fontSize: 13),)
                 ],
               ),
             )

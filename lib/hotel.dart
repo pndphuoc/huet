@@ -32,7 +32,7 @@ List<roomTypeModel> roomTypesOfHuongGiangHotel = [
   roomTypeModel(id: 4, name: "VIP room")
 ];
 List<String> imagesOfHuongGiangHotel = [
-  'https://www.huonggianghotel.com.vn/wp-content/uploads/2018/08/DSC_1308-HDR-Custom-1.jpg',
+  'https://ak-d.tripcdn.com/images/200h0i0000009ehpzF02A_Z_1100_824_R5_Q70_D.jpg',
   'https://www.huonggianghotel.com.vn/wp-content/uploads/2018/06/DSC_4563-HDR2_1600x1068-1.jpg',
   'https://cf.bstatic.com/xdata/images/hotel/max1280x900/185016305.jpg?k=e0510db64b6c0f4b0623cb63a4014b95c677970d880c414c864fbbe094a9211c&o=&hp=1'
 ];
@@ -42,8 +42,8 @@ List<hotelModel> listHotels = [
       name: "Silk Path Grand Hue Hotel",
       address: "2 Lê Lợi",
       hotelLocaton:
-      location(latitude: 16.458015573692116, longitude: 107.57969752805363),
-      images: imagesOfHuongGiangHotel,
+          location(latitude: 16.458015573692116, longitude: 107.57969752805363),
+      images: ["https://pix10.agoda.net/hotelImages/14694836/-1/9914bb8998c5b239d3c8ac6b8563016d.jpg?ca=13&ce=1&s=1024x768", "http://silkpathhotel.com/media/ckfinder/images/Hotel/2/Hue6789/Hue_Acco_doc.jpg", "http://silkpathhotel.com/media/ckfinder/images/Slide_mice/Hue_Mice_Banquet.jpg", "https://cdn1.ivivu.com/iVivu/2020/09/10/11/spgh-overview-2-cr-800x450.jpg"],
       price: 200,
       types: roomTypesOfHuongGiangHotel,
       rating: 5),
@@ -63,17 +63,17 @@ List<hotelModel> listHotels = [
       address: "50A Hùng Vương",
       hotelLocaton:
           location(latitude: 16.463430881885497, longitude: 107.59451227529739),
-      images: imagesOfHuongGiangHotel,
+      images: ["https://statics.vinpearl.com/Hinh-anh-review-vinpearl-Hu%E1%BA%BF.jpg", "https://cdn1.ivivu.com/iVivu/2019/04/12/11/khach-san-vinpearl-hue-17-800x450.jpg", "https://statics.vinpearl.com/gia-phong-vinpearl-hue-2_1627379379.jpg"],
       price: 200,
       types: roomTypesOfHuongGiangHotel,
       rating: 4.5),
   hotelModel(
       id: 3,
-      name: "The Manor Crown Huế",
-      address: "62 Tố Hữu",
+      name: "Imperial Hotel Hue",
+      address: "08 Hùng Vương",
       hotelLocaton:
           location(latitude: 16.463786394219735, longitude: 107.60703420242594),
-      images: imagesOfHuongGiangHotel,
+      images: ["https://yt3.ggpht.com/ytc/AMLnZu_J1rEF4cTT9WCVqdya_lp1zujGum-jdPtWrUur=s900-c-k-c0x00ffffff-no-rj", "https://etrip4utravel.s3-ap-southeast-1.amazonaws.com/images/product/2022/03/2ee0927c-e8b1-4a65-86d5-35944611703e.jpg", "https://khamphadisan.com.vn/wp-content/uploads/2016/10/home_imperial.jpg"],
       price: 200,
       types: roomTypesOfHuongGiangHotel,
       rating: 3.5),
@@ -83,7 +83,7 @@ List<hotelModel> listHotels = [
       address: "5 Lê Lợi",
       hotelLocaton:
           location(latitude: 16.459255735696967, longitude: 107.5802938520555),
-      images: imagesOfHuongGiangHotel,
+      images: ["https://d19lgisewk9l6l.cloudfront.net/assetbank/Exterior_La_Residence_Hotel_Spa_28562.jpg", "https://www.vendomtalents.com/image/news/news-main-azerai-la-residence-opens-in-hue-vietnam.1550593386.jpg", "https://savingbooking.com/wp-content/uploads/2021/01/175012720.jpg"],
       price: 200,
       types: roomTypesOfHuongGiangHotel,
       rating: 4.5),
@@ -99,11 +99,13 @@ class MyBehavior extends ScrollBehavior {
 
 final ScrollController scrollController = ScrollController();
 bool isRecommendationHotel = true;
+bool _innerBoxIsScrolled = false;
 
-class _HotelPageState extends State<HotelPage> {
+class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
   final ScrollController scrollController = ScrollController();
   String selectedCheckInDate = '';
   String selectedCheckOutDate = '';
+  late final TabController _tabController;
 
   Future<Position> getUserCurrentLocation() async {
     await Geolocator.requestPermission()
@@ -133,6 +135,7 @@ class _HotelPageState extends State<HotelPage> {
     getUserCurrentLocation().then((value) async {
       print(value.latitude.toString() + " " + value.longitude.toString());
     });
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   bool isLoading = true;
@@ -149,22 +152,25 @@ class _HotelPageState extends State<HotelPage> {
       });
     }
 
-    if (isRecommendationHotel)
-    {
-      listHotels.sort((b, a) {
-        return a.rating!.compareTo(b.rating!);
-      },);
+    if (isRecommendationHotel) {
+      listHotels.sort(
+        (b, a) {
+          return a.rating!.compareTo(b.rating!);
+        },
+      );
+    } else {
+      listHotels.sort(
+        (a, b) {
+          return a.distance!.compareTo(b.distance!);
+        },
+      );
     }
-    else
-    {
-      listHotels.sort((a, b) {
-        return a.distance!.compareTo(b.distance!);
-      },);
-    }
+    var top = 0.0;
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
+        backgroundColor: colors.backgroundColor,
         resizeToAvoidBottomInset: false,
         body: SafeArea(
           child: isLoading
@@ -177,58 +183,155 @@ class _HotelPageState extends State<HotelPage> {
                       (BuildContext context, bool innerBoxIsScrolled) {
                     return [
                       SliverAppBar(
-                        flexibleSpace: FlexibleSpaceBar(
-                          centerTitle: true,
-                          title: banner(context),
-                          background: Container(
-                            decoration: BoxDecoration(
-                                image: DecorationImage(
-                                    image: AssetImage(
-                                        "assets/images/hotel/img.png"))),
-                          ),
+                        flexibleSpace: LayoutBuilder(
+                          builder: (BuildContext context,
+                              BoxConstraints constraints) {
+                            top = constraints.biggest.height;
+                            return ShowUp(
+                              delay: 0,
+                              child: FlexibleSpaceBar(
+                                centerTitle: true,
+                                title: Container(
+                                  child: Text(
+                                    "Find the perfect\nhotel",
+                                    style: GoogleFonts.montserrat(
+                                        color: colors.backgroundColor,
+                                        fontSize: 25),
+                                  ),
+                                  margin: EdgeInsets.only(bottom: 50),
+                                ),
+                                background: Container(
+                                  decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                          image: AssetImage(
+                                              "assets/images/hotel/img.png"),
+                                          fit: BoxFit.cover)),
+                                ),
+                              ),
+                            );
+                          },
                         ),
                         elevation: 0,
                         automaticallyImplyLeading: false,
                         expandedHeight:
-                            MediaQuery.of(context).size.height / 3.33,
+                            MediaQuery.of(context).size.height / 3,
                         floating: false,
-                        backgroundColor: Colors.transparent,
+                        pinned: true,
+                        backgroundColor: colors.backgroundColor,
+                        bottom: PreferredSize(
+                            child: ShowUp(
+                              delay: 200,
+                              child: searchBlock(context, innerBoxIsScrolled),
+                            ),
+                            preferredSize: Size.fromHeight(34)),
                       )
                     ];
                   },
-                  body: Column(
-                    children: [
-                      Container(
-                        margin:
-                            EdgeInsets.only(left: 20, right: 20, bottom: 15),
-                        child: searchBlock(context),
-                      ),
-                      sortBlock(context),
-                      SizedBox(
-                        height: 5,
-                      ),
-                      Expanded(
-                        child: AnimationLimiter(
-                          child: ShowUp(
-                            delay: 450,
-                            child: ImplicitlyAnimatedList<hotelModel>(
-                              items: listHotels,
-                              itemBuilder: (context, animation, item, index) => SizeFadeTransition(
+                  body: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        hotHotelsBlock(context),
+                        sortBlock(context),
+                        SizedBox(
+                          height: 15,
+                        ),
+                        /*Expanded(
+                          child: AnimationLimiter(
+                            child: ShowUp(
+                              delay: 450,
+                              child: ImplicitlyAnimatedList<hotelModel>(
+                                physics: NeverScrollableScrollPhysics(),
+                                items: listHotels,
+                                itemBuilder: (context, animation, item, index) =>
+                                    SizeFadeTransition(
                                   animation: animation,
                                   sizeFraction: 0.7,
-                                key: Key(item.id.toString()),
-                                child: hotelItem(context, item),
+                                  key: Key(item.id.toString()),
+                                  child: hotelItem(context, item),
+                                ),
+                                areItemsTheSame: (a, b) => a.id == b.id,
                               ),
-                              areItemsTheSame: (a, b) => a.id == b.id,
                             ),
                           ),
-                        ),
-                      )
-                    ],
+                        )*/
+                        ...listHotels.map((e) => hotelItem(context, e))
+                      ],
+                    ),
                   ),
                 ),
         ),
       ),
+    );
+  }
+
+  hotHotelsBlock(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+          color: colors.backgroundColor,),
+      margin: EdgeInsets.only(top: 20, bottom: 20),
+      height: MediaQuery.of(context).size.height / 3.5,
+      child: Column(
+        children: [
+          Container(
+            margin: EdgeInsets.only(left: 15),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Hot Hotels",
+                  style: GoogleFonts.montserrat(fontSize: 20),
+                ),
+                IconButton(
+                  onPressed: () {},
+                  icon: Icon(Icons.keyboard_arrow_right),
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                )
+              ],
+            ),
+          ),
+          Expanded(
+            child: Container(
+              margin: EdgeInsets.only(bottom: 15),
+              child: ListView.builder(
+                physics: BouncingScrollPhysics(),
+                scrollDirection: Axis.horizontal,
+                itemCount: listHotels.length,
+                itemBuilder: (context, index) => hotHotelItem(context, index),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  hotHotelItem(BuildContext context, int index) {
+    return Container(
+      margin: index == 0 ?EdgeInsets.only(left: 20):index==listHotels.length-1?EdgeInsets.only(left: 10, right: 20):EdgeInsets.only(left: 10),
+      child: GestureDetector(
+          child: Container(
+            width: MediaQuery.of(context).size.width/2.8,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+                image: DecorationImage(
+                    image: NetworkImage(listHotels[index].images.first),
+                    fit: BoxFit.cover), // button text
+              ),
+              child: Align(
+                alignment: Alignment.bottomLeft,
+                child: Container(
+                  margin: EdgeInsets.only(left: 7, bottom: 7),
+                  child: Text(listHotels[index].name, style: GoogleFonts.montserrat(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600), maxLines: 1,),
+                )
+              )
+          ),
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) {
+              // do something
+              return HotelDetail(model: listHotels[index]);
+            }));
+          }),
     );
   }
 
@@ -236,157 +339,61 @@ class _HotelPageState extends State<HotelPage> {
     return ShowUp(
       delay: 0,
       child: Container(
-        margin: EdgeInsets.only(bottom: 40),
+        margin: EdgeInsets.only(bottom: 50),
         child: Text(
           "Find the perfect \nhotel",
           style: GoogleFonts.montserrat(color: Colors.white, fontSize: 25),
         ),
-        /* child: RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(children: [
-              TextSpan(
-                  text: "Find the",
-                  style: GoogleFonts.montserrat(
-                      textStyle: TextStyle(color: Colors.white, fontSize: 25))),
-              TextSpan(
-                  text: "perfect",
-                  style: GoogleFonts.montserrat(
-                      textStyle: TextStyle(
-                          color: colors.primaryColor,
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold))),
-              TextSpan(
-                  text: " hotel ",
-                  style: GoogleFonts.montserrat(
-                      textStyle: TextStyle(color: Colors.white, fontSize: 25))),
-              TextSpan(
-                  text: "for your ",
-                  style: GoogleFonts.montserrat(
-                      textStyle: TextStyle(color: Colors.white, fontSize: 25))),
-              TextSpan(
-                  text: "TRIP ",
-                  style: GoogleFonts.montserrat(
-                      textStyle: TextStyle(
-                          color: colors.primaryColor,
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold))),
-              WidgetSpan(
-                  child: Icon(
-                Icons.directions_bike_outlined,
-                size: 20,
-                color: Colors.white,
-              ))
-            ])),*/
-/*        child: Stack(
-          children: [
-            Image.asset("assets/images/hotel/img.png"),
-            Container(
-              margin: EdgeInsets.all(15),
-              child: Positioned(
-                child: Text("Find the perfect hotel", style: GoogleFonts.montserrat(fontSize: 25),),
-                bottom: 30,
-              ),
-            )
-          ],
-        ),*/
       ),
     );
   }
 
-  searchBlock(BuildContext context) {
-    return ShowUp(
-      delay: 150,
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        decoration: BoxDecoration(
-            color: Colors.white, borderRadius: BorderRadius.circular(25)),
-        child: Column(
-          children: [
-            Container(
-              margin: EdgeInsets.only(left: 15, right: 15, top: 15),
-              child: TextField(
-                decoration: InputDecoration(
-                    hintText: 'Name of hotel/homestay',
-                    hintStyle: GoogleFonts.montserrat(),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: BorderSide.none),
-                    filled: true,
-                    fillColor: colors.filterItemColor),
+  searchBlock(BuildContext context, bool innerBoxIsScrolled) {
+    print("testt ${innerBoxIsScrolled}");
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      decoration: BoxDecoration(
+          //color: innerBoxIsScrolled?colors.backgroundColor:Colors.transparent
+          ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              margin: EdgeInsets.only(left: 15, top: 15, bottom: 15),
+              child: SizedBox(
+                height: 60,
+                child: TextField(
+                  decoration: InputDecoration(
+                      hintText: "Hotel's name",
+                      hintStyle: GoogleFonts.montserrat(),
+                      border: OutlineInputBorder(
+                          //borderRadius: BorderRadius.only(bottomLeft: Radius.circular(15), topLeft: Radius.circular(15)),
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: BorderSide.none),
+                      filled: true,
+                      fillColor: colors.hotelDetailBackgroundColor),
+                ),
               ),
             ),
-            /*Container(
-              margin: EdgeInsets.only(bottom: 15),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 60,
-                      margin: EdgeInsets.only(left: 15, top: 15),
-                      child: ElevatedButton(
-                          onPressed: () => _selectCheckInDate(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: colors.filterItemColor,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(15),
-                                    bottomLeft: Radius.circular(15))),
-                            elevation: 0.0,
-                            shadowColor: Colors.transparent,
-                          ),
-                          child: Text(
-                            selectedCheckInDate != ''
-                                ? selectedCheckInDate
-                                : "Check-In",
-                            style: TextStyle(color: Colors.grey),
-                          )),
-                    ),
-                  ),
-                  Expanded(
-                      child: Container(
-                    height: 60,
-                    margin: EdgeInsets.only(right: 15, top: 15),
-                    child: ElevatedButton(
-                        onPressed: () => _selectCheckOutDate(context),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: colors.filterItemColor,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(15),
-                                  bottomRight: Radius.circular(15))),
-                          elevation: 0.0,
-                          shadowColor: Colors.transparent,
-                        ),
-                        child: Text(
-                          selectedCheckOutDate != ''
-                              ? selectedCheckOutDate
-                              : "Check-Out",
-                          style: TextStyle(color: Colors.grey),
-                        )),
-                  ))
-                ],
+          ),
+          Container(
+            margin: EdgeInsets.only(right: 15, bottom: 15, top: 15, left: 15),
+            height: 60,
+            width: 60,
+            child: ElevatedButton(
+              onPressed: () {},
+              child: Center(
+                child: Icon(Icons.search),
               ),
-            ),*/
-            SizedBox(height: 15,),
-            Container(
-              margin: EdgeInsets.only(left: 15, right: 15, bottom: 15),
-              height: 60,
-              child: ElevatedButton(
-                onPressed: () {},
-                child: Center(
-                  child: Text(
-                    "Find",
-                    style: TextStyle(fontSize: 20),
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.findButtonColor,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15))),
-              ),
-            )
-          ],
-        ),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: colors.primaryColor,
+                  shape: RoundedRectangleBorder(
+                    //borderRadius: BorderRadius.only(topRight: Radius.circular(15), bottomRight: Radius.circular(15))
+                    borderRadius: BorderRadius.circular(15),
+                  )),
+            ),
+          )
+        ],
       ),
     );
   }
@@ -452,8 +459,8 @@ class _HotelPageState extends State<HotelPage> {
                           "Recommendation",
                           style: isRecommendationHotel == true
                               ? GoogleFonts.montserrat(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold)
+                                  color: colors.primaryColor,
+                                  fontWeight: FontWeight.w600)
                               : GoogleFonts.montserrat(color: Colors.black),
                         ))),
               ),
@@ -466,15 +473,14 @@ class _HotelPageState extends State<HotelPage> {
                           onPressed: () {
                             setState(() {
                               isRecommendationHotel = false;
-
                             });
                           },
                           child: Text(
                             "Near to you",
                             style: isRecommendationHotel == false
                                 ? GoogleFonts.montserrat(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold)
+                                    color: colors.primaryColor,
+                                    fontWeight: FontWeight.w600)
                                 : GoogleFonts.montserrat(color: Colors.black),
                           ))))
             ],
@@ -563,8 +569,8 @@ class _HotelPageState extends State<HotelPage> {
               ),
               Expanded(
                 child: Container(
-                  padding: EdgeInsets.only(
-                      top: 20, right: 20, bottom: 20, left: 10),
+                  padding:
+                      EdgeInsets.only(top: 20, right: 20, bottom: 20, left: 10),
                   height: 130,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -622,8 +628,7 @@ class _HotelPageState extends State<HotelPage> {
                             text: model.distance != null
                                 ? " ${model.distance!.toStringAsFixed(2)} km"
                                 : " km",
-                            style:
-                                TextStyle(fontSize: 12, color: Colors.black))
+                            style: TextStyle(fontSize: 12, color: Colors.black))
                       ])),
                       RichText(
                           text: TextSpan(children: [
@@ -655,4 +660,6 @@ class _HotelPageState extends State<HotelPage> {
       ),
     );
   }
+
+  popularHotelsBlock(BuildContext context) {}
 }
