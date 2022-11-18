@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hue_t/animation/show_right.dart';
 import 'colors.dart' as colors;
 import 'model/reviewModel.dart';
 
@@ -110,7 +111,7 @@ class _AllReviewsState extends State<AllReviews> with TickerProviderStateMixin{
                 margin: EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    ...reviewsList.map((e) => reviewsBlock(context, e))
+                    ...reviewsList.map((e) => reviewsBlock(context, reviewsList.indexOf(e)))
                   ],
                 ),
               ),
@@ -121,7 +122,7 @@ class _AllReviewsState extends State<AllReviews> with TickerProviderStateMixin{
                 margin: EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    ...reviewsList.where((element) => element.images!=null).toList().map((e) => reviewsBlock(context, e))
+                    ...reviewsList.where((element) => element.images!=null).toList().map((e) => reviewsBlock(context, reviewsList.indexOf(e)))
                   ],
                 ),
               ),
@@ -134,8 +135,8 @@ class _AllReviewsState extends State<AllReviews> with TickerProviderStateMixin{
     );
   }
 
-  reviewsBlock(BuildContext context, reviewModel e) {
-    return Container(
+  reviewsBlock(BuildContext context, int index) {
+    return ShowRight(child: Container(
       margin: EdgeInsets.only(bottom: 15),
       padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
@@ -180,19 +181,19 @@ class _AllReviewsState extends State<AllReviews> with TickerProviderStateMixin{
                     onRatingUpdate: (rating) {},
                     itemSize: 15,
                     allowHalfRating: true,
-                    initialRating: e.rating.toDouble(),
+                    initialRating: reviewsList[index].rating.toDouble(),
                   ),
                   SizedBox(
                     height: 10,
                   ),
-                  Text(e.review!),
+                  Text(reviewsList[index].review!),
                   SizedBox(
                     height: 10,
                   ),
                   Wrap(
                     children: [
-                      if (e.images != null)
-                        ...e.images!.map((i) => Container(
+                      if (reviewsList[index].images != null)
+                        ...reviewsList[index].images!.map((i) => Container(
                           width: 70,
                           child: AspectRatio(
                             aspectRatio: 1 / 1,
@@ -207,13 +208,13 @@ class _AllReviewsState extends State<AllReviews> with TickerProviderStateMixin{
                     ],
                   ),
                   SizedBox(height: 5,),
-                  Text(e.reviewDate.toString(), style: GoogleFonts.montserrat(color: Colors.grey, fontWeight: FontWeight.w300, fontSize: 13),)
+                  Text(reviewsList[index].reviewDate.toString(), style: GoogleFonts.montserrat(color: Colors.grey, fontWeight: FontWeight.w300, fontSize: 13),)
                 ],
               ),
             )
           ],
         ),
       ),
-    );
+    ), delay: 100*index);
   }
 }

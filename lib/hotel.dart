@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:hue_t/animation/show_left.dart';
+import 'package:hue_t/animation/show_right.dart';
+import 'package:hue_t/hot_hotels_page.dart';
 import 'package:hue_t/hotel_detail.dart';
 import 'package:hue_t/model/locationModel.dart';
 import 'package:hue_t/model/roomTypeModel.dart';
@@ -14,7 +17,7 @@ import 'colors.dart' as colors;
 import 'model/hotelModel.dart';
 import 'fade_on_scroll.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hue_t/show_up.dart';
+import 'package:hue_t/animation/show_up.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'dart:math';
 
@@ -76,7 +79,7 @@ List<hotelModel> listHotels = [
       images: ["https://yt3.ggpht.com/ytc/AMLnZu_J1rEF4cTT9WCVqdya_lp1zujGum-jdPtWrUur=s900-c-k-c0x00ffffff-no-rj", "https://etrip4utravel.s3-ap-southeast-1.amazonaws.com/images/product/2022/03/2ee0927c-e8b1-4a65-86d5-35944611703e.jpg", "https://khamphadisan.com.vn/wp-content/uploads/2016/10/home_imperial.jpg"],
       price: 200,
       types: roomTypesOfHuongGiangHotel,
-      rating: 3.5),
+      rating: 4.5),
   hotelModel(
       id: 1,
       name: "Azerai La Residence, Hue",
@@ -86,7 +89,7 @@ List<hotelModel> listHotels = [
       images: ["https://d19lgisewk9l6l.cloudfront.net/assetbank/Exterior_La_Residence_Hotel_Spa_28562.jpg", "https://www.vendomtalents.com/image/news/news-main-azerai-la-residence-opens-in-hue-vietnam.1550593386.jpg", "https://savingbooking.com/wp-content/uploads/2021/01/175012720.jpg"],
       price: 200,
       types: roomTypesOfHuongGiangHotel,
-      rating: 4.5),
+      rating: 4),
 ];
 
 class MyBehavior extends ScrollBehavior {
@@ -172,62 +175,63 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
       home: Scaffold(
         backgroundColor: colors.backgroundColor,
         resizeToAvoidBottomInset: false,
-        body: SafeArea(
-          child: isLoading
-              ? Center(
-                  child: LoadingAnimationWidget.staggeredDotsWave(
-                      color: colors.primaryColor, size: 50),
-                )
-              : NestedScrollView(
-                  headerSliverBuilder:
-                      (BuildContext context, bool innerBoxIsScrolled) {
-                    return [
-                      SliverAppBar(
-                        flexibleSpace: LayoutBuilder(
-                          builder: (BuildContext context,
-                              BoxConstraints constraints) {
-                            top = constraints.biggest.height;
-                            return ShowUp(
-                              delay: 0,
-                              child: FlexibleSpaceBar(
-                                centerTitle: true,
-                                title: Container(
-                                  child: Text(
-                                    "Find the perfect\nhotel",
-                                    style: GoogleFonts.montserrat(
-                                        color: colors.backgroundColor,
-                                        fontSize: 25),
-                                  ),
-                                  margin: EdgeInsets.only(bottom: 50),
+        body: isLoading
+            ? Center(
+                child: LoadingAnimationWidget.staggeredDotsWave(
+                    color: colors.primaryColor, size: 50),
+              )
+            : NestedScrollView(
+                headerSliverBuilder:
+                    (BuildContext context, bool innerBoxIsScrolled) {
+                  return [
+                    SliverAppBar(
+                      flexibleSpace: LayoutBuilder(
+                        builder: (BuildContext context,
+                            BoxConstraints constraints) {
+                          top = constraints.biggest.height;
+                          return ShowUp(
+                            delay: 0,
+                            child: FlexibleSpaceBar(
+                              centerTitle: true,
+                              title: Container(
+                                child: Text(
+                                  "Find the perfect\nhotel",
+                                  style: GoogleFonts.montserrat(
+                                      color: colors.backgroundColor,
+                                      fontSize: 25),
                                 ),
-                                background: Container(
-                                  decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                          image: AssetImage(
-                                              "assets/images/hotel/img.png"),
-                                          fit: BoxFit.cover)),
-                                ),
+                                margin: EdgeInsets.only(bottom: 50),
                               ),
-                            );
-                          },
-                        ),
-                        elevation: 0,
-                        automaticallyImplyLeading: false,
-                        expandedHeight:
-                            MediaQuery.of(context).size.height / 3,
-                        floating: false,
-                        pinned: true,
-                        backgroundColor: colors.backgroundColor,
-                        bottom: PreferredSize(
-                            child: ShowUp(
-                              delay: 200,
-                              child: searchBlock(context, innerBoxIsScrolled),
+                              background: Container(
+                                decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                        image: AssetImage(
+                                            "assets/images/hotel/img.png"),
+                                        fit: BoxFit.cover)),
+                              ),
                             ),
-                            preferredSize: Size.fromHeight(34)),
-                      )
-                    ];
-                  },
-                  body: SingleChildScrollView(
+                          );
+                        },
+                      ),
+                      elevation: 0,
+                      automaticallyImplyLeading: false,
+                      expandedHeight:
+                          MediaQuery.of(context).size.height / 3,
+                      floating: false,
+                      pinned: true,
+                      backgroundColor: colors.backgroundColor,
+                      bottom: PreferredSize(
+                          child: ShowUp(
+                            delay: 200,
+                            child: searchBlock(context, innerBoxIsScrolled),
+                          ),
+                          preferredSize: Size.fromHeight(34)),
+                    )
+                  ];
+                },
+                body: ScrollConfiguration(
+                  behavior: MyBehavior(),
+                  child: SingleChildScrollView(
                     child: Column(
                       children: [
                         hotHotelsBlock(context),
@@ -254,12 +258,12 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                             ),
                           ),
                         )*/
-                        ...listHotels.map((e) => hotelItem(context, e))
+                        ...listHotels.map((e) => hotelItem(context, listHotels.indexOf(e)))
                       ],
                     ),
                   ),
-                ),
-        ),
+                )
+              ),
       ),
     );
   }
@@ -268,26 +272,37 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
     return Container(
       decoration: BoxDecoration(
           color: colors.backgroundColor,),
-      margin: EdgeInsets.only(top: 20, bottom: 20),
+      margin: EdgeInsets.only(top: 15,),
       height: MediaQuery.of(context).size.height / 3.5,
       child: Column(
         children: [
-          Container(
-            margin: EdgeInsets.only(left: 15),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Hot Hotels",
-                  style: GoogleFonts.montserrat(fontSize: 20),
+          GestureDetector(
+            onTap: (){
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (context) => HotHotelsPage()));
+            },
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              color: colors.backgroundColor,
+              margin: EdgeInsets.only(left: 20, right: 20),
+              child: ShowRight(
+                delay: 300,
+                /*child: RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(text: "Hot Hotels", style: GoogleFonts.poppins(color: Colors.black, fontSize: 25)),
+                      WidgetSpan(child: Icon(Icons.keyboard_arrow_right))
+                    ]
+                  ),
+                )*/
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Hot Hotels", style: GoogleFonts.poppins(color: Colors.black, fontSize: 25),),
+                    Icon(Icons.keyboard_arrow_right)
+                  ],
                 ),
-                IconButton(
-                  onPressed: () {},
-                  icon: Icon(Icons.keyboard_arrow_right),
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                )
-              ],
+              ),
             ),
           ),
           Expanded(
@@ -307,43 +322,47 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
   }
 
   hotHotelItem(BuildContext context, int index) {
-    return Container(
-      margin: index == 0 ?EdgeInsets.only(left: 20):index==listHotels.length-1?EdgeInsets.only(left: 10, right: 20):EdgeInsets.only(left: 10),
-      child: GestureDetector(
-          child: Container(
-            width: MediaQuery.of(context).size.width/2.8,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                image: DecorationImage(
-                    image: NetworkImage(listHotels[index].images.first),
-                    fit: BoxFit.cover), // button text
-              ),
-              child: Align(
-                alignment: Alignment.bottomLeft,
-                child: Container(
-                  margin: EdgeInsets.only(left: 7, bottom: 7),
-                  child: Text(listHotels[index].name, style: GoogleFonts.montserrat(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600), maxLines: 1,),
+    return ShowUp(
+      delay: 400 + index*100,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15)
+        ),
+        margin: index == 0 ?EdgeInsets.only(left: 20):index==listHotels.length-1?EdgeInsets.only(left: 10, right: 20):EdgeInsets.only(left: 10),
+        child: GestureDetector(
+            child: Container(
+              width: MediaQuery.of(context).size.width/2.8,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  image: DecorationImage(
+                      image: NetworkImage(listHotels[index].images.first),
+                      fit: BoxFit.cover), // button text
+                ),
+                child: Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Container(
+                    margin: EdgeInsets.only(left: 7, bottom: 7),
+                    child: Text(listHotels[index].name, style: GoogleFonts.montserrat(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600), maxLines: 1,),
+                  )
                 )
-              )
-          ),
-          onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) {
-              // do something
-              return HotelDetail(model: listHotels[index]);
-            }));
-          }),
+            ),
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                // do something
+                return HotelDetail(model: listHotels[index]);
+              }));
+            }),
+      ),
     );
   }
 
   banner(BuildContext context) {
-    return ShowUp(
-      delay: 0,
-      child: Container(
-        margin: EdgeInsets.only(bottom: 50),
-        child: Text(
-          "Find the perfect \nhotel",
-          style: GoogleFonts.montserrat(color: Colors.white, fontSize: 25),
-        ),
+    return Container(
+      margin: EdgeInsets.only(bottom: 50),
+      child: Text(
+        "Find the perfect \nhotel",
+        style: GoogleFonts.montserrat(color: Colors.white, fontSize: 25),
       ),
     );
   }
@@ -399,7 +418,7 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
   }
 
   sortBlock(BuildContext context) {
-    return ShowUp(
+    return ShowRight(
       delay: 300,
       child: Container(
         height: 50,
@@ -532,134 +551,136 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
     });
   }
 
-  hotelItem(BuildContext context, hotelModel model) {
-    return Container(
-      margin: EdgeInsets.only(left: 20, right: 20, bottom: 20),
-      child: ElevatedButton(
-        onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) {
-            // do something
-            return HotelDetail(model: model);
-          }));
-        },
-        style: ElevatedButton.styleFrom(
-            elevation: 0.0,
-            shadowColor: Colors.white,
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            )),
-        child: Container(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Container(
-                margin: EdgeInsets.only(top: 15, bottom: 15),
-                decoration:
-                    BoxDecoration(borderRadius: BorderRadius.circular(10)),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Image.network(
-                    model.images.first,
-                    fit: BoxFit.cover,
-                    height: 100,
-                    width: 100,
+  hotelItem(BuildContext context, int index) {
+    return ShowRight(
+      delay: 400+index*100,
+      child: Container(
+        margin: EdgeInsets.only(left: 20, right: 20, bottom: 20),
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) {
+              // do something
+              return HotelDetail(model: listHotels[index]);
+            }));
+          },
+          style: ElevatedButton.styleFrom(
+              elevation: 0.0,
+              shadowColor: Colors.white,
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              )),
+          child: Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(top: 15, bottom: 15),
+                  decoration:
+                      BoxDecoration(borderRadius: BorderRadius.circular(10)),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(
+                      listHotels[index].images.first,
+                      fit: BoxFit.cover,
+                      height: 100,
+                      width: 100,
+                    ),
                   ),
                 ),
-              ),
-              Expanded(
-                child: Container(
-                  padding:
-                      EdgeInsets.only(top: 20, right: 20, bottom: 20, left: 10),
-                  height: 130,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        model.name,
-                        style: GoogleFonts.notoSans(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black),
-                        maxLines: 1,
-                      ),
-                      RichText(
-                          text: TextSpan(children: [
-                        WidgetSpan(
-                          child: RatingBar(
-                            ratingWidget: RatingWidget(
-                                full: Icon(
-                                  Icons.star,
-                                  color: Colors.yellow,
-                                ),
-                                half: Icon(
-                                  Icons.star_half,
-                                  color: Colors.yellow,
-                                ),
-                                empty: Icon(
-                                  Icons.star_border,
-                                  color: Colors.yellow,
-                                )),
-                            onRatingUpdate: (rating) {},
-                            itemSize: 15,
-                            allowHalfRating: true,
-                            initialRating:
-                                model.rating != null ? model.rating! : 0,
-                          ),
-                        ),
-                        TextSpan(text: " "),
-                        TextSpan(
-                            text: model.rating != null
-                                ? model.rating!.toString()
-                                : "No review",
-                            style: GoogleFonts.montserrat(
-                                color: Colors.black, fontSize: 11))
-                      ])),
-                      RichText(
-                          text: TextSpan(children: [
-                        WidgetSpan(
-                            child: Icon(
-                          Icons.map_outlined,
-                          size: 16,
-                          color: Colors.grey,
-                        )),
-                        TextSpan(
-                            text: model.distance != null
-                                ? " ${model.distance!.toStringAsFixed(2)} km"
-                                : " km",
-                            style: TextStyle(fontSize: 12, color: Colors.black))
-                      ])),
-                      RichText(
-                          text: TextSpan(children: [
-                        WidgetSpan(
-                            child: Icon(
-                          Icons.attach_money,
-                          size: 20,
-                          color: Colors.black,
-                        )),
-                        TextSpan(
-                            text: model.price.toString(),
-                            style: GoogleFonts.montserrat(
-                              color: Colors.black,
+                Expanded(
+                  child: Container(
+                    padding:
+                        EdgeInsets.only(top: 20, right: 20, bottom: 20, left: 10),
+                    height: 130,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          listHotels[index].name,
+                          style: GoogleFonts.notoSans(
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                            )),
-                        TextSpan(
-                            text: "/night",
-                            style: GoogleFonts.montserrat(
-                                fontSize: 12, color: Colors.grey))
-                      ]))
-                    ],
+                              color: Colors.black),
+                          maxLines: 1,
+                        ),
+                        RichText(
+                            text: TextSpan(children: [
+                          WidgetSpan(
+                            child: RatingBar(
+                              ratingWidget: RatingWidget(
+                                  full: Icon(
+                                    Icons.star,
+                                    color: Colors.yellow,
+                                  ),
+                                  half: Icon(
+                                    Icons.star_half,
+                                    color: Colors.yellow,
+                                  ),
+                                  empty: Icon(
+                                    Icons.star_border,
+                                    color: Colors.yellow,
+                                  )),
+                              onRatingUpdate: (rating) {},
+                              itemSize: 15,
+                              allowHalfRating: true,
+                              initialRating:
+                              listHotels[index].rating != null ? listHotels[index].rating! : 0,
+                            ),
+                          ),
+                          TextSpan(text: " "),
+                          TextSpan(
+                              text: listHotels[index].rating != null
+                                  ? listHotels[index].rating!.toString()
+                                  : "No review",
+                              style: GoogleFonts.montserrat(
+                                  color: Colors.black, fontSize: 11))
+                        ])),
+                        RichText(
+                            text: TextSpan(children: [
+                          WidgetSpan(
+                              child: Icon(
+                            Icons.map_outlined,
+                            size: 16,
+                            color: Colors.grey,
+                          )),
+                          TextSpan(
+                              text: listHotels[index].distance != null
+                                  ? " ${listHotels[index].distance!.toStringAsFixed(2)} km"
+                                  : " km",
+                              style: TextStyle(fontSize: 12, color: Colors.black))
+                        ])),
+                        RichText(
+                            text: TextSpan(children: [
+                          WidgetSpan(
+                              child: Icon(
+                            Icons.attach_money,
+                            size: 20,
+                            color: Colors.black,
+                          )),
+                          TextSpan(
+                              text: listHotels[index].price.toString(),
+                              style: GoogleFonts.montserrat(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              )),
+                          TextSpan(
+                              text: "/night",
+                              style: GoogleFonts.montserrat(
+                                  fontSize: 12, color: Colors.grey))
+                        ]))
+                      ],
+                    ),
                   ),
-                ),
-              )
-            ],
+                )
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  popularHotelsBlock(BuildContext context) {}
 }

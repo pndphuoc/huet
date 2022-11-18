@@ -8,8 +8,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hue_t/all_reviews.dart';
 import 'package:hue_t/fullscreen_map.dart';
 import 'package:hue_t/model/hotelModel.dart';
-import 'package:hue_t/show_up.dart';
+import 'package:hue_t/animation/show_up.dart';
 import 'package:geolocator/geolocator.dart';
+import 'animation/show_right.dart';
 import 'colors.dart' as colors;
 import 'model/reviewModel.dart';
 import 'package:map_launcher/map_launcher.dart' as map;
@@ -64,10 +65,17 @@ class _HotelDetailState extends State<HotelDetail> {
         images: [
           "https://www.gannett-cdn.com/-mm-/05b227ad5b8ad4e9dcb53af4f31d7fbdb7fa901b/c=0-64-2119-1259/local/-/media/USATODAY/USATODAY/2014/08/13/1407953244000-177513283.jpg"
         ],
-        reviewDate: DateTime(2022, 11, 15, 12, 56)
-    ),
-    reviewModel(id: 2, rating: 4, review: "Normal", reviewDate: DateTime(2022, 11, 15, 12, 56)),
-    reviewModel(id: 3, rating: 1, review: "Too bad", reviewDate: DateTime(2022, 11, 15, 12, 56))
+        reviewDate: DateTime(2022, 11, 15, 12, 56)),
+    reviewModel(
+        id: 2,
+        rating: 4,
+        review: "Normal",
+        reviewDate: DateTime(2022, 11, 15, 12, 56)),
+    reviewModel(
+        id: 3,
+        rating: 1,
+        review: "Too bad",
+        reviewDate: DateTime(2022, 11, 15, 12, 56))
   ];
 
   @override
@@ -239,42 +247,21 @@ class _HotelDetailState extends State<HotelDetail> {
                     delay: 300,
                     child: Container(
                       margin: EdgeInsets.only(top: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          RichText(
-                            text: TextSpan(children: [
-                              WidgetSpan(
-                                  child: Icon(
-                                Icons.pin_drop_outlined,
-                                size: 20,
-                                color: Colors.black,
-                              )),
-                              TextSpan(
-                                  text: " ${widget.model.address}",
-                                  style: GoogleFonts.nunitoSans(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black,
-                                      fontSize: 20))
-                            ]),
-                          ),
-                          RichText(
-                            text: TextSpan(children: [
-                              WidgetSpan(
-                                  child: Icon(
-                                Icons.star_rate_rounded,
-                                size: 25,
-                                color: colors.starsReviewColor,
-                              )),
-                              TextSpan(
-                                  text: " ${widget.model.rating}/5",
-                                  style: GoogleFonts.quicksand(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black,
-                                      fontSize: 20))
-                            ]),
-                          ),
-                        ],
+                      child: RichText(
+                        text: TextSpan(children: [
+                          WidgetSpan(
+                              child: Icon(
+                            Icons.pin_drop_outlined,
+                            size: 20,
+                            color: Colors.black,
+                          )),
+                          TextSpan(
+                              text: " ${widget.model.address}",
+                              style: GoogleFonts.nunitoSans(
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                  fontSize: 20))
+                        ]),
                       ),
                     ),
                   ),
@@ -313,7 +300,7 @@ class _HotelDetailState extends State<HotelDetail> {
                 ),
                 Container(
                   margin: EdgeInsets.only(left: 20, right: 20),
-                  child: ShowUp(
+                  child: ShowRight(
                       child: Text(
                         "Map",
                         style: GoogleFonts.montserrat(fontSize: 25),
@@ -325,15 +312,18 @@ class _HotelDetailState extends State<HotelDetail> {
                   child: ShowUp(
                       child: GestureDetector(
                         onTap: () async {
-                          final availableMaps = await map.MapLauncher.installedMaps;
+                          final availableMaps =
+                              await map.MapLauncher.installedMaps;
 
-                          await availableMaps.first.showDirections(destination: map.Coords(widget.model.hotelLocaton!.latitude, widget.model.hotelLocaton!.longitude));
+                          await availableMaps.first.showDirections(
+                              destination: map.Coords(
+                                  widget.model.hotelLocaton!.latitude,
+                                  widget.model.hotelLocaton!.longitude));
 
 /*                          await availableMaps.first.showMarker(
                             coords: map.Coords(widget.model.hotelLocaton!.latitude, widget.model.hotelLocaton!.longitude),
                             title: widget.model.name,
                           );*/
-
                         },
                         child: Container(
                           margin: EdgeInsets.only(top: 15),
@@ -361,7 +351,8 @@ class _HotelDetailState extends State<HotelDetail> {
                                   // on below line setting compass enabled.
                                   //compassEnabled: true,
                                   // on below line specifying controller on map complete.
-                                  onMapCreated: (GoogleMapController controller) {
+                                  onMapCreated:
+                                      (GoogleMapController controller) {
                                     _controller.complete(controller);
                                   },
                                 ),
@@ -370,10 +361,14 @@ class _HotelDetailState extends State<HotelDetail> {
                                   child: Container(
                                     width: double.infinity,
                                     height: 20,
-                                    child: Text("Click to open direction in Google Map", textAlign: TextAlign.center, style: GoogleFonts.montserrat(color: Colors.black),),
-                                    decoration: BoxDecoration(
-                                        color: Colors.grey.withOpacity(0.7)
+                                    child: Text(
+                                      "Click to open direction in Google Map",
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.montserrat(
+                                          color: Colors.black),
                                     ),
+                                    decoration: BoxDecoration(
+                                        color: Colors.grey.withOpacity(0.7)),
                                   ),
                                 )
                               ],
@@ -388,7 +383,7 @@ class _HotelDetailState extends State<HotelDetail> {
                 ),
                 Container(
                   margin: EdgeInsets.only(left: 20, right: 20),
-                  child: ShowUp(
+                  child: ShowRight(
                     delay: 750,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -628,8 +623,16 @@ class _HotelDetailState extends State<HotelDetail> {
                             ))
                     ],
                   ),
-                  SizedBox(height: 5,),
-                  Text(e.reviewDate.toString(), style: GoogleFonts.montserrat(color: Colors.grey, fontWeight: FontWeight.w300, fontSize: 13),)
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Text(
+                    e.reviewDate.toString(),
+                    style: GoogleFonts.montserrat(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w300,
+                        fontSize: 13),
+                  )
                 ],
               ),
             )
