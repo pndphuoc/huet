@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hue_t/all_reviews.dart';
 import 'package:hue_t/fullscreen_map.dart';
-import 'package:hue_t/model/hotelModel.dart';
+import 'package:hue_t/model/accommodationModel.dart';
 import 'package:hue_t/animation/show_up.dart';
 import 'package:geolocator/geolocator.dart';
 import 'animation/show_right.dart';
@@ -96,21 +96,21 @@ class _HotelDetailState extends State<HotelDetail> {
       // marker added for hotels location
       _markers.add(Marker(
           markerId: MarkerId("3"),
-          position: LatLng(widget.model.hotelLocaton!.latitude,
-              widget.model.hotelLocaton!.longitude),
+          position: LatLng(widget.model.accommodationLocation!.latitude,
+              widget.model.accommodationLocation!.longitude),
           infoWindow: InfoWindow(title: "Hotel's Locations")));
 
-      double miny = (value.latitude <= widget.model.hotelLocaton!.latitude)
+      double miny = (value.latitude <= widget.model.accommodationLocation!.latitude)
           ? value.latitude
-          : widget.model.hotelLocaton!.latitude;
-      double minx = (value.longitude <= widget.model.hotelLocaton!.longitude)
+          : widget.model.accommodationLocation!.latitude;
+      double minx = (value.longitude <= widget.model.accommodationLocation!.longitude)
           ? value.longitude
-          : widget.model.hotelLocaton!.longitude;
-      double maxy = (value.latitude <= widget.model.hotelLocaton!.latitude)
-          ? widget.model.hotelLocaton!.latitude
+          : widget.model.accommodationLocation!.longitude;
+      double maxy = (value.latitude <= widget.model.accommodationLocation!.latitude)
+          ? widget.model.accommodationLocation!.latitude
           : value.latitude;
-      double maxx = (value.longitude <= widget.model.hotelLocaton!.longitude)
-          ? widget.model.hotelLocaton!.longitude
+      double maxx = (value.longitude <= widget.model.accommodationLocation!.longitude)
+          ? widget.model.accommodationLocation!.longitude
           : value.longitude;
 
       double southWestLatitude = miny;
@@ -151,7 +151,7 @@ class _HotelDetailState extends State<HotelDetail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: colors.hotelDetailBackgroundColor,
+      backgroundColor: colors.isDarkMode?colors.backgroundColorDarkMode:colors.hotelDetailBackgroundColor,
       body: Stack(children: [
         SingleChildScrollView(
           child: Container(
@@ -234,7 +234,7 @@ class _HotelDetailState extends State<HotelDetail> {
                       child: Text(
                         widget.model.name,
                         style: GoogleFonts.quicksand(
-                            color: Colors.black,
+                            color: colors.isDarkMode?Colors.white:Colors.black,
                             fontWeight: FontWeight.bold,
                             fontSize: 30),
                       ),
@@ -253,13 +253,13 @@ class _HotelDetailState extends State<HotelDetail> {
                               child: Icon(
                             Icons.pin_drop_outlined,
                             size: 20,
-                            color: Colors.black,
+                                color: colors.isDarkMode?Colors.white:Colors.black,
                           )),
                           TextSpan(
                               text: " ${widget.model.address}",
                               style: GoogleFonts.nunitoSans(
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.black,
+                                  color: colors.isDarkMode?Colors.white:Colors.black,
                                   fontSize: 20))
                         ]),
                       ),
@@ -282,13 +282,13 @@ class _HotelDetailState extends State<HotelDetail> {
                               height: 40,
                               width: MediaQuery.of(context).size.width / 4,
                               decoration: BoxDecoration(
-                                  color: colors.backgroundColor,
+                                  color: colors.isDarkMode?colors.categoryBlockColorDarkMode:colors.categoryBlockColor,
                                   borderRadius: BorderRadius.circular(15)),
                               child: Center(
                                   child: Text(
                                 e.name,
                                 style:
-                                    GoogleFonts.quicksand(color: Colors.black),
+                                    GoogleFonts.quicksand(color: colors.isDarkMode?Colors.white:Colors.black),
                               )),
                             ))
                       ],
@@ -303,7 +303,7 @@ class _HotelDetailState extends State<HotelDetail> {
                   child: ShowRight(
                       child: Text(
                         "Map",
-                        style: GoogleFonts.montserrat(fontSize: 25),
+                        style: GoogleFonts.montserrat(fontSize: 25, color: colors.isDarkMode?Colors.white:Colors.black),
                       ),
                       delay: 600),
                 ),
@@ -317,8 +317,8 @@ class _HotelDetailState extends State<HotelDetail> {
 
                           await availableMaps.first.showDirections(
                               destination: map.Coords(
-                                  widget.model.hotelLocaton!.latitude,
-                                  widget.model.hotelLocaton!.longitude));
+                                  widget.model.accommodationLocation!.latitude,
+                                  widget.model.accommodationLocation!.longitude));
 
 /*                          await availableMaps.first.showMarker(
                             coords: map.Coords(widget.model.hotelLocaton!.latitude, widget.model.hotelLocaton!.longitude),
@@ -339,6 +339,7 @@ class _HotelDetailState extends State<HotelDetail> {
                             child: Stack(
                               children: [
                                 GoogleMap(
+
                                   zoomControlsEnabled: false,
                                   // on below line setting camera position
                                   initialCameraPosition: _kGoogle,
@@ -365,7 +366,7 @@ class _HotelDetailState extends State<HotelDetail> {
                                       "Click to open direction in Google Map",
                                       textAlign: TextAlign.center,
                                       style: GoogleFonts.montserrat(
-                                          color: Colors.black),
+                                          color: colors.isDarkMode?Colors.white:Colors.black),
                                     ),
                                     decoration: BoxDecoration(
                                         color: Colors.grey.withOpacity(0.7)),
@@ -397,7 +398,7 @@ class _HotelDetailState extends State<HotelDetail> {
                             Text(
                               "Reviews",
                               style: GoogleFonts.montserrat(
-                                  color: Colors.black, fontSize: 25),
+                                  color: colors.isDarkMode?Colors.white:Colors.black, fontSize: 25),
                             ),
                             Row(
                               children: [
@@ -421,7 +422,7 @@ class _HotelDetailState extends State<HotelDetail> {
                                   initialRating: widget.model.rating!,
                                 ),
                                 Text(
-                                  " ${widget.model.rating!}/5",
+                                  " ${widget.model.rating!}/5", style: GoogleFonts.poppins(color: colors.isDarkMode?Colors.white:Colors.black),
                                 )
                               ],
                             )
