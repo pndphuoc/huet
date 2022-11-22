@@ -3,14 +3,11 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/animation/show_up.dart';
-import 'animation/show_right.dart';
-import 'colors.dart' as colors;
+import '../animation/show_right.dart';
+import '../colors.dart' as colors;
 import 'hotel_detail.dart';
-import 'model/accommodationModel.dart';
-import 'model/locationModel.dart';
-import 'model/roomTypeModel.dart';
-import 'package:sticky_headers/sticky_headers.dart';
-import 'fake_data.dart' as faker;
+import '../fake_data.dart' as faker;
+import 'package:hue_t/get_user_location.dart' as userLocation;
 
 class HomestaysPage extends StatefulWidget {
   const HomestaysPage({Key? key}) : super(key: key);
@@ -25,15 +22,6 @@ class HomestaysPage extends StatefulWidget {
 bool isRecommendationHotel = true;
 
 class _HomestaysPageState extends State<HomestaysPage> {
-  Future<Position> getUserCurrentLocation() async {
-    await Geolocator.requestPermission()
-        .then((value) {})
-        .onError((error, stackTrace) async {
-      await Geolocator.requestPermission();
-      print("ERROR" + error.toString());
-    });
-    return await Geolocator.getCurrentPosition();
-  }
 
   Future<void> distanceCaculating(Position value) async {
     for (int i = 0; i < faker.listHotels.length; i++) {
@@ -52,7 +40,7 @@ class _HomestaysPageState extends State<HomestaysPage> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      getUserCurrentLocation().then((value) async {
+      userLocation.getUserCurrentLocation().then((value) async {
         print(value.latitude.toString() + " " + value.longitude.toString());
         await distanceCaculating(value);
         setState(() {

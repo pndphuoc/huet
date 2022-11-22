@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hue_t/home.dart';
-import 'package:hue_t/hotel.dart';
+import 'package:hue_t/accommodation_views/home.dart';
+import 'package:hue_t/accommodation_views/hotel.dart';
 import 'colors.dart' as colors;
 void main() {
   runApp(const MyApp());

@@ -5,15 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:hue_t/all_reviews.dart';
+import 'package:hue_t/accommodation_views/all_reviews.dart';
 import 'package:hue_t/fullscreen_map.dart';
 import 'package:hue_t/model/accommodationModel.dart';
 import 'package:hue_t/animation/show_up.dart';
 import 'package:geolocator/geolocator.dart';
-import 'animation/show_right.dart';
-import 'colors.dart' as colors;
-import 'model/reviewModel.dart';
+import '../animation/show_right.dart';
+import '../colors.dart' as colors;
+import '../model/reviewModel.dart';
 import 'package:map_launcher/map_launcher.dart' as map;
+import '../get_user_location.dart' as userLocation;
 
 class HotelDetail extends StatefulWidget {
   const HotelDetail({Key? key, required this.model}) : super(key: key);
@@ -45,16 +46,6 @@ class _HotelDetailState extends State<HotelDetail> {
   // on below line we have created the list of markers
   final List<Marker> _markers = <Marker>[];
 
-  // created method for getting user current location
-  Future<Position> getUserCurrentLocation() async {
-    await Geolocator.requestPermission()
-        .then((value) {})
-        .onError((error, stackTrace) async {
-      await Geolocator.requestPermission();
-      print("ERROR" + error.toString());
-    });
-    return await Geolocator.getCurrentPosition();
-  }
 
   //reviews data
   List<reviewModel> reviewsList = [
@@ -81,17 +72,7 @@ class _HotelDetailState extends State<HotelDetail> {
   @override
   void initState() {
     super.initState();
-    getUserCurrentLocation().then((value) async {
-      print(value.latitude.toString() + " " + value.longitude.toString());
-
-      // marker added for current users location
-      // _markers.add(Marker(
-      //   markerId: MarkerId("2"),
-      //   position: LatLng(value.latitude, value.longitude),
-      //   infoWindow: InfoWindow(
-      //     title: 'Your Location',
-      //   ),
-      // ));
+    userLocation.getUserCurrentLocation().then((value) async {
 
       // marker added for hotels location
       _markers.add(Marker(
@@ -118,7 +99,7 @@ class _HotelDetailState extends State<HotelDetail> {
 
       double northEastLatitude = maxy;
       double northEastLongitude = maxx;
-
+      setState(() { });
       // specified current users location
       CameraPosition cameraPosition = new CameraPosition(
         target: LatLng(value.latitude, value.longitude),
@@ -134,9 +115,9 @@ class _HotelDetailState extends State<HotelDetail> {
         super.dispose();
       }
 
-      Timer(Duration(milliseconds: 500), () async {
+      Timer(Duration(milliseconds: 1000), () async {
         controller.animateCamera(
-          CameraUpdate.newLatLngBounds(
+           CameraUpdate.newLatLngBounds(
               LatLngBounds(
                 northeast: LatLng(northEastLatitude, northEastLongitude),
                 southwest: LatLng(southWestLatitude, southWestLongitude),
@@ -144,7 +125,7 @@ class _HotelDetailState extends State<HotelDetail> {
               30),
         );
       });
-      setState(() {});
+      setState(() { });
     });
   }
 
