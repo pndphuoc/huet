@@ -43,56 +43,79 @@ class _BottomNavBarV2State extends State<BottomNavBarV2> {
             Container(
               width: MediaQuery.of(context).size.width,
               height: 65,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      Icons.home,
-                      color: currentIndex == 0
-                          ? Color.fromARGB(255, 104, 104, 172)
-                          : Colors.grey.shade400,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0, right: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        Icons.home,
+                        color: currentIndex == 0
+                            ? Color.fromARGB(255, 104, 104, 172)
+                            : Colors.grey.shade400,
+                      ),
+                      onPressed: () {
+                        setBottomBarIndex(0);
+                      },
+                      splashColor: Colors.white,
                     ),
-                    onPressed: () {
-                      setBottomBarIndex(0);
-                    },
-                    splashColor: Colors.white,
-                  ),
-                  IconButton(
-                      icon: Icon(
-                        Icons.hotel_outlined,
-                        color: currentIndex == 1
-                            ? Color.fromARGB(255, 104, 104, 172)
-                            : Colors.grey.shade400,
-                      ),
-                      onPressed: () {
-                        setBottomBarIndex(1);
-                      }),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.20,
-                  ),
-                  IconButton(
-                      icon: Icon(
-                        Icons.restaurant_menu,
-                        color: currentIndex == 2
-                            ? Color.fromARGB(255, 104, 104, 172)
-                            : Colors.grey.shade400,
-                      ),
-                      onPressed: () {
-                        setBottomBarIndex(2);
-                      }),
-                  IconButton(
-                      icon: Icon(
-                        Icons.place_outlined,
-                        color: currentIndex == 3
-                            ? Color.fromARGB(255, 104, 104, 172)
-                            : Colors.grey.shade400,
-                      ),
-                      onPressed: () {
-                        setBottomBarIndex(3);
-                      }),
-                ],
+                    IconButton(
+                        icon: Icon(
+                          Icons.hotel_outlined,
+                          color: currentIndex == 1
+                              ? Color.fromARGB(255, 104, 104, 172)
+                              : Colors.grey.shade400,
+                        ),
+                        onPressed: () {
+                          setBottomBarIndex(1);
+                        }),
+                    IconButton(
+                        icon: Icon(
+                          Icons.restaurant_menu,
+                          color: currentIndex == 1
+                              ? Color.fromARGB(255, 104, 104, 172)
+                              : Colors.grey.shade400,
+                        ),
+                        onPressed: () {
+                          setBottomBarIndex(1);
+                        }),
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.20,
+                    ),
+                    IconButton(
+                        icon: Icon(
+                          Icons.place_outlined,
+                          color: currentIndex == 1
+                              ? Color.fromARGB(255, 104, 104, 172)
+                              : Colors.grey.shade400,
+                        ),
+                        onPressed: () {
+                          setBottomBarIndex(1);
+                        }),
+                    IconButton(
+                        icon: Icon(
+                          Icons.image_outlined,
+                          color: currentIndex == 2
+                              ? Color.fromARGB(255, 104, 104, 172)
+                              : Colors.grey.shade400,
+                        ),
+                        onPressed: () {
+                          setBottomBarIndex(2);
+                        }),
+                    IconButton(
+                        icon: Icon(
+                          Icons.person_outline_outlined,
+                          color: currentIndex == 3
+                              ? Color.fromARGB(255, 104, 104, 172)
+                              : Colors.grey.shade400,
+                        ),
+                        onPressed: () {
+                          setBottomBarIndex(3);
+                        }),
+                  ],
+                ),
               ),
             )
           ],

@@ -6,6 +6,7 @@ import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hue_t/view/foodstore/foodstoredetail.dart';
 import 'package:hue_t/view/navigationbar/navigationbar.dart' as NavigationBar;
 import 'package:hue_t/model/foodstore/restaurant.dart' as restaurant;
 import 'package:hue_t/colors.dart' as color;
@@ -25,6 +26,7 @@ class Foodstore extends StatefulWidget {
 }
 
 class _FoodstoreState extends State<Foodstore> {
+  var popular1 = true;
   List imageslide = [
     "assets/images/foodstore/food3.jpg",
     "assets/images/foodstore/food1.jpg",
@@ -50,6 +52,14 @@ class _FoodstoreState extends State<Foodstore> {
         image: "assets/images/foodstore/category/3.png",
         color: Color.fromARGB(255, 250, 247, 220)),
   ];
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      restaurant.sort();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -391,164 +401,367 @@ class _FoodstoreState extends State<Foodstore> {
       margin: EdgeInsets.only(bottom: 60),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Stack(
             children: [
-              Container(
-                width: MediaQuery.of(context).size.width / 2,
-                height: 40,
-                decoration: BoxDecoration(
-                    border: Border(
-                        bottom: BorderSide(
-                            width: 2,
-                            color: Color.fromARGB(255, 104, 104, 172)))),
-                child: Center(
-                  child: Text("Hot",
-                      style: GoogleFonts.poppins(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: Color.fromARGB(255, 104, 104, 172))),
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        popular1 = true;
+                      });
+                    },
+                    child: Container(
+                      width: MediaQuery.of(context).size.width / 2,
+                      height: 40,
+                      decoration: BoxDecoration(),
+                      child: Center(
+                        child: Text("Hot",
+                            style: GoogleFonts.poppins(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: popular1
+                                    ? Color.fromARGB(255, 104, 104, 172)
+                                    : Color.fromARGB(255, 87, 86, 86))),
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        popular1 = false;
+                      });
+                    },
+                    child: Container(
+                      width: MediaQuery.of(context).size.width / 2,
+                      height: 40,
+                      decoration: BoxDecoration(),
+                      child: Center(
+                        child: Text("Rating",
+                            style: GoogleFonts.poppins(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: !popular1
+                                    ? Color.fromARGB(255, 104, 104, 172)
+                                    : Color.fromARGB(255, 97, 97, 97))),
+                      ),
+                    ),
+                  )
+                ],
               ),
-              Container(
-                width: MediaQuery.of(context).size.width / 2,
-                height: 40,
-                child: Center(
-                  child: Text("Rating",
-                      style: GoogleFonts.poppins(
-                          fontSize: 15, fontWeight: FontWeight.w600)),
-                ),
-              )
+              AnimatedPositioned(
+                  bottom: 0,
+                  left: popular1 ? 0 : MediaQuery.of(context).size.width / 2,
+                  duration: Duration(milliseconds: 300),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width / 2,
+                    decoration: BoxDecoration(
+                        border: Border(
+                            bottom: BorderSide(
+                                width: 2,
+                                color: Color.fromARGB(255, 104, 104, 172)))),
+                  ))
             ],
           ),
           SizedBox(
             height: 3,
           ),
-          Container(
-            width: MediaQuery.of(context).size.width,
-            height: 130 * (restaurant.listrestaurant.length as double),
-            child: Column(
-              children: [
-                ...restaurant.listrestaurant.map((e) => Container(
-                      margin: EdgeInsets.only(bottom: 10),
-                      width: MediaQuery.of(context).size.width,
-                      height: 120,
-                      color: Colors.white,
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Row(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(5),
-                              child: Image.asset(e.image![0].toString(),
-                                  height: double.infinity,
-                                  width: 90,
-                                  fit: BoxFit.cover),
-                            ),
-                            SizedBox(
-                              width: 15,
-                            ),
-                            Container(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(e.title.toString(),
-                                      style: GoogleFonts.poppins(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
-                                      )),
-                                  SizedBox(
-                                    height: 4,
-                                  ),
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Row(
+          popular1
+              ? Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: 130 * (restaurant.listrestaurant.length as double),
+                  child: Column(
+                    children: [
+                      ...restaurant.listrestaurant.map((e) => GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => FoodstoreDetail()));
+                            },
+                            child: Container(
+                              margin: EdgeInsets.only(bottom: 10),
+                              width: MediaQuery.of(context).size.width,
+                              height: 120,
+                              color: Colors.white,
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Row(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(5),
+                                      child: Image.asset(e.image![0].toString(),
+                                          height: double.infinity,
+                                          width: 90,
+                                          fit: BoxFit.cover),
+                                    ),
+                                    SizedBox(
+                                      width: 15,
+                                    ),
+                                    Container(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          Icon(
-                                            Icons.star,
-                                            size: 17,
-                                            color: Colors.amber,
-                                          ),
-                                          SizedBox(
-                                            width: 3,
-                                          ),
-                                          Text(e.rating.toString(),
+                                          Text(e.title.toString(),
                                               style: GoogleFonts.poppins(
-                                                  fontSize: 13,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Colors.grey))
-                                        ],
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 10.0, right: 10),
-                                        child: Text(
-                                          "|",
-                                          style: TextStyle(
-                                              fontSize: 17, color: Colors.grey),
-                                        ),
-                                      ),
-                                      Row(
-                                        children: [
-                                          Icon(Icons.location_on_outlined,
-                                              size: 17),
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w600,
+                                              )),
                                           SizedBox(
-                                            width: 3,
+                                            height: 4,
                                           ),
-                                          Text("0.3km")
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.star,
+                                                    size: 17,
+                                                    color: Colors.amber,
+                                                  ),
+                                                  SizedBox(
+                                                    width: 3,
+                                                  ),
+                                                  Text(e.rating.toString(),
+                                                      style:
+                                                          GoogleFonts.poppins(
+                                                              fontSize: 13,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                              color:
+                                                                  Colors.grey))
+                                                ],
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    left: 10.0, right: 10),
+                                                child: Text(
+                                                  "|",
+                                                  style: TextStyle(
+                                                      fontSize: 17,
+                                                      color: Colors.grey),
+                                                ),
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                      Icons
+                                                          .location_on_outlined,
+                                                      size: 17),
+                                                  SizedBox(
+                                                    width: 3,
+                                                  ),
+                                                  Text("0.3km")
+                                                ],
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    left: 10.0, right: 10),
+                                                child: Text(
+                                                  "|",
+                                                  style: TextStyle(
+                                                      fontSize: 17,
+                                                      color: Colors.grey),
+                                                ),
+                                              ),
+                                              Text("Closing",
+                                                  style: GoogleFonts.poppins(
+                                                      fontSize: 13,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: Color.fromARGB(
+                                                          255, 247, 69, 62)))
+                                            ],
+                                          ),
+                                          SizedBox(
+                                            height: 5,
+                                          ),
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
+                                            children: [
+                                              Icon(
+                                                Icons.person,
+                                                size: 25,
+                                                color: Colors.grey,
+                                              ),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text(
+                                                  "Checkin: " +
+                                                      e.checkin.toString(),
+                                                  style: GoogleFonts.poppins(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: Color.fromARGB(
+                                                          255, 100, 99, 99)))
+                                            ],
+                                          )
                                         ],
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 10.0, right: 10),
-                                        child: Text(
-                                          "|",
-                                          style: TextStyle(
-                                              fontSize: 17, color: Colors.grey),
-                                        ),
-                                      ),
-                                      Text("Closing",
-                                          style: GoogleFonts.poppins(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w600,
-                                              color: Color.fromARGB(
-                                                  255, 247, 69, 62)))
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 5,
-                                  ),
-                                  Row(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Icon(
-                                        Icons.person,
-                                        size: 30,
-                                        color: Colors.grey,
-                                      ),
-                                      SizedBox(
-                                        width: 5,
-                                      ),
-                                      Text("Checkin: " + e.checkin.toString(),
-                                          style: GoogleFonts.poppins(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                              color: Color.fromARGB(
-                                                  255, 100, 99, 99)))
-                                    ],
-                                  )
-                                ],
+                                    )
+                                  ],
+                                ),
                               ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ))
-              ],
-            ),
-          )
+                            ),
+                          ))
+                    ],
+                  ),
+                )
+              : Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: 130 * (restaurant.listrestaurant2.length as double),
+                  child: Column(
+                    children: [
+                      ...restaurant.listrestaurant2.map((e) => GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => FoodstoreDetail()));
+                            },
+                            child: Container(
+                              margin: EdgeInsets.only(bottom: 10),
+                              width: MediaQuery.of(context).size.width,
+                              height: 120,
+                              color: Colors.white,
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Row(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(5),
+                                      child: Image.asset(e.image![0].toString(),
+                                          height: double.infinity,
+                                          width: 90,
+                                          fit: BoxFit.cover),
+                                    ),
+                                    SizedBox(
+                                      width: 15,
+                                    ),
+                                    Container(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(e.title.toString(),
+                                              style: GoogleFonts.poppins(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w600,
+                                              )),
+                                          SizedBox(
+                                            height: 4,
+                                          ),
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.star,
+                                                    size: 17,
+                                                    color: Colors.amber,
+                                                  ),
+                                                  SizedBox(
+                                                    width: 3,
+                                                  ),
+                                                  Text(e.rating.toString(),
+                                                      style:
+                                                          GoogleFonts.poppins(
+                                                              fontSize: 13,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                              color:
+                                                                  Colors.grey))
+                                                ],
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    left: 10.0, right: 10),
+                                                child: Text(
+                                                  "|",
+                                                  style: TextStyle(
+                                                      fontSize: 17,
+                                                      color: Colors.grey),
+                                                ),
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                      Icons
+                                                          .location_on_outlined,
+                                                      size: 17),
+                                                  SizedBox(
+                                                    width: 3,
+                                                  ),
+                                                  Text("0.3km")
+                                                ],
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    left: 10.0, right: 10),
+                                                child: Text(
+                                                  "|",
+                                                  style: TextStyle(
+                                                      fontSize: 17,
+                                                      color: Colors.grey),
+                                                ),
+                                              ),
+                                              Text("Closing",
+                                                  style: GoogleFonts.poppins(
+                                                      fontSize: 13,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: Color.fromARGB(
+                                                          255, 247, 69, 62)))
+                                            ],
+                                          ),
+                                          SizedBox(
+                                            height: 5,
+                                          ),
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.end,
+                                            children: [
+                                              Icon(
+                                                Icons.person,
+                                                size: 25,
+                                                color: Colors.grey,
+                                              ),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text(
+                                                  "Checkin: " +
+                                                      e.checkin.toString(),
+                                                  style: GoogleFonts.poppins(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: Color.fromARGB(
+                                                          255, 100, 99, 99)))
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ))
+                    ],
+                  ),
+                )
         ],
       ),
     );
