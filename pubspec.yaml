@@ -20,7 +20,11 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
+<<<<<<< HEAD
   sdk: ">=2.17.6 <3.0.0"
+=======
+  sdk: '>=2.18.0 <3.0.0'
+>>>>>>> 941fc0b107ce8e84a10a81f616c6e47579f83c7a
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -29,16 +33,37 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  map_launcher: ^2.4.0
+  google_maps_webservice: ^0.0.19
+  flutter_polyline_points:
+  geolocator: ^9.0.2
+  permission_handler: ^10.2.0
+  google_maps_flutter:
+  flutter_rating_bar:
+  swipeable_page_route: ^0.2.6
+  flutter_staggered_grid_view:
+  flutter_staggered_animations: ^1.0.0
+  loading_animation_widget:
+  implicitly_animated_reorderable_list: ^0.4.2
   syncfusion_flutter_datepicker: ^20.3.56
+  google_fonts: ^3.0.1
+  sticky_headers: ^0.3.0
+  flutter_sticky_header: ^0.6.4
+  hidable: ^1.0.3
+  carousel_slider: ^4.1.1
   flutter:
     sdk: flutter
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+<<<<<<< HEAD
   device_preview: ^1.1.0
   card_swiper: ^2.0.4
   google_fonts: ^3.0.1
+=======
+  google_maps_flutter_web: ^0.4.0+3
+>>>>>>> 941fc0b107ce8e84a10a81f616c6e47579f83c7a
 
 dev_dependencies:
   flutter_test:
