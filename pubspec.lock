@@ -7,10 +7,7 @@ packages:
       name: async
       url: "https://pub.dartlang.org"
     source: hosted
-<<<<<<< HEAD
     version: "2.8.2"
-=======
-    version: "2.9.0"
   black_hole_flutter:
     dependency: transitive
     description:
@@ -18,7 +15,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.3.5"
->>>>>>> 941fc0b107ce8e84a10a81f616c6e47579f83c7a
   boolean_selector:
     dependency: transitive
     description:
@@ -26,15 +22,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0"
-<<<<<<< HEAD
-  card_swiper:
-    dependency: "direct main"
-    description:
-      name: card_swiper
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.0.4"
-=======
   carousel_slider:
     dependency: "direct main"
     description:
@@ -42,7 +29,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.1.1"
->>>>>>> 941fc0b107ce8e84a10a81f616c6e47579f83c7a
   characters:
     dependency: transitive
     description:
@@ -78,8 +64,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.2"
-<<<<<<< HEAD
-=======
   csslib:
     dependency: transitive
     description:
@@ -87,7 +71,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.17.2"
->>>>>>> 941fc0b107ce8e84a10a81f616c6e47579f83c7a
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -115,11 +98,7 @@ packages:
       name: fake_async
       url: "https://pub.dartlang.org"
     source: hosted
-<<<<<<< HEAD
     version: "1.3.0"
-=======
-    version: "1.3.1"
->>>>>>> 941fc0b107ce8e84a10a81f616c6e47579f83c7a
   ffi:
     dependency: transitive
     description:
@@ -146,13 +125,11 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.1"
-<<<<<<< HEAD
   flutter_localizations:
     dependency: transitive
     description: flutter
     source: sdk
     version: "0.0.0"
-=======
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -195,7 +172,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.4"
->>>>>>> 941fc0b107ce8e84a10a81f616c6e47579f83c7a
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -206,7 +182,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-<<<<<<< HEAD
   freezed_annotation:
     dependency: transitive
     description:
@@ -214,7 +189,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.0"
-=======
   geolocator:
     dependency: "direct main"
     description:
@@ -257,7 +231,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.1"
->>>>>>> 941fc0b107ce8e84a10a81f616c6e47579f83c7a
   google_fonts:
     dependency: "direct main"
     description:
@@ -265,8 +238,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.1"
-<<<<<<< HEAD
-=======
   google_maps:
     dependency: transitive
     description:
@@ -330,7 +301,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.15.1"
->>>>>>> 941fc0b107ce8e84a10a81f616c6e47579f83c7a
   http:
     dependency: transitive
     description:
@@ -345,8 +315,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.0.2"
-<<<<<<< HEAD
-=======
   implicitly_animated_reorderable_list:
     dependency: "direct main"
     description:
@@ -354,7 +322,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.4.2"
->>>>>>> 941fc0b107ce8e84a10a81f616c6e47579f83c7a
   intl:
     dependency: transitive
     description:
@@ -369,15 +336,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.4"
-<<<<<<< HEAD
-  json_annotation:
-    dependency: transitive
-    description:
-      name: json_annotation
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "4.7.0"
-=======
   js_wrapping:
     dependency: transitive
     description:
@@ -385,7 +343,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.7.4"
->>>>>>> 941fc0b107ce8e84a10a81f616c6e47579f83c7a
+  json_annotation:
+    dependency: transitive
+    description:
+      name: json_annotation
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.7.0"
   lints:
     dependency: transitive
     description:
@@ -448,11 +412,7 @@ packages:
       name: path
       url: "https://pub.dartlang.org"
     source: hosted
-<<<<<<< HEAD
     version: "1.8.1"
-=======
-    version: "1.8.2"
->>>>>>> 941fc0b107ce8e84a10a81f616c6e47579f83c7a
   path_provider:
     dependency: transitive
     description:
@@ -502,8 +462,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.3"
-<<<<<<< HEAD
-=======
   permission_handler:
     dependency: "direct main"
     description:
@@ -539,7 +497,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.2"
->>>>>>> 941fc0b107ce8e84a10a81f616c6e47579f83c7a
   platform:
     dependency: transitive
     description:
@@ -561,7 +518,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.2.4"
-<<<<<<< HEAD
   provider:
     dependency: transitive
     description:
@@ -569,6 +525,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "6.0.4"
+  sanitize_html:
+    dependency: transitive
+    description:
+      name: sanitize_html
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0"
   shared_preferences:
     dependency: transitive
     description:
@@ -625,15 +588,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.1"
-=======
-  sanitize_html:
-    dependency: transitive
-    description:
-      name: sanitize_html
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.0.0"
->>>>>>> 941fc0b107ce8e84a10a81f616c6e47579f83c7a
   sky_engine:
     dependency: transitive
     description: flutter
@@ -680,10 +634,7 @@ packages:
       name: string_scanner
       url: "https://pub.dartlang.org"
     source: hosted
-<<<<<<< HEAD
     version: "1.1.0"
-=======
-    version: "1.1.1"
   swipeable_page_route:
     dependency: "direct main"
     description:
@@ -691,7 +642,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.6"
->>>>>>> 941fc0b107ce8e84a10a81f616c6e47579f83c7a
   syncfusion_flutter_core:
     dependency: transitive
     description:
@@ -719,11 +669,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-<<<<<<< HEAD
     version: "0.4.9"
-=======
-    version: "0.4.12"
->>>>>>> 941fc0b107ce8e84a10a81f616c6e47579f83c7a
   typed_data:
     dependency: transitive
     description:
@@ -731,8 +677,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.3.1"
-<<<<<<< HEAD
-=======
   value_layout_builder:
     dependency: transitive
     description:
@@ -740,7 +684,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.3.1"
->>>>>>> 941fc0b107ce8e84a10a81f616c6e47579f83c7a
   vector_math:
     dependency: transitive
     description:
@@ -763,9 +706,5 @@ packages:
     source: hosted
     version: "0.2.0+2"
 sdks:
-<<<<<<< HEAD
   dart: ">=2.17.6 <3.0.0"
-=======
-  dart: ">=2.18.0 <3.0.0"
->>>>>>> 941fc0b107ce8e84a10a81f616c6e47579f83c7a
   flutter: ">=3.0.0"
