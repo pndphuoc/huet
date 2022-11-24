@@ -222,36 +222,7 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                         ),
                       )),
                 ),
-                Positioned(child: SnakeNavigationBar.color(
-                  behaviour: snakeBarStyle,
-                  snakeShape: snakeShape,
-                  shape: bottomBarShape,
-                  padding: padding,
-                  backgroundColor: colors.navigationBarColor,
-                  ///configuration for SnakeNavigationBar.color
-                  snakeViewColor: colors.primaryColor,
-                  selectedItemColor: snakeShape == SnakeShape.indicator ? selectedColor : null,
-                  unselectedItemColor: Colors.black,
-
-                  ///configuration for SnakeNavigationBar.gradient
-                  //snakeViewGradient: selectedGradient,
-                  //selectedItemGradient: snakeShape == SnakeShape.indicator ? selectedGradient : null,
-                  //unselectedItemGradient: unselectedGradient,
-
-                  showUnselectedLabels: showUnselectedLabels,
-                  showSelectedLabels: showSelectedLabels,
-
-                  currentIndex: _selectedItemPosition,
-                  onTap: (index) => setState(() => _selectedItemPosition = index),
-                  items: [
-                    BottomNavigationBarItem(icon: Icon(Icons.hotel), label: 'Accommodations'),
-                    BottomNavigationBarItem(icon: Icon(Icons.fastfood), label: 'Food stores'),
-                    BottomNavigationBarItem(icon: Icon(Icons.place), label: 'Tourist attraction'),
-                    BottomNavigationBarItem(icon: Icon(Icons.newspaper), label: 'Events'),
-                    BottomNavigationBarItem(icon: Icon(Icons.camera_alt), label: 'Social network'),
-                    BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Personal')
-                  ],
-                ),
+                Positioned(child: bottomNavigationBar(context),
                 bottom: 0, left: 0, right: 0,
                 )
 /*                Positioned(
@@ -261,6 +232,39 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                     child: navigationBar.NavigationBar())*/
               ]),
       ),
+    );
+  }
+
+  bottomNavigationBar(BuildContext context) {
+    return SnakeNavigationBar.color(
+      behaviour: snakeBarStyle,
+      snakeShape: snakeShape,
+      shape: bottomBarShape,
+      padding: padding,
+      backgroundColor: colors.navigationBarColor,
+      ///configuration for SnakeNavigationBar.color
+      snakeViewColor: colors.primaryColor,
+      selectedItemColor: snakeShape == SnakeShape.indicator ? selectedColor : null,
+      unselectedItemColor: Colors.black,
+
+      ///configuration for SnakeNavigationBar.gradient
+      //snakeViewGradient: selectedGradient,
+      //selectedItemGradient: snakeShape == SnakeShape.indicator ? selectedGradient : null,
+      //unselectedItemGradient: unselectedGradient,
+
+      showUnselectedLabels: showUnselectedLabels,
+      showSelectedLabels: showSelectedLabels,
+
+      currentIndex: _selectedItemPosition,
+      onTap: (index) => setState(() => _selectedItemPosition = index),
+      items: [
+        BottomNavigationBarItem(icon: Icon(Icons.hotel), label: 'Accommodations'),
+        BottomNavigationBarItem(icon: Icon(Icons.fastfood), label: 'Food stores'),
+        BottomNavigationBarItem(icon: Icon(Icons.place), label: 'Tourist attraction'),
+        BottomNavigationBarItem(icon: Icon(Icons.newspaper), label: 'Events'),
+        BottomNavigationBarItem(icon: Icon(Icons.camera_alt), label: 'Social network'),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Personal')
+      ],
     );
   }
 
