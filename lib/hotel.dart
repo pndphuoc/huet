@@ -196,7 +196,7 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                               ),
                             ),
                           )*/
-                          ...faker.listHotels.map((e) => hotelItem(context, faker.listHotels.indexOf(e)))
+                          ...faker.listHotels.map((e) => popularAccommondationItem(context, faker.listHotels.indexOf(e)))
                         ],
                       ),
                     ),
@@ -258,7 +258,7 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                 physics: BouncingScrollPhysics(),
                 scrollDirection: Axis.horizontal,
                 itemCount: faker.listHotels.length,
-                itemBuilder: (context, index) => hotHotelItem(context, index),
+                itemBuilder: (context, index) => accommodationItem(context, index),
               ),
             ),
           )
@@ -267,7 +267,7 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
     );
   }
 
-  hotHotelItem(BuildContext context, int index) {
+  accommodationItem(BuildContext context, int index) {
     return ShowUp(
       delay: 400 + index*100,
       child: Container(
@@ -455,7 +455,7 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
     );
   }
 
-  hotelItem(BuildContext context, int index) {
+  popularAccommondationItem(BuildContext context, int index) {
     return ShowRight(
       delay: 400+index*100,
       child: Container(
