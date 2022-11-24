@@ -88,7 +88,6 @@ class _FoodstoreState extends State<Foodstore> {
                 ],
               ),
             ),
-            NavigationBar.BottomNavBarV2()
           ],
         ),
       ),

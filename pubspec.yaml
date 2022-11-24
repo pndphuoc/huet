@@ -29,6 +29,8 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  flutter_snake_navigationbar:
+  material_design_icons_flutter: ^6.0.7096
   map_launcher: ^2.4.0
   google_maps_webservice: ^0.0.19
   flutter_polyline_points:

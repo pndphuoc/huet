@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hue_t/animation/show_right.dart';
 import 'package:hue_t/accommodation_views/homestays_list.dart';
@@ -101,111 +102,104 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                 child: LoadingAnimationWidget.staggeredDotsWave(
                     color: colors.primaryColor, size: 50),
               )
-            : SafeArea(
-                child: NestedScrollView(
-                    headerSliverBuilder:
-                        (BuildContext context, bool innerBoxIsScrolled) {
-                      return [
-                        SliverAppBar(
-                          flexibleSpace: LayoutBuilder(
-                            builder: (BuildContext context,
-                                BoxConstraints constraints) {
-                              top = constraints.biggest.height;
-                              return ShowUp(
-                                delay: 0,
-                                child: FlexibleSpaceBar(
-                                  centerTitle: true,
-                                  title: Container(
-                                    child: Text(
-                                      "Find the perfect\naccommodations",
-                                      style: GoogleFonts.montserrat(
-                                          color: innerBoxIsScrolled
-                                              ? colors.backgroundColorDarkMode
-                                              : colors.backgroundColor,
-                                          fontSize: 25),
+            : Stack(children: [
+                SafeArea(
+                  child: NestedScrollView(
+                      headerSliverBuilder:
+                          (BuildContext context, bool innerBoxIsScrolled) {
+                        return [
+                          SliverAppBar(
+                            flexibleSpace: LayoutBuilder(
+                              builder: (BuildContext context,
+                                  BoxConstraints constraints) {
+                                top = constraints.biggest.height;
+                                return ShowUp(
+                                  delay: 0,
+                                  child: FlexibleSpaceBar(
+                                    centerTitle: true,
+                                    title: Container(
+                                      child: Text(
+                                        "Find the perfect\naccommodations",
+                                        style: GoogleFonts.montserrat(
+                                            color: innerBoxIsScrolled
+                                                ? colors.backgroundColorDarkMode
+                                                : colors.backgroundColor,
+                                            fontSize: 25),
+                                      ),
+                                      margin: EdgeInsets.only(bottom: 70),
                                     ),
-                                    margin: EdgeInsets.only(bottom: 70),
+                                    background: Container(
+                                      decoration: BoxDecoration(
+                                          image: DecorationImage(
+                                              image: AssetImage(
+                                                  "assets/images/hotel/img.png"),
+                                              fit: BoxFit.cover)),
+                                    ),
                                   ),
-                                  background: Container(
-                                    decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                            image: AssetImage(
-                                                "assets/images/hotel/img.png"),
-                                            fit: BoxFit.cover)),
-                                  ),
+                                );
+                              },
+                            ),
+                            elevation: 0,
+                            automaticallyImplyLeading: false,
+                            expandedHeight:
+                                MediaQuery.of(context).size.height / 3,
+                            floating: false,
+                            pinned: true,
+                            backgroundColor: colors.isDarkMode
+                                ? colors.backgroundColorDarkMode
+                                : colors.backgroundColor,
+                            bottom: PreferredSize(
+                                child: ShowUp(
+                                  delay: 200,
+                                  child:
+                                      searchBlock(context, innerBoxIsScrolled),
                                 ),
-                              );
-                            },
+                                preferredSize: Size.fromHeight(34)),
+                          )
+                        ];
+                      },
+                      body: ScrollConfiguration(
+                        behavior: MyBehavior(),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              accommodationBlock(context, "Hotels"),
+                              accommodationBlock(context, "Resorts/Villas"),
+                              accommodationBlock(context, "Homestays"),
+                              Container(
+                                margin: EdgeInsets.only(
+                                    left: 20, right: 20, top: 15, bottom: 10),
+                                width: MediaQuery.of(context).size.width,
+                                child: Text(
+                                  "Popular accommodations",
+                                  style: GoogleFonts.poppins(
+                                      color: colors.isDarkMode
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontSize: 25),
+                                ),
+                              ),
+                              sortBlock(context),
+                              SizedBox(
+                                height: 15,
+                              ),
+                              ...faker.listHotels.map((e) =>
+                                  popularAccommondationItem(
+                                      context, faker.listHotels.indexOf(e))),
+                              SizedBox(
+                                height: 60,
+                              )
+                            ],
                           ),
-                          elevation: 0,
-                          automaticallyImplyLeading: false,
-                          expandedHeight:
-                              MediaQuery.of(context).size.height / 3,
-                          floating: false,
-                          pinned: true,
-                          backgroundColor: colors.isDarkMode
-                              ? colors.backgroundColorDarkMode
-                              : colors.backgroundColor,
-                          bottom: PreferredSize(
-                              child: ShowUp(
-                                delay: 200,
-                                child: searchBlock(context, innerBoxIsScrolled),
-                              ),
-                              preferredSize: Size.fromHeight(34)),
-                        )
-                      ];
-                    },
-                    body: ScrollConfiguration(
-                      behavior: MyBehavior(),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            accommodationBlock(context, "Hotels"),
-                            accommodationBlock(context, "Resorts/Villas"),
-                            accommodationBlock(context, "Homestays"),
-                            Container(
-                              margin: EdgeInsets.only(
-                                  left: 20, right: 20, top: 15, bottom: 10),
-                              width: MediaQuery.of(context).size.width,
-                              child: Text(
-                                "Popular accommodations",
-                                style: GoogleFonts.poppins(
-                                    color: colors.isDarkMode
-                                        ? Colors.white
-                                        : Colors.black,
-                                    fontSize: 25),
-                              ),
-                            ),
-                            sortBlock(context),
-                            SizedBox(
-                              height: 15,
-                            ),
-                            /*Expanded(
-                            child: AnimationLimiter(
-                              child: ShowUp(
-                                delay: 450,
-                                child: ImplicitlyAnimatedList<hotelModel>(
-                                  physics: NeverScrollableScrollPhysics(),
-                                  items: faker.listHotels,
-                                  itemBuilder: (context, animation, item, index) =>
-                                      SizeFadeTransition(
-                                    animation: animation,
-                                    sizeFraction: 0.7,
-                                    key: Key(item.id.toString()),
-                                    child: hotelItem(context, item),
-                                  ),
-                                  areItemsTheSame: (a, b) => a.id == b.id,
-                                ),
-                              ),
-                            ),
-                          )*/
-                            ...faker.listHotels.map((e) =>
-                                hotelItem(context, faker.listHotels.indexOf(e)))
-                          ],
                         ),
-                      ),
-                    )),
-              ),
+                      )),
+                ),
+/*                Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: navigationBar.NavigationBar())*/
+              ]),
       ),
     );
   }
@@ -490,7 +484,7 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
     );
   }
 
-  hotelItem(BuildContext context, int index) {
+  popularAccommondationItem(BuildContext context, int index) {
     return ShowRight(
       delay: 400 + index * 100,
       child: Container(
