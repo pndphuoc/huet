@@ -249,11 +249,7 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                 physics: BouncingScrollPhysics(),
                 scrollDirection: Axis.horizontal,
                 itemCount: faker.listHotels.length,
-<<<<<<< HEAD:lib/hotel.dart
-                itemBuilder: (context, index) => accommodationItem(context, index),
-=======
                 itemBuilder: (context, index) => accommodationItemHorizonal(context, index),
->>>>>>> 941fc0b107ce8e84a10a81f616c6e47579f83c7a:lib/accommodation_views/hotel.dart
               ),
             ),
           )
@@ -262,11 +258,7 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
     );
   }
 
-<<<<<<< HEAD:lib/hotel.dart
-  accommodationItem(BuildContext context, int index) {
-=======
   accommodationItemHorizonal(BuildContext context, int index) {
->>>>>>> 941fc0b107ce8e84a10a81f616c6e47579f83c7a:lib/accommodation_views/hotel.dart
     return ShowUp(
       delay: 400 + index*100,
       child: Container(
