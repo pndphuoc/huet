@@ -1,4 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:device_preview/device_preview.dart';
+import 'package:animate_do/animate_do.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:hue_t/view/Foodstore/foodstore.dart';
+import 'package:hue_t/view/foodstore/foodstoredetail.dart';
 import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
 import 'package:hue_t/home.dart';
 import 'package:hue_t/accommodation_views/hotel.dart';
@@ -6,19 +12,97 @@ import 'accommodation_views/homestays_list.dart';
 import 'accommodation_views/hotels_list.dart';
 import 'accommodation_views/resorts_list.dart';
 import 'colors.dart' as colors;
-void main() {
-  runApp(const MyApp());
+
+void main() => runApp(
+      DevicePreview(
+        enabled: true,
+        builder: (context) => MyApp(), // Wrap your app
+      ),
+    );
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      useInheritedMediaQuery: true,
+      locale: DevicePreview.locale(context),
+      builder: DevicePreview.appBuilder,
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      home: SplashScreen(),
+    );
+  }
 }
 
-
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(seconds: 4)).then((value) => Navigator.of(context)
+        .pushReplacement(CupertinoPageRoute(builder: (ctx) => HueT())));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        child: Stack(
+      children: [
+        Image.asset(
+          'assets/images/splashscreen/3.png',
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          fit: BoxFit.cover,
+        ),
+        Positioned(
+            top: 330,
+            child: Image.asset(
+              'assets/images/splashscreen/5.png',
+              width: MediaQuery.of(context).size.width,
+            )),
+        Positioned(
+            top: 100,
+            child: ElasticInUp(
+              duration: Duration(milliseconds: 3000),
+              child: Image.asset(
+                'assets/images/splashscreen/2.png',
+                width: MediaQuery.of(context).size.width,
+              ),
+            )),
+        Positioned(
+            top: 700,
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SpinKitThreeBounce(
+                    color: Colors.white,
+                    duration: Duration(milliseconds: 1000),
+                    size: 40,
+                  ),
+                ],
+              ),
+            ))
+      ],
+    ));
+  }
+}
+
+class HueT extends StatefulWidget {
+  const HueT({super.key});
+
+  @override
+  State<HueT> createState() => _HueTState();
+}
+
+class _HueTState extends State<HueT> {
   final BorderRadius _borderRadius = const BorderRadius.only(
     topLeft: Radius.circular(25),
     topRight: Radius.circular(25),
@@ -43,10 +127,10 @@ class _MyAppState extends State<MyApp> {
   Color unselectedColor = Colors.blueGrey;
 
   Gradient selectedGradient =
-  const LinearGradient(colors: [Colors.red, Colors.amber]);
+      const LinearGradient(colors: [Colors.red, Colors.amber]);
 
   Gradient unselectedGradient =
-  const LinearGradient(colors: [Colors.red, Colors.blueGrey]);
+      const LinearGradient(colors: [Colors.red, Colors.blueGrey]);
 
   Color? containerColor;
 
@@ -60,7 +144,7 @@ class _MyAppState extends State<MyApp> {
   int _selectedItemPosition = 2;
   final List<Widget> _children = [
     HotelPage(),
-    HomestaysPage(),
+    Foodstore(),
     HomePage(),
     ResortsPage(),
     HotelsPage()
@@ -76,7 +160,7 @@ class _MyAppState extends State<MyApp> {
       ///configuration for SnakeNavigationBar.color
       snakeViewColor: colors.primaryColor,
       selectedItemColor:
-      snakeShape == SnakeShape.indicator ? selectedColor : null,
+          snakeShape == SnakeShape.indicator ? selectedColor : null,
       unselectedItemColor: Colors.black,
 
       ///configuration for SnakeNavigationBar.gradient
@@ -87,7 +171,7 @@ class _MyAppState extends State<MyApp> {
       showUnselectedLabels: showUnselectedLabels,
       showSelectedLabels: showSelectedLabels,
 
-      currentIndex:  _selectedItemPosition,
+      currentIndex: _selectedItemPosition,
       onTap: (index) => setState(() => _selectedItemPosition = index),
       items: [
         BottomNavigationBarItem(
@@ -113,6 +197,7 @@ class _MyAppState extends State<MyApp> {
       ],
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

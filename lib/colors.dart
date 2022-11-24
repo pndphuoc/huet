@@ -13,7 +13,7 @@ var hotelDetailBackgroundColor = Colors.white;
 var accommodationItemColor = Colors.white;
 var reviewItemColor = Color.fromARGB(255, 246, 246, 246);
 var starsReviewColor = Color.fromARGB(255, 254, 200, 0);
-var primaryColor = Color.fromARGB(255,104,104,172);
+var primaryColor = Color.fromARGB(255, 104, 104, 172);
 
 //dark mode
 var backgroundColorDarkMode = Color.fromARGB(255, 18, 18, 18);
