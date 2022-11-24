@@ -467,9 +467,9 @@ class _FoodstoreState extends State<Foodstore> {
             height: 3,
           ),
           popular1
-              ? Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: 130 * (restaurant.listrestaurant.length as double),
+              ? SingleChildScrollView(
+                  /*width: MediaQuery.of(context).size.width,
+                  height: 130 * (restaurant.listrestaurant.length as double),*/
                   child: Column(
                     children: [
                       ...restaurant.listrestaurant.map((e) => GestureDetector(
@@ -614,9 +614,7 @@ class _FoodstoreState extends State<Foodstore> {
                     ],
                   ),
                 )
-              : Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: 130 * (restaurant.listrestaurant2.length as double),
+              : SingleChildScrollView(
                   child: Column(
                     children: [
                       ...restaurant.listrestaurant2.map((e) => GestureDetector(

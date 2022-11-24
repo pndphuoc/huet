@@ -14,10 +14,7 @@ import 'accommodation_views/resorts_list.dart';
 import 'colors.dart' as colors;
 
 void main() => runApp(
-      DevicePreview(
-        enabled: true,
-        builder: (context) => MyApp(), // Wrap your app
-      ),
+      MyApp(), // Wrap your app
     );
 
 class MyApp extends StatelessWidget {
@@ -149,6 +146,7 @@ class _HueTState extends State<HueT> {
     ResortsPage(),
     HotelsPage()
   ];
+
   bottomNavigationBar(BuildContext context) {
     return SnakeNavigationBar.color(
       behaviour: snakeBarStyle,
@@ -201,7 +199,7 @@ class _HueTState extends State<HueT> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Hue Travel',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),

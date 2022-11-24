@@ -53,10 +53,7 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
                   children: [
                     GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => Foodstore()));
+                        Navigator.pop(context);
                       },
                       child: Container(
                         width: 40,
