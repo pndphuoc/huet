@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hue_t/animation/show_right.dart';
-import 'package:hue_t/homestays_list.dart';
-import 'package:hue_t/hotels_list.dart';
-import 'package:hue_t/hotel_detail.dart';
-import 'package:hue_t/resorts_list.dart';
+import 'package:hue_t/accommodation_views/homestays_list.dart';
+import 'package:hue_t/accommodation_views/hotels_list.dart';
+import 'package:hue_t/accommodation_views/hotel_detail.dart';
+import 'package:hue_t/accommodation_views/resorts_list.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'colors.dart' as colors;
+import '../colors.dart' as colors;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/animation/show_up.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'fake_data.dart' as faker;
+import '../fake_data.dart' as faker;
+import '../get_user_location.dart' as userLocation;
 
 class HotelPage extends StatefulWidget {
   const HotelPage({Key? key}) : super(key: key);
@@ -40,15 +41,6 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
   String selectedCheckOutDate = '';
   late final TabController _tabController;
 
-  Future<Position> getUserCurrentLocation() async {
-    await Geolocator.requestPermission()
-        .then((value) {})
-        .onError((error, stackTrace) async {
-      await Geolocator.requestPermission();
-      print("ERROR" + error.toString());
-    });
-    return await Geolocator.getCurrentPosition();
-  }
 
   Future<void> distanceCaculating(Position value) async {
     for (int i = 0; i < faker.listHotels.length; i++) {
@@ -65,9 +57,9 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    getUserCurrentLocation().then((value) async {
+/*    getUserCurrentLocation().then((value) async {
       print(value.latitude.toString() + " " + value.longitude.toString());
-    });
+    });*/
     _tabController = TabController(length: 3, vsync: this);
   }
 
@@ -76,8 +68,7 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      getUserCurrentLocation().then((value) async {
-        print(value.latitude.toString() + " " + value.longitude.toString());
+      userLocation.getUserCurrentLocation().then((value) async {
         await distanceCaculating(value);
         setState(() {
           isLoading = false;
@@ -258,7 +249,11 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                 physics: BouncingScrollPhysics(),
                 scrollDirection: Axis.horizontal,
                 itemCount: faker.listHotels.length,
+<<<<<<< HEAD:lib/hotel.dart
                 itemBuilder: (context, index) => accommodationItem(context, index),
+=======
+                itemBuilder: (context, index) => accommodationItemHorizonal(context, index),
+>>>>>>> 941fc0b107ce8e84a10a81f616c6e47579f83c7a:lib/accommodation_views/hotel.dart
               ),
             ),
           )
@@ -267,12 +262,16 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
     );
   }
 
+<<<<<<< HEAD:lib/hotel.dart
   accommodationItem(BuildContext context, int index) {
+=======
+  accommodationItemHorizonal(BuildContext context, int index) {
+>>>>>>> 941fc0b107ce8e84a10a81f616c6e47579f83c7a:lib/accommodation_views/hotel.dart
     return ShowUp(
       delay: 400 + index*100,
       child: Container(
         decoration: BoxDecoration(
-          color: colors.isDarkMode?colors.accomodationItemColorDarkMode:colors.backgroundColor,
+          color: colors.isDarkMode?colors.accomodationItemColorDarkMode:Colors.white,
           borderRadius: BorderRadius.circular(15)
         ),
         margin: index == 0 ?EdgeInsets.only(left: 20):index==faker.listHotels.length-1?EdgeInsets.only(left: 10, right: 20):EdgeInsets.only(left: 10),

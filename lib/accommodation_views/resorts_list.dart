@@ -3,34 +3,22 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/animation/show_up.dart';
-import 'animation/show_right.dart';
-import 'colors.dart' as colors;
+import '../animation/show_right.dart';
+import '../colors.dart' as colors;
 import 'hotel_detail.dart';
-import 'model/accommodationModel.dart';
-import 'model/locationModel.dart';
-import 'model/roomTypeModel.dart';
-import 'package:sticky_headers/sticky_headers.dart';
-import 'fake_data.dart' as faker;
+import '../fake_data.dart' as faker;
+import 'package:hue_t/get_user_location.dart' as userLocation;
 
-class HotelsPage extends StatefulWidget {
-  const HotelsPage({Key? key}) : super(key: key);
+class ResortsPage extends StatefulWidget {
+  const ResortsPage({Key? key}) : super(key: key);
 
   @override
-  State<HotelsPage> createState() => _HotelsPageState();
+  State<ResortsPage> createState() => _ResortsPageState();
 }
 
 bool isRecommendationHotel = true;
 
-class _HotelsPageState extends State<HotelsPage> {
-  Future<Position> getUserCurrentLocation() async {
-    await Geolocator.requestPermission()
-        .then((value) {})
-        .onError((error, stackTrace) async {
-      await Geolocator.requestPermission();
-      print("ERROR" + error.toString());
-    });
-    return await Geolocator.getCurrentPosition();
-  }
+class _ResortsPageState extends State<ResortsPage> {
 
   Future<void> distanceCaculating(Position value) async {
     for (int i = 0; i < faker.listHotels.length; i++) {
@@ -49,7 +37,7 @@ class _HotelsPageState extends State<HotelsPage> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      getUserCurrentLocation().then((value) async {
+      userLocation.getUserCurrentLocation().then((value) async {
         print(value.latitude.toString() + " " + value.longitude.toString());
         await distanceCaculating(value);
         setState(() {
@@ -71,12 +59,12 @@ class _HotelsPageState extends State<HotelsPage> {
       );
     }
     return Scaffold(
-        body: Stack(
-          children: [
-            contentBlock(context),
-            backButton(context)
-          ],
-        ),
+      body: Stack(
+        children: [
+          contentBlock(context),
+          backButton(context)
+        ],
+      ),
     );
   }
 
@@ -213,11 +201,11 @@ class _HotelsPageState extends State<HotelsPage> {
       child: Container(
         height: MediaQuery.of(context).size.height/4,
         decoration: BoxDecoration(
-          image: DecorationImage(
-            image: NetworkImage("https://cdn4.tropicalsky.co.uk/images/1800x600/indochine-palace-main-image.jpg"),
-            fit: BoxFit.cover,
-            alignment: Alignment.topCenter
-          )
+            image: DecorationImage(
+                image: NetworkImage("https://cdn4.tropicalsky.co.uk/images/1800x600/indochine-palace-main-image.jpg"),
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter
+            )
         ),
       ),
     );
@@ -230,8 +218,8 @@ class _HotelsPageState extends State<HotelsPage> {
         child: Center(
           child: Column(
             children: [
-              Text("Hot Hotels", style: GoogleFonts.poppins(fontSize: 25, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center,),
-              Text("Best-rated hotels in the last month", style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w300), textAlign: TextAlign.center),
+              Text("Resorts", style: GoogleFonts.poppins(fontSize: 25, fontWeight: FontWeight.bold, color: Colors.black), textAlign: TextAlign.center,),
+              Text("Best-rated resort in the last month", style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w300), textAlign: TextAlign.center),
             ],
           ),
         ),
