@@ -21,7 +21,6 @@ class HotelPage extends StatefulWidget {
   State<HotelPage> createState() => _HotelPageState();
 }
 
-
 class MyBehavior extends ScrollBehavior {
   @override
   Widget buildOverscrollIndicator(
@@ -34,23 +33,22 @@ final ScrollController scrollController = ScrollController();
 bool isRecommendationHotel = true;
 bool _innerBoxIsScrolled = false;
 
-
 class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
   final ScrollController scrollController = ScrollController();
   String selectedCheckInDate = '';
   String selectedCheckOutDate = '';
   late final TabController _tabController;
 
-
   Future<void> distanceCaculating(Position value) async {
     for (int i = 0; i < faker.listHotels.length; i++) {
-      faker.listHotels[i].distance = GeolocatorPlatform.instance.distanceBetween(
-            value.latitude,
-            value.longitude,
-            faker.listHotels[i].accommodationLocation.latitude,
-            faker.listHotels[i].accommodationLocation.longitude,
-          ) /
-          1000;
+      faker.listHotels[i].distance =
+          GeolocatorPlatform.instance.distanceBetween(
+                value.latitude,
+                value.longitude,
+                faker.listHotels[i].accommodationLocation.latitude,
+                faker.listHotels[i].accommodationLocation.longitude,
+              ) /
+              1000;
     }
   }
 
@@ -94,7 +92,9 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        backgroundColor: colors.isDarkMode?colors.backgroundColorDarkMode:colors.backgroundColor,
+        backgroundColor: colors.isDarkMode
+            ? colors.backgroundColorDarkMode
+            : colors.backgroundColor,
         resizeToAvoidBottomInset: false,
         body: isLoading
             ? Center(
@@ -102,73 +102,85 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                     color: colors.primaryColor, size: 50),
               )
             : SafeArea(
-              child: NestedScrollView(
-                  headerSliverBuilder:
-                      (BuildContext context, bool innerBoxIsScrolled) {
-                    return [
-                      SliverAppBar(
-                        flexibleSpace: LayoutBuilder(
-                          builder: (BuildContext context,
-                              BoxConstraints constraints) {
-                            top = constraints.biggest.height;
-                            return ShowUp(
-                              delay: 0,
-                              child: FlexibleSpaceBar(
-                                centerTitle: true,
-                                title: Container(
-                                  child: Text(
-                                    "Find the perfect\naccommodations",
-                                    style: GoogleFonts.montserrat(
-                                        color: innerBoxIsScrolled?colors.backgroundColorDarkMode:colors.backgroundColor,
-                                        fontSize: 25),
+                child: NestedScrollView(
+                    headerSliverBuilder:
+                        (BuildContext context, bool innerBoxIsScrolled) {
+                      return [
+                        SliverAppBar(
+                          flexibleSpace: LayoutBuilder(
+                            builder: (BuildContext context,
+                                BoxConstraints constraints) {
+                              top = constraints.biggest.height;
+                              return ShowUp(
+                                delay: 0,
+                                child: FlexibleSpaceBar(
+                                  centerTitle: true,
+                                  title: Container(
+                                    child: Text(
+                                      "Find the perfect\naccommodations",
+                                      style: GoogleFonts.montserrat(
+                                          color: innerBoxIsScrolled
+                                              ? colors.backgroundColorDarkMode
+                                              : colors.backgroundColor,
+                                          fontSize: 25),
+                                    ),
+                                    margin: EdgeInsets.only(bottom: 70),
                                   ),
-                                  margin: EdgeInsets.only(bottom: 70),
+                                  background: Container(
+                                    decoration: BoxDecoration(
+                                        image: DecorationImage(
+                                            image: AssetImage(
+                                                "assets/images/hotel/img.png"),
+                                            fit: BoxFit.cover)),
+                                  ),
                                 ),
-                                background: Container(
-                                  decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                          image: AssetImage(
-                                              "assets/images/hotel/img.png"),
-                                          fit: BoxFit.cover)),
-                                ),
+                              );
+                            },
+                          ),
+                          elevation: 0,
+                          automaticallyImplyLeading: false,
+                          expandedHeight:
+                              MediaQuery.of(context).size.height / 3,
+                          floating: false,
+                          pinned: true,
+                          backgroundColor: colors.isDarkMode
+                              ? colors.backgroundColorDarkMode
+                              : colors.backgroundColor,
+                          bottom: PreferredSize(
+                              child: ShowUp(
+                                delay: 200,
+                                child: searchBlock(context, innerBoxIsScrolled),
                               ),
-                            );
-                          },
-                        ),
-                        elevation: 0,
-                        automaticallyImplyLeading: false,
-                        expandedHeight:
-                            MediaQuery.of(context).size.height / 3,
-                        floating: false,
-                        pinned: true,
-                        backgroundColor: colors.isDarkMode?colors.backgroundColorDarkMode:colors.backgroundColor,
-                        bottom: PreferredSize(
-                            child: ShowUp(
-                              delay: 200,
-                              child: searchBlock(context, innerBoxIsScrolled),
+                              preferredSize: Size.fromHeight(34)),
+                        )
+                      ];
+                    },
+                    body: ScrollConfiguration(
+                      behavior: MyBehavior(),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            accommodationBlock(context, "Hotels"),
+                            accommodationBlock(context, "Resorts/Villas"),
+                            accommodationBlock(context, "Homestays"),
+                            Container(
+                              margin: EdgeInsets.only(
+                                  left: 20, right: 20, top: 15, bottom: 10),
+                              width: MediaQuery.of(context).size.width,
+                              child: Text(
+                                "Popular accommodations",
+                                style: GoogleFonts.poppins(
+                                    color: colors.isDarkMode
+                                        ? Colors.white
+                                        : Colors.black,
+                                    fontSize: 25),
+                              ),
                             ),
-                            preferredSize: Size.fromHeight(34)),
-                      )
-                    ];
-                  },
-                  body: ScrollConfiguration(
-                    behavior: MyBehavior(),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          accommodationBlock(context, "Hotels"),
-                          accommodationBlock(context, "Resorts/Villas"),
-                          accommodationBlock(context, "Homestays"),
-                          Container(
-                            margin: EdgeInsets.only(left: 20, right: 20, top: 15, bottom: 10),
-                            width: MediaQuery.of(context).size.width,
-                            child: Text("Popular accommodations", style: GoogleFonts.poppins(color: colors.isDarkMode?Colors.white:Colors.black, fontSize: 25),),
-                          ),
-                          sortBlock(context),
-                          SizedBox(
-                            height: 15,
-                          ),
-                          /*Expanded(
+                            sortBlock(context),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            /*Expanded(
                             child: AnimationLimiter(
                               child: ShowUp(
                                 delay: 450,
@@ -187,13 +199,13 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                               ),
                             ),
                           )*/
-                          ...faker.listHotels.map((e) => hotelItem(context, faker.listHotels.indexOf(e)))
-                        ],
+                            ...faker.listHotels.map((e) =>
+                                hotelItem(context, faker.listHotels.indexOf(e)))
+                          ],
+                        ),
                       ),
-                    ),
-                  )
-                ),
-            ),
+                    )),
+              ),
       ),
     );
   }
@@ -201,13 +213,18 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
   accommodationBlock(BuildContext context, String name) {
     return Container(
       decoration: BoxDecoration(
-          color: colors.isDarkMode?colors.backgroundColorDarkMode:colors.backgroundColor,),
-      margin: EdgeInsets.only(top: 15,),
+        color: colors.isDarkMode
+            ? colors.backgroundColorDarkMode
+            : colors.backgroundColor,
+      ),
+      margin: EdgeInsets.only(
+        top: 15,
+      ),
       height: MediaQuery.of(context).size.height / 3.5,
       child: Column(
         children: [
           GestureDetector(
-            onTap: (){
+            onTap: () {
               StatefulWidget direction;
               if (name == "Hotels")
                 direction = HotelsPage();
@@ -220,7 +237,9 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
             },
             child: Container(
               width: MediaQuery.of(context).size.width,
-              color: colors.isDarkMode?colors.backgroundColorDarkMode:colors.backgroundColor,
+              color: colors.isDarkMode
+                  ? colors.backgroundColorDarkMode
+                  : colors.backgroundColor,
               margin: EdgeInsets.only(left: 20, right: 20),
               child: ShowRight(
                 delay: 300,
@@ -235,7 +254,13 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(name, style: GoogleFonts.poppins(color: colors.isDarkMode?Colors.white:Colors.black, fontSize: 25),),
+                    Text(
+                      name,
+                      style: GoogleFonts.poppins(
+                          color:
+                              colors.isDarkMode ? Colors.white : Colors.black,
+                          fontSize: 25),
+                    ),
                     Icon(Icons.keyboard_arrow_right)
                   ],
                 ),
@@ -249,7 +274,8 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                 physics: BouncingScrollPhysics(),
                 scrollDirection: Axis.horizontal,
                 itemCount: faker.listHotels.length,
-                itemBuilder: (context, index) => accommodationItemHorizonal(context, index),
+                itemBuilder: (context, index) =>
+                    accommodationItemHorizonal(context, index),
               ),
             ),
           )
@@ -260,16 +286,21 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
 
   accommodationItemHorizonal(BuildContext context, int index) {
     return ShowUp(
-      delay: 400 + index*100,
+      delay: 400 + index * 100,
       child: Container(
         decoration: BoxDecoration(
-          color: colors.isDarkMode?colors.accomodationItemColorDarkMode:Colors.white,
-          borderRadius: BorderRadius.circular(15)
-        ),
-        margin: index == 0 ?EdgeInsets.only(left: 20):index==faker.listHotels.length-1?EdgeInsets.only(left: 10, right: 20):EdgeInsets.only(left: 10),
+            color: colors.isDarkMode
+                ? colors.accomodationItemColorDarkMode
+                : Colors.white,
+            borderRadius: BorderRadius.circular(15)),
+        margin: index == 0
+            ? EdgeInsets.only(left: 20)
+            : index == faker.listHotels.length - 1
+                ? EdgeInsets.only(left: 10, right: 20)
+                : EdgeInsets.only(left: 10),
         child: GestureDetector(
             child: Container(
-              width: MediaQuery.of(context).size.width/2.8,
+                width: MediaQuery.of(context).size.width / 2.8,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
                   image: DecorationImage(
@@ -277,13 +308,18 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                       fit: BoxFit.cover), // button text
                 ),
                 child: Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Container(
-                    margin: EdgeInsets.only(left: 7, bottom: 7),
-                    child: Text(faker.listHotels[index].name, style: GoogleFonts.montserrat(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600), maxLines: 1,),
-                  )
-                )
-            ),
+                    alignment: Alignment.bottomLeft,
+                    child: Container(
+                      margin: EdgeInsets.only(left: 7, bottom: 7),
+                      child: Text(
+                        faker.listHotels[index].name,
+                        style: GoogleFonts.montserrat(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600),
+                        maxLines: 1,
+                      ),
+                    ))),
             onTap: () {
               Navigator.push(context, MaterialPageRoute(builder: (context) {
                 // do something
@@ -321,13 +357,17 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                 child: TextField(
                   decoration: InputDecoration(
                       hintText: "Accommodation's name",
-                      hintStyle: GoogleFonts.montserrat(color: colors.isDarkMode?Colors.white:Colors.black),
+                      hintStyle: GoogleFonts.montserrat(
+                          color:
+                              colors.isDarkMode ? Colors.white : Colors.black),
                       border: OutlineInputBorder(
                           //borderRadius: BorderRadius.only(bottomLeft: Radius.circular(15), topLeft: Radius.circular(15)),
                           borderRadius: BorderRadius.circular(15),
                           borderSide: BorderSide.none),
                       filled: true,
-                      fillColor: colors.isDarkMode? colors.accomodationItemColorDarkMode:colors.accommodationItemColor),
+                      fillColor: colors.isDarkMode
+                          ? colors.accomodationItemColorDarkMode
+                          : colors.accommodationItemColor),
                 ),
               ),
             ),
@@ -365,7 +405,9 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
           right: 20,
         ),
         decoration: BoxDecoration(
-            color: colors.isDarkMode?colors.accomodationItemColorDarkMode:colors.accommodationItemColor,
+            color: colors.isDarkMode
+                ? colors.accomodationItemColorDarkMode
+                : colors.accommodationItemColor,
             borderRadius: BorderRadius.circular(25)),
         child: Stack(children: [
           /*AnimatedContainer(duration: Duration(milliseconds: 500),
@@ -391,7 +433,9 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
               width: constraints.maxWidth * 0.5,
               child: Container(
                 decoration: BoxDecoration(
-                    color: colors.isDarkMode?colors.backgroundColorDarkMode:colors.backgroundColor,
+                    color: colors.isDarkMode
+                        ? colors.backgroundColorDarkMode
+                        : colors.backgroundColor,
                     borderRadius: BorderRadius.circular(25)),
               ),
             );
@@ -448,7 +492,7 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
 
   hotelItem(BuildContext context, int index) {
     return ShowRight(
-      delay: 400+index*100,
+      delay: 400 + index * 100,
       child: Container(
         margin: EdgeInsets.only(left: 20, right: 20, bottom: 20),
         child: ElevatedButton(
@@ -461,7 +505,9 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
           style: ElevatedButton.styleFrom(
               elevation: 0.0,
               shadowColor: Colors.white,
-              backgroundColor: colors.isDarkMode?colors.accomodationItemColorDarkMode:colors.accommodationItemColor,
+              backgroundColor: colors.isDarkMode
+                  ? colors.accomodationItemColorDarkMode
+                  : colors.accommodationItemColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
               )),
@@ -485,8 +531,8 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                 ),
                 Expanded(
                   child: Container(
-                    padding:
-                        EdgeInsets.only(top: 20, right: 20, bottom: 20, left: 10),
+                    padding: EdgeInsets.only(
+                        top: 20, right: 20, bottom: 20, left: 10),
                     height: 130,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -497,7 +543,9 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                           style: GoogleFonts.notoSans(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: colors.isDarkMode?Colors.white:Colors.black),
+                              color: colors.isDarkMode
+                                  ? Colors.white
+                                  : Colors.black),
                           maxLines: 1,
                         ),
                         RichText(
@@ -521,7 +569,9 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                               itemSize: 15,
                               allowHalfRating: true,
                               initialRating:
-                              faker.listHotels[index].rating != null ? faker.listHotels[index].rating! : 0,
+                                  faker.listHotels[index].rating != null
+                                      ? faker.listHotels[index].rating!
+                                      : 0,
                             ),
                           ),
                           TextSpan(text: " "),
@@ -530,7 +580,10 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                                   ? faker.listHotels[index].rating!.toString()
                                   : "No review",
                               style: GoogleFonts.montserrat(
-                                  color: colors.isDarkMode?Colors.white:Colors.black, fontSize: 11))
+                                  color: colors.isDarkMode
+                                      ? Colors.white
+                                      : Colors.black,
+                                  fontSize: 11))
                         ])),
                         RichText(
                             text: TextSpan(children: [
@@ -544,7 +597,11 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                               text: faker.listHotels[index].distance != null
                                   ? " ${faker.listHotels[index].distance!.toStringAsFixed(2)} km"
                                   : " km",
-                              style: TextStyle(fontSize: 12, color: colors.isDarkMode?Colors.white:Colors.black))
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: colors.isDarkMode
+                                      ? Colors.white
+                                      : Colors.black))
                         ])),
                         RichText(
                             text: TextSpan(children: [
@@ -552,12 +609,15 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                               child: Icon(
                             Icons.attach_money,
                             size: 20,
-                                color: colors.isDarkMode?Colors.white:Colors.black,
+                            color:
+                                colors.isDarkMode ? Colors.white : Colors.black,
                           )),
                           TextSpan(
                               text: faker.listHotels[index].price.toString(),
                               style: GoogleFonts.montserrat(
-                                color: colors.isDarkMode?Colors.white:Colors.black,
+                                color: colors.isDarkMode
+                                    ? Colors.white
+                                    : Colors.black,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20,
                               )),
@@ -577,5 +637,4 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
       ),
     );
   }
-
 }

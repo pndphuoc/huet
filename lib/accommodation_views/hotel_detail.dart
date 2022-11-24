@@ -6,7 +6,6 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hue_t/accommodation_views/all_reviews.dart';
-import 'package:hue_t/fullscreen_map.dart';
 import 'package:hue_t/model/accommodationModel.dart';
 import 'package:hue_t/animation/show_up.dart';
 import 'package:geolocator/geolocator.dart';

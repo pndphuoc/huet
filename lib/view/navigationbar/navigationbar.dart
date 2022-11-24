@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hue_t/accommodation_views/hotel.dart';
 
 class BottomNavBarV2 extends StatefulWidget {
   @override
@@ -70,33 +71,14 @@ class _BottomNavBarV2State extends State<BottomNavBarV2> {
                         ),
                         onPressed: () {
                           setBottomBarIndex(1);
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => HotelPage()));
                         }),
                     IconButton(
                         icon: Icon(
                           Icons.restaurant_menu,
-                          color: currentIndex == 1
-                              ? Color.fromARGB(255, 104, 104, 172)
-                              : Colors.grey.shade400,
-                        ),
-                        onPressed: () {
-                          setBottomBarIndex(1);
-                        }),
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.20,
-                    ),
-                    IconButton(
-                        icon: Icon(
-                          Icons.place_outlined,
-                          color: currentIndex == 1
-                              ? Color.fromARGB(255, 104, 104, 172)
-                              : Colors.grey.shade400,
-                        ),
-                        onPressed: () {
-                          setBottomBarIndex(1);
-                        }),
-                    IconButton(
-                        icon: Icon(
-                          Icons.image_outlined,
                           color: currentIndex == 2
                               ? Color.fromARGB(255, 104, 104, 172)
                               : Colors.grey.shade400,
@@ -104,15 +86,38 @@ class _BottomNavBarV2State extends State<BottomNavBarV2> {
                         onPressed: () {
                           setBottomBarIndex(2);
                         }),
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.20,
+                    ),
                     IconButton(
                         icon: Icon(
-                          Icons.person_outline_outlined,
+                          Icons.place_outlined,
                           color: currentIndex == 3
                               ? Color.fromARGB(255, 104, 104, 172)
                               : Colors.grey.shade400,
                         ),
                         onPressed: () {
                           setBottomBarIndex(3);
+                        }),
+                    IconButton(
+                        icon: Icon(
+                          Icons.image_outlined,
+                          color: currentIndex == 4
+                              ? Color.fromARGB(255, 104, 104, 172)
+                              : Colors.grey.shade400,
+                        ),
+                        onPressed: () {
+                          setBottomBarIndex(4);
+                        }),
+                    IconButton(
+                        icon: Icon(
+                          Icons.person_outline_outlined,
+                          color: currentIndex == 5
+                              ? Color.fromARGB(255, 104, 104, 172)
+                              : Colors.grey.shade400,
+                        ),
+                        onPressed: () {
+                          setBottomBarIndex(5);
                         }),
                   ],
                 ),
