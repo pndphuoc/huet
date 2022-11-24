@@ -53,39 +53,6 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
     }
   }
 
-  final BorderRadius _borderRadius = const BorderRadius.only(
-    topLeft: Radius.circular(25),
-    topRight: Radius.circular(25),
-  );
-
-  ShapeBorder? bottomBarShape = const RoundedRectangleBorder(
-    borderRadius: BorderRadius.all(Radius.circular(25)),
-  );
-  SnakeBarBehaviour snakeBarStyle = SnakeBarBehaviour.floating;
-  EdgeInsets padding = const EdgeInsets.only(left: 12, right: 12, bottom: 12);
-
-  int _selectedItemPosition = 2;
-  SnakeShape snakeShape = SnakeShape.circle;
-
-  bool showSelectedLabels = false;
-  bool showUnselectedLabels = false;
-
-  Color selectedColor = Colors.black;
-  Color unselectedColor = Colors.blueGrey;
-
-  Gradient selectedGradient =
-  const LinearGradient(colors: [Colors.red, Colors.amber]);
-  Gradient unselectedGradient =
-  const LinearGradient(colors: [Colors.red, Colors.blueGrey]);
-
-  Color? containerColor;
-  List<Color> containerColors = [
-    const Color(0xFFFDE1D7),
-    const Color(0xFFE4EDF5),
-    const Color(0xFFE7EEED),
-    const Color(0xFFF4E4CE),
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -94,6 +61,7 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
     });*/
     _tabController = TabController(length: 3, vsync: this);
   }
+
   bool isLoading = true;
 
   @override
@@ -215,16 +183,17 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                               SizedBox(
                                 height: 15,
                               ),
-                              ...faker.listHotels.map((e) => popularAccommondationItem(
-                                  context, faker.listHotels.indexOf(e)))
+                              ...faker.listHotels.map((e) =>
+                                  popularAccommondationItem(
+                                      context, faker.listHotels.indexOf(e))),
+                              SizedBox(
+                                height: 60,
+                              )
                             ],
                           ),
                         ),
                       )),
                 ),
-                Positioned(child: bottomNavigationBar(context),
-                bottom: 0, left: 0, right: 0,
-                )
 /*                Positioned(
                     left: 0,
                     right: 0,
@@ -232,39 +201,6 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                     child: navigationBar.NavigationBar())*/
               ]),
       ),
-    );
-  }
-
-  bottomNavigationBar(BuildContext context) {
-    return SnakeNavigationBar.color(
-      behaviour: snakeBarStyle,
-      snakeShape: snakeShape,
-      shape: bottomBarShape,
-      padding: padding,
-      backgroundColor: colors.navigationBarColor,
-      ///configuration for SnakeNavigationBar.color
-      snakeViewColor: colors.primaryColor,
-      selectedItemColor: snakeShape == SnakeShape.indicator ? selectedColor : null,
-      unselectedItemColor: Colors.black,
-
-      ///configuration for SnakeNavigationBar.gradient
-      //snakeViewGradient: selectedGradient,
-      //selectedItemGradient: snakeShape == SnakeShape.indicator ? selectedGradient : null,
-      //unselectedItemGradient: unselectedGradient,
-
-      showUnselectedLabels: showUnselectedLabels,
-      showSelectedLabels: showSelectedLabels,
-
-      currentIndex: _selectedItemPosition,
-      onTap: (index) => setState(() => _selectedItemPosition = index),
-      items: [
-        BottomNavigationBarItem(icon: Icon(Icons.hotel), label: 'Accommodations'),
-        BottomNavigationBarItem(icon: Icon(Icons.fastfood), label: 'Food stores'),
-        BottomNavigationBarItem(icon: Icon(Icons.place), label: 'Tourist attraction'),
-        BottomNavigationBarItem(icon: Icon(Icons.newspaper), label: 'Events'),
-        BottomNavigationBarItem(icon: Icon(Icons.camera_alt), label: 'Social network'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Personal')
-      ],
     );
   }
 
