@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 bool isDarkMode = false;
 
 var backgroundColor = Color.fromARGB(255, 246, 246, 246);
+var navigationBarColor = Color.fromARGB(255, 236, 236, 236);
 var filterItemColor = Color.fromARGB(255, 246, 246, 246);
 var findButtonColor = Color.fromARGB(255, 39, 46, 50);
 var hotelDetailBackgroundColor = Colors.white;
