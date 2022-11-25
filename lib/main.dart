@@ -4,7 +4,6 @@ import 'package:device_preview/device_preview.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:hue_t/accommodation_views/hotel_detail.dart';
-import 'package:hue_t/social_network.dart';
 import 'package:hue_t/view/Foodstore/foodstore.dart';
 import 'package:hue_t/view/foodstore/foodstoredetail.dart';
 import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
@@ -146,7 +145,6 @@ class _HueTState extends State<HueT> {
     HotelPage(),
     Foodstore(),
     HomePage(),
-    SocialNetwork(),
     HotelsPage()
   ];
 
