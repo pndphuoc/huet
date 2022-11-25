@@ -315,10 +315,7 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                       ),
                     ))),
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) {
-                // do something
-                return HotelDetail(model: faker.listHotels[index]);
-              }));
+              Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(builder: (context) => HotelDetail(model: faker.listHotels[index])));
             }),
       ),
     );

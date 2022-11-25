@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:hue_t/accommodation_views/hotel_detail.dart';
+import 'package:hue_t/social_network.dart';
 import 'package:hue_t/view/Foodstore/foodstore.dart';
 import 'package:hue_t/view/foodstore/foodstoredetail.dart';
 import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
@@ -12,6 +14,7 @@ import 'accommodation_views/homestays_list.dart';
 import 'accommodation_views/hotels_list.dart';
 import 'accommodation_views/resorts_list.dart';
 import 'colors.dart' as colors;
+import 'fake_data.dart' as faker;
 
 void main() => runApp(
       MyApp(), // Wrap your app
@@ -143,7 +146,7 @@ class _HueTState extends State<HueT> {
     HotelPage(),
     Foodstore(),
     HomePage(),
-    ResortsPage(),
+    SocialNetwork(),
     HotelsPage()
   ];
 
@@ -185,13 +188,14 @@ class _HueTState extends State<HueT> {
             label: 'Home',
             activeIcon: Icon(Icons.home)),
         BottomNavigationBarItem(
-            icon: Icon(Icons.place_outlined),
-            label: 'Tourist attraction',
-            activeIcon: Icon(Icons.place)),
-        BottomNavigationBarItem(
             icon: Icon(Icons.camera_alt_outlined),
             label: 'Social network',
             activeIcon: Icon(Icons.camera_alt)),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: 'Personal Infomation',
+            activeIcon: Icon(Icons.person)),
+
       ],
     );
   }
