@@ -21,3 +21,8 @@ var accomodationItemColorDarkMode = Color.fromARGB(255, 50, 50, 50);
 
 var categoryBlockColorDarkMode = Color.fromARGB(255, 50, 50, 50);
 var categoryBlockColor = Color.fromARGB(255, 246, 246, 246);
+
+//social network
+var SN_circleButton = Colors.white;
+var SN_postBackgroundColor = Colors.white;
+var SN_postTextColor = Color.fromARGB(255, 200, 200, 200);

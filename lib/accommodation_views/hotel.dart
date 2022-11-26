@@ -132,7 +132,7 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                                       decoration: BoxDecoration(
                                           image: DecorationImage(
                                               image: AssetImage(
-                                                  "assets/images/hotel/img.png"),
+                                                  "assets/images/hotel/img1.png"),
                                               fit: BoxFit.cover)),
                                     ),
                                   ),

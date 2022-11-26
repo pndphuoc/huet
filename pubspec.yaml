@@ -83,6 +83,7 @@ flutter:
     - assets/
     - assets/images/
     - assets/images/hotel/
+    - assets/images/socialNetwork/
     - assets/images/foodstore/
     - assets/images/splashscreen/
     - assets/images/foodstore/category/
