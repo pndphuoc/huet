@@ -26,3 +26,4 @@ var categoryBlockColor = Color.fromARGB(255, 246, 246, 246);
 var SN_circleButton = Colors.white;
 var SN_postBackgroundColor = Colors.white;
 var SN_postTextColor = Color.fromARGB(255, 200, 200, 200);
+var SN_commentBackgroudColor = Color.fromARGB(255, 200, 200, 200);

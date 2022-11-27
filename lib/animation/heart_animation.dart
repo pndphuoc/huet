@@ -39,7 +39,7 @@ class _HeartAnimationState extends State<HeartAnimation> with SingleTickerProvid
   Future doAnimation() async {
     await controller.forward();
     await controller.reverse();
-    //await Future.delayed(Duration(milliseconds: 200));
+    await Future.delayed(Duration(milliseconds: 100));
 
     if(widget.onEnd != null)
       widget.onEnd!();

@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/animation/heart_animation.dart';
 import 'package:hue_t/colors.dart' as colors;
 import 'package:hue_t/model/social_network/postModel.dart';
+import 'package:hue_t/view/social_network_network/postComments.dart';
+import 'package:hue_t/view/social_network_network/socialNetwork.dart';
 import 'package:im_animations/im_animations.dart';
 
 class Post extends StatefulWidget {
@@ -164,7 +166,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin{
                         onEnd: () => setState(() => isHeartAnimating = false),
                           duration: Duration(milliseconds: 500),
                           isAnimating: isHeartAnimating,
-                          child: Icon(Icons.favorite, color: Colors.white, size: 150,)),
+                          child: Icon(Icons.favorite, color: Colors.white, size: 120,)),
                     ),
                       top: 0,
                       bottom: 0,
@@ -198,7 +200,10 @@ class _PostState extends State<Post> with TickerProviderStateMixin{
                           ),
                         ),
                         Text("4k", style: GoogleFonts.readexPro(color: colors.SN_postTextColor, fontSize: 15,),),
-                        IconButton(onPressed: (){}, icon: Icon(Icons.mode_comment_outlined, size: 25,),
+                        IconButton(onPressed: (){
+                          Navigator.push(
+                              context, MaterialPageRoute(builder: (context) => PostCommentsPage(post: widget.samplePost,)));
+                        }, icon: Icon(Icons.mode_comment_outlined, size: 25,),
                           splashColor: Colors.transparent,
                           highlightColor:  Colors.transparent,
                           hoverColor: Colors.transparent,
