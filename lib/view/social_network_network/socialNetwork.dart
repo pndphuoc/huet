@@ -17,6 +17,8 @@ PostModel samplePost = PostModel(postID: 1, content: "In the Hue",  userID: 1, p
 class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
   List<Widget> postsList = [
     Post(samplePost: samplePost),
+    Post(samplePost: samplePost),
+    Post(samplePost: samplePost),
   ];
 
   @override
@@ -31,7 +33,9 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
               child: Column(
                 children: [
                   SizedBox(height: 70,),
-                  postsList[0]
+                  for(var item in postsList)
+                    item,
+                  SizedBox(height: 80,)
                 ],
               ),
             ),

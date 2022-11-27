@@ -1,8 +1,10 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hue_t/animation/heart_animation.dart';
 import 'package:hue_t/colors.dart' as colors;
 import 'package:hue_t/model/social_network/postModel.dart';
+import 'package:im_animations/im_animations.dart';
 
 class Post extends StatefulWidget {
   const Post({Key? key, required this.samplePost}) : super(key: key);
@@ -18,12 +20,11 @@ class _PostState extends State<Post> with TickerProviderStateMixin{
   );
   late final Animation<double> _animation = CurvedAnimation(
     parent: _heartController,
-    curve: Curves.elasticInOut,
+    curve: Curves.fastOutSlowIn,
   );
-
   int currentPos = 0;
   bool isLiked = false;
-
+  bool isHeartAnimating = false;
   @override
   void dispose() {
     _heartController.dispose();
@@ -100,6 +101,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin{
                 onDoubleTap: (){
                   setState(() {
                     isLiked = true;
+                    isHeartAnimating = true;
                   });
                 },
                 child: Stack(
@@ -154,6 +156,20 @@ class _PostState extends State<Post> with TickerProviderStateMixin{
                           );
                         }).toList(),
                       ),
+                    ),
+                    Positioned(child: AnimatedOpacity(
+                      opacity: isHeartAnimating ? 1 : 0,
+                      duration: Duration(milliseconds: 200),
+                      child: HeartAnimation(
+                        onEnd: () => setState(() => isHeartAnimating = false),
+                          duration: Duration(milliseconds: 500),
+                          isAnimating: isHeartAnimating,
+                          child: Icon(Icons.favorite, color: Colors.white, size: 150,)),
+                    ),
+                      top: 0,
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
                     )
                   ],
                 ),
@@ -167,15 +183,19 @@ class _PostState extends State<Post> with TickerProviderStateMixin{
                     //margin: EdgeInsets.only(left: 10, right: 10, top: 10),
                     child: Row(
                       children: [
-                        IconButton(onPressed: (){
-                          setState(() {
-                            isLiked = !isLiked;
-                          });
-                        }, icon: isLiked?Icon(Icons.favorite_rounded, color: Colors.red, size: 30,):Icon(Icons.favorite_outline_rounded, size: 30,),
-                          splashColor: Colors.transparent,
-                          highlightColor:  Colors.transparent,
-                          hoverColor: Colors.transparent,
-                          padding: EdgeInsets.zero,
+                        HeartAnimation(
+                          isAnimating: isHeartAnimating,////
+                          child: IconButton(onPressed: (){
+                            setState(() {
+                              isLiked = !isLiked;
+                              _heartController.forward();
+                            });
+                          }, icon: isLiked?Icon(Icons.favorite_rounded, color: Colors.red, size: 30,):Icon(Icons.favorite_outline_rounded, size: 30,),
+                            splashColor: Colors.transparent,
+                            highlightColor:  Colors.transparent,
+                            hoverColor: Colors.transparent,
+                            padding: EdgeInsets.zero,
+                          ),
                         ),
                         Text("4k", style: GoogleFonts.readexPro(color: colors.SN_postTextColor, fontSize: 15,),),
                         IconButton(onPressed: (){}, icon: Icon(Icons.mode_comment_outlined, size: 25,),
