@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
+import 'package:hue_t/model/social_network/comment_model.dart';
 import 'package:hue_t/model/social_network/postModel.dart';
+import 'package:hue_t/view/social_network_network/comment.dart';
 
 class PostCommentsPage extends StatefulWidget {
   const PostCommentsPage({Key? key, required this.post}) : super(key: key);
@@ -11,12 +13,89 @@ class PostCommentsPage extends StatefulWidget {
   State<PostCommentsPage> createState() => _PostCommentsPageState();
 }
 
+List<CommentModel> commentList = [
+  CommentModel(
+      id: "1", userId: "1", postId: "1", content: "abcsdf", likeCount: 6999),
+  CommentModel(
+      id: "2",
+      userId: "2",
+      postId: "1",
+      content: "Phuoc dep trai",
+      likeCount: 2431),
+  CommentModel(
+      id: "2",
+      userId: "2",
+      postId: "1",
+      content: "Phuoc dep trai",
+      likeCount: 2431),
+  CommentModel(
+      id: "2",
+      userId: "2",
+      postId: "1",
+      content: "Phuoc dep trai",
+      likeCount: 2431),
+  CommentModel(
+      id: "2",
+      userId: "2",
+      postId: "1",
+      content: "Phuoc dep trai",
+      likeCount: 2431),
+  CommentModel(
+      id: "2",
+      userId: "2",
+      postId: "1",
+      content: "Phuoc dep trai",
+      likeCount: 2431),
+  CommentModel(
+      id: "2",
+      userId: "2",
+      postId: "1",
+      content: "Phuoc dep trai",
+      likeCount: 2431),
+  CommentModel(
+      id: "2",
+      userId: "2",
+      postId: "1",
+      content: "Phuoc dep trai",
+      likeCount: 2431),
+  CommentModel(
+      id: "2",
+      userId: "2",
+      postId: "1",
+      content: "Phuoc dep trai",
+      likeCount: 2431),
+  CommentModel(
+      id: "2",
+      userId: "2",
+      postId: "1",
+      content: "Phuoc dep trai",
+      likeCount: 2431),
+  CommentModel(
+      id: "2",
+      userId: "2",
+      postId: "1",
+      content: "Phuoc dep trai",
+      likeCount: 2431),
+  CommentModel(
+      id: "2",
+      userId: "2",
+      postId: "1",
+      content: "Phuoc dep trai",
+      likeCount: 2431),
+  CommentModel(
+      id: "2",
+      userId: "2",
+      postId: "1",
+      content: "Phuoc dep trai",
+      likeCount: 2431)
+];
+
 class _PostCommentsPageState extends State<PostCommentsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.black),
+        iconTheme: const IconThemeData(color: Colors.black),
         title: Text(
           "Comments",
           style: GoogleFonts.readexPro(color: Colors.black),
@@ -26,11 +105,18 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
       ),
       backgroundColor: colors.backgroundColor,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [contentBlock(context), commentBlock(context)],
+        child: Stack(children: [
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                contentBlock(context),
+                ...commentList.map((e) => Comment(cmt: e)),
+                const SizedBox(height: 80, )
+              ],
+            ),
           ),
-        ),
+          commentBlock(context)
+        ]),
       ),
     );
   }
@@ -43,20 +129,14 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
 
   contentBlock(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: Colors.grey,
-            width: 0.5
-          )
-        )
-      ),
-      margin: EdgeInsets.only(left: 20, right: 20, top: 10),
-      padding: EdgeInsets.only(bottom: 10),
+      decoration: const BoxDecoration(
+          border: Border(bottom: BorderSide(color: Colors.grey, width: 0.5))),
+      margin: const EdgeInsets.only(left: 20, right: 20, top: 10),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
+          const SizedBox(
             height: 45,
             width: 45,
             child: CircleAvatar(
@@ -65,7 +145,7 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
               ),
             ),
           ),
-          SizedBox(
+          const SizedBox(
             width: 10,
           ),
           Column(
@@ -79,7 +159,7 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
                     style: GoogleFonts.readexPro(
                         color: Colors.black, fontSize: 15),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: 10,
                   ),
                   Text(
@@ -88,7 +168,7 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
                   )
                 ],
               ),
-              SizedBox(
+              const SizedBox(
                 height: 5,
               ),
               Text(
@@ -104,79 +184,63 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
   }
 
   commentBlock(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-      ),
-      padding: EdgeInsets.only(top: 10),
-      margin: EdgeInsets.only(left: 20, right: 20, bottom: 20),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: 45,
-            width: 45,
-            child: CircleAvatar(
-              backgroundImage: AssetImage(
-                "assets/images/socialNetwork/lisaAvatar.png",
-              ),
+    return Positioned(
+        bottom: 0,
+        left: 0,
+        right: 0,
+        child: IntrinsicHeight(
+          child: Container(
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              color: colors.SN_postBackgroundColor,
+              borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))
             ),
-          ),
-          SizedBox(
-            width: 10,
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      "lalalalisa_m",
-                      style: GoogleFonts.readexPro(
-                          color: Colors.black, fontSize: 15),
+                Container(
+                  height: 45,
+                  width: 45,
+                  child: const CircleAvatar(
+                    backgroundImage: AssetImage(
+                      "assets/images/socialNetwork/avatar.png",
                     ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Text(
-                      "${daysBetween(widget.post.createDate, DateTime.now())} days before",
-                      style: GoogleFonts.readexPro(color: Colors.grey),
-                    )
-                  ],
+                  ),
                 ),
-                SizedBox(
-                  height: 5,
+                const SizedBox(
+                  width: 10,
                 ),
-                Text(
-                  "Bạn fan tên Phước đẹp trai quá !! <3",
-                  style:
-                      GoogleFonts.montserrat(color: Colors.black, fontSize: 15),
+                const Expanded(child: TextField(
+                  autofocus: true,
+                  textInputAction: TextInputAction.send,
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  decoration: InputDecoration(
+                      contentPadding: EdgeInsets.fromLTRB(10, 15, 10, 10),
+                      border: InputBorder.none,
+                    hintText: "Write a comment"
+                  ),
+                )),
+                const SizedBox(
+                  width: 10,
+                ),
+                IconButton(
+                  onPressed: () {},
+                  icon: Icon(
+                    Icons.send_rounded,
+                    color: colors.primaryColor,
+                    size: 30,
+                  ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  splashColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
                 )
               ],
             ),
           ),
-         SizedBox(width: 10,),
-         IntrinsicWidth(child: Column(
-           children: [
-             IconButton(
-              icon: Icon(Icons.favorite_outline,
-                size: 15,),
-               onPressed: (){},
-               splashColor: Colors.transparent,
-               hoverColor: Colors.transparent,
-               highlightColor: Colors.transparent,
-               padding: EdgeInsets.zero,
-               constraints: BoxConstraints(),
-             ),
-             Text(
-               "2446",
-               style: GoogleFonts.readexPro(color: Colors.grey),
-             )
-           ],
-         ),)
-        ],
-      ),
-    );
+        ));
   }
 }

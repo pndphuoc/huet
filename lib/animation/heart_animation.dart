@@ -24,7 +24,7 @@ class _HeartAnimationState extends State<HeartAnimation> with SingleTickerProvid
       duration: Duration(milliseconds: halfDuration)
     );
 
-    scale = Tween<double>(begin: 1, end: 1.2).animate(controller);
+    scale = Tween<double>(begin: 1, end: 1.5).animate(controller);
   }
 
   @override

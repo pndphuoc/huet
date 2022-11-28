@@ -11,11 +11,12 @@ import 'package:im_animations/im_animations.dart';
 class Post extends StatefulWidget {
   const Post({Key? key, required this.samplePost}) : super(key: key);
   final PostModel samplePost;
+
   @override
   State<Post> createState() => _PostState();
 }
 
-class _PostState extends State<Post> with TickerProviderStateMixin{
+class _PostState extends State<Post> with TickerProviderStateMixin {
   late final AnimationController _heartController = AnimationController(
     duration: const Duration(milliseconds: 500),
     vsync: this,
@@ -27,6 +28,8 @@ class _PostState extends State<Post> with TickerProviderStateMixin{
   int currentPos = 0;
   bool isLiked = false;
   bool isHeartAnimating = false;
+  bool isHeartButtonAnimating = false;
+
   @override
   void dispose() {
     _heartController.dispose();
@@ -36,84 +39,101 @@ class _PostState extends State<Post> with TickerProviderStateMixin{
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 10, top: 10, left: 20, right: 20),
+      margin: const EdgeInsets.only(bottom: 10, top: 10, left: 20, right: 20),
       width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
           color: colors.SN_postBackgroundColor,
-          borderRadius: BorderRadius.circular(30)
-      ),
+          borderRadius: BorderRadius.circular(30)),
       child: Container(
         //padding: EdgeInsets.only(top: 15, left: 15),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              margin: EdgeInsets.only(left: 15, right: 15, top: 15),
+              margin: const EdgeInsets.only(left: 15, right: 15, top: 15),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                      margin: EdgeInsets.only(right: 10),
+                      margin: const EdgeInsets.only(right: 10),
                       height: 50,
                       width: 50,
-                      child: CircleAvatar(
-                        backgroundImage:
-                        AssetImage("assets/images/socialNetwork/jennieAvatar.png"),
+                      child: const  CircleAvatar(
+                        backgroundImage: AssetImage(
+                            "assets/images/socialNetwork/jennieAvatar.png"),
                       )),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("jennierubyjane", style: GoogleFonts.readexPro(fontSize: 15, fontWeight: FontWeight.bold),),
+                        Text(
+                          "jennierubyjane",
+                          style: GoogleFonts.readexPro(
+                              fontSize: 15, fontWeight: FontWeight.bold),
+                        ),
                         Row(
                           children: [
-                            Text("at ", style: GoogleFonts.readexPro(color: Colors.black),),
+                            Text(
+                              "at ",
+                              style: GoogleFonts.readexPro(color: Colors.black),
+                            ),
                             Expanded(
-                              child: TextButton(onPressed: (){}, child: Text("Trường Đại học Khoa học Huế", style: GoogleFonts.readexPro(color: Colors.black, fontWeight: FontWeight.w500), overflow: TextOverflow.ellipsis),
+                              child: TextButton(
+                                  onPressed: () {},
+                                  child: Text("Trường Đại học Khoa học Huế",
+                                      style: GoogleFonts.readexPro(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w500),
+                                      overflow: TextOverflow.ellipsis),
                                   style: TextButton.styleFrom(
                                     minimumSize: Size.zero,
                                     padding: EdgeInsets.zero,
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
                                     splashFactory: NoSplash.splashFactory,
-                                  )
-                              ),
+                                  )),
                             )
                           ],
                         )
                       ],
                     ),
                   ),
-                  SizedBox(width: 10,),
+                  const SizedBox(
+                    width: 10,
+                  ),
                   Container(
-                    child: IconButton(onPressed: (){}, icon: Icon(Icons.more_vert_outlined),
+                    child: IconButton(
+                      onPressed: () {},
+                      icon: Icon(Icons.more_vert_outlined),
                       highlightColor: Colors.transparent,
                       hoverColor: Colors.transparent,
                       splashColor: Colors.transparent,
                       padding: EdgeInsets.zero,
-                      constraints: BoxConstraints(),
+                      constraints: const BoxConstraints(),
                     ),
                   )
                 ],
               ),
             ),
             Container(
-              margin: EdgeInsets.only(top: 10),
+              margin: const EdgeInsets.only(top: 10),
               width: double.infinity,
               child: GestureDetector(
-                onDoubleTap: (){
+                onDoubleTap: () {
                   setState(() {
                     isLiked = true;
                     isHeartAnimating = true;
+                    isHeartButtonAnimating = true;
                   });
                 },
                 child: Stack(
                   children: [
                     CarouselSlider(
                       options: CarouselOptions(
-                        //height: MediaQuery.of(context).size.height / 2.8,
+                          //height: MediaQuery.of(context).size.height / 2.8,
                           aspectRatio: 1,
                           reverse: false,
-                          scrollPhysics: BouncingScrollPhysics(),
+                          scrollPhysics: const BouncingScrollPhysics(),
                           enableInfiniteScroll: false,
                           viewportFraction: 1,
                           onPageChanged: (index, reason) {
@@ -126,8 +146,10 @@ class _PostState extends State<Post> with TickerProviderStateMixin{
                           return Container(
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(25)),
-                              child: Image.asset(e, width: double.infinity,)
-                          );
+                              child: Image.asset(
+                                e,
+                                width: double.infinity,
+                              ));
                         });
                       }).toList(),
                     ),
@@ -143,7 +165,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin{
                             duration: Duration(milliseconds: 100),
                             width: currentPos == index ? 20 : 8.0,
                             height: 8.0,
-                            margin: EdgeInsets.symmetric(
+                            margin: const EdgeInsets.symmetric(
                                 vertical: 10.0, horizontal: 2.0),
                             decoration: BoxDecoration(
                                 shape: currentPos == index
@@ -153,25 +175,31 @@ class _PostState extends State<Post> with TickerProviderStateMixin{
                                     ? BorderRadius.circular(8)
                                     : BorderRadius.circular(8),
                                 color: currentPos == index
-                                    ? Color.fromRGBO(255, 255, 255, 10)
-                                    : Color.fromRGBO(236, 236, 236, 0.5)),
+                                    ? const Color.fromRGBO(255, 255, 255, 10)
+                                    : const Color.fromRGBO(236, 236, 236, 0.5)),
                           );
                         }).toList(),
                       ),
                     ),
-                    Positioned(child: AnimatedOpacity(
-                      opacity: isHeartAnimating ? 1 : 0,
-                      duration: Duration(milliseconds: 200),
-                      child: HeartAnimation(
-                        onEnd: () => setState(() => isHeartAnimating = false),
-                          duration: Duration(milliseconds: 500),
-                          isAnimating: isHeartAnimating,
-                          child: Icon(Icons.favorite, color: Colors.white, size: 120,)),
-                    ),
+                    Positioned(
                       top: 0,
                       bottom: 0,
                       left: 0,
                       right: 0,
+                      child: AnimatedOpacity(
+                        opacity: isHeartAnimating ? 1 : 0,
+                        duration: const Duration(milliseconds: 200),
+                        child: HeartAnimation(
+                            onEnd: () =>
+                                setState(() => isHeartAnimating = false),
+                            duration: const Duration(milliseconds: 500),
+                            isAnimating: isHeartAnimating,
+                            child: const Icon(
+                              Icons.favorite,
+                              color: Colors.white,
+                              size: 120,
+                            )),
+                      ),
                     )
                   ],
                 ),
@@ -186,37 +214,73 @@ class _PostState extends State<Post> with TickerProviderStateMixin{
                     child: Row(
                       children: [
                         HeartAnimation(
-                          isAnimating: isHeartAnimating,////
-                          child: IconButton(onPressed: (){
-                            setState(() {
-                              isLiked = !isLiked;
-                              _heartController.forward();
-                            });
-                          }, icon: isLiked?Icon(Icons.favorite_rounded, color: Colors.red, size: 30,):Icon(Icons.favorite_outline_rounded, size: 30,),
+                          isAnimating: isHeartButtonAnimating || isHeartAnimating, ////
+                          child: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                isLiked = !isLiked;
+                                isHeartButtonAnimating = !isHeartButtonAnimating;
+                                _heartController.forward();
+                              });
+                            },
+                            icon: isLiked
+                                ? const Icon(
+                                    Icons.favorite_rounded,
+                                    color: Colors.red,
+                                    size: 30,
+                                  )
+                                : const Icon(
+                                    Icons.favorite_outline_rounded,
+                                    size: 30,
+                                  ),
                             splashColor: Colors.transparent,
-                            highlightColor:  Colors.transparent,
+                            highlightColor: Colors.transparent,
                             hoverColor: Colors.transparent,
                             padding: EdgeInsets.zero,
                           ),
                         ),
-                        Text("4k", style: GoogleFonts.readexPro(color: colors.SN_postTextColor, fontSize: 15,),),
-                        IconButton(onPressed: (){
-                          Navigator.push(
-                              context, MaterialPageRoute(builder: (context) => PostCommentsPage(post: widget.samplePost,)));
-                        }, icon: Icon(Icons.mode_comment_outlined, size: 25,),
+                        Text(
+                          "4k",
+                          style: GoogleFonts.readexPro(
+                            color: colors.SN_postTextColor,
+                            fontSize: 15,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => PostCommentsPage(
+                                          post: widget.samplePost,
+                                        )));
+                          },
+                          icon: const Icon(
+                            Icons.mode_comment_outlined,
+                            size: 25,
+                          ),
                           splashColor: Colors.transparent,
-                          highlightColor:  Colors.transparent,
+                          highlightColor: Colors.transparent,
                           hoverColor: Colors.transparent,
                           padding: EdgeInsets.zero,
                         ),
-                        Text("2.1k",style: GoogleFonts.readexPro(color: colors.SN_postTextColor, fontSize: 15,), )
+                        Text(
+                          "2.1k",
+                          style: GoogleFonts.readexPro(
+                            color: colors.SN_postTextColor,
+                            fontSize: 15,
+                          ),
+                        )
                       ],
                     ),
                   ),
                   Container(
                     child: IconButton(
-                      onPressed: (){},
-                      icon: Icon(Icons.bookmark_outline, size: 30,),
+                      onPressed: () {},
+                      icon: const Icon(
+                        Icons.bookmark_outline,
+                        size: 30,
+                      ),
                       splashColor: Colors.transparent,
                       hoverColor: Colors.transparent,
                       highlightColor: Colors.transparent,
@@ -228,7 +292,10 @@ class _PostState extends State<Post> with TickerProviderStateMixin{
             ),
             Container(
                 padding: EdgeInsets.only(left: 10, right: 10, bottom: 10),
-                child: Text(widget.samplePost.content, style: GoogleFonts.readexPro(color: Colors.black),)),
+                child: Text(
+                  widget.samplePost.content,
+                  style: GoogleFonts.readexPro(color: Colors.black),
+                )),
             Container(
               padding: EdgeInsets.only(left: 10, right: 10, bottom: 10),
               child: Row(
@@ -237,28 +304,38 @@ class _PostState extends State<Post> with TickerProviderStateMixin{
                   Container(
                     height: 30,
                     width: 30,
-                    child: CircleAvatar(
-                      backgroundImage:
-                      AssetImage("assets/images/socialNetwork/avatar.png",),
+                    child: const CircleAvatar(
+                      backgroundImage: AssetImage(
+                        "assets/images/socialNetwork/avatar.png",
+                      ),
                     ),
                   ),
-                  SizedBox(width: 10,),
-                  Expanded(child: SizedBox(
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  const Expanded(
+                      child: SizedBox(
                     child: TextField(
                       textInputAction: TextInputAction.send,
                       keyboardType: TextInputType.multiline,
                       maxLines: null,
                       decoration: InputDecoration(
                           contentPadding: EdgeInsets.fromLTRB(10, 15, 10, 0),
-                        hintText: "Write a comment",
-                        border: InputBorder.none
-                      ),
+                          hintText: "Write a comment",
+                          border: InputBorder.none),
                     ),
                   )),
-                  SizedBox(width: 10,),
-                  IconButton(onPressed: (){}, icon: Icon(Icons.send_rounded, color: colors.primaryColor,),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  IconButton(
+                    onPressed: () {},
+                    icon: Icon(
+                      Icons.send_rounded,
+                      color: colors.primaryColor,
+                    ),
                     padding: EdgeInsets.zero,
-                    constraints: BoxConstraints(),
+                    constraints: const BoxConstraints(),
                     splashColor: Colors.transparent,
                     hoverColor: Colors.transparent,
                     highlightColor: Colors.transparent,
@@ -269,6 +346,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin{
           ],
         ),
       ),
-    );;
+    );
+    ;
   }
 }

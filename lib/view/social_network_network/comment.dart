@@ -1,21 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hue_t/animation/heart_animation.dart';
+import 'package:hue_t/model/social_network/comment_model.dart';
 
 class Comment extends StatefulWidget {
-  const Comment({Key? key}) : super(key: key);
-
+  const Comment({Key? key, required this.cmt}) : super(key: key);
+  final CommentModel cmt;
   @override
   State<Comment> createState() => _CommentState();
 }
 
-class _CommentState extends State<Comment> {
+class _CommentState extends State<Comment> with TickerProviderStateMixin{
+  bool isLiked = false;
+
+  late final AnimationController _heartController = AnimationController(
+    duration: const Duration(milliseconds: 500),
+    vsync: this,
+  );
+  late final Animation<double> _animation = CurvedAnimation(
+    parent: _heartController,
+    curve: Curves.fastOutSlowIn,
+  );
+  int currentPos = 0;
+  bool isHeartAnimating = false;
+  @override
+  void dispose() {
+    _heartController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
       ),
-      padding: EdgeInsets.only(top: 10),
-      margin: EdgeInsets.only(left: 20, right: 20, bottom: 20),
+      margin: EdgeInsets.only(left: 20, right: 20, top: 20),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -56,7 +75,7 @@ class _CommentState extends State<Comment> {
                   height: 5,
                 ),
                 Text(
-                  "Bạn fan tên Phước đẹp trai quá !! <3",
+                  widget.cmt.content,
                   style:
                   GoogleFonts.montserrat(color: Colors.black, fontSize: 15),
                 )
@@ -66,18 +85,29 @@ class _CommentState extends State<Comment> {
           SizedBox(width: 10,),
           IntrinsicWidth(child: Column(
             children: [
-              IconButton(
-                icon: Icon(Icons.favorite_outline,
-                  size: 15,),
-                onPressed: (){},
-                splashColor: Colors.transparent,
-                hoverColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                padding: EdgeInsets.zero,
-                constraints: BoxConstraints(),
+              HeartAnimation(
+                onEnd: () => setState(() => isHeartAnimating = false),
+                duration: Duration(milliseconds: 500),
+                isAnimating: isHeartAnimating,
+                child: IconButton(
+                  icon: isLiked?Icon(Icons.favorite,
+                    size: 15, color: Colors.red,): Icon(Icons.favorite_outline,
+                    size: 15,),
+                  onPressed: (){
+                    setState(() {
+                      isLiked = !isLiked;
+                      isHeartAnimating = !isHeartAnimating;
+                    });
+                  },
+                  splashColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                  padding: EdgeInsets.zero,
+                  constraints: BoxConstraints(),
+                ),
               ),
               Text(
-                "2446",
+                widget.cmt.likeCount.toString(),
                 style: GoogleFonts.readexPro(color: Colors.grey),
               )
             ],
