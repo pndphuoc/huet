@@ -7,7 +7,7 @@ import '../animation/show_right.dart';
 import '../colors.dart' as colors;
 import 'hotel_detail.dart';
 import '../fake_data.dart' as faker;
-import 'package:hue_t/get_user_location.dart' as userLocation;
+import 'package:hue_t/permission/get_user_location.dart' as userLocation;
 
 class HomestaysPage extends StatefulWidget {
   const HomestaysPage({Key? key}) : super(key: key);

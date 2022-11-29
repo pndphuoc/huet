@@ -13,7 +13,7 @@ import '../animation/show_right.dart';
 import '../colors.dart' as colors;
 import '../model/reviewModel.dart';
 import 'package:map_launcher/map_launcher.dart' as map;
-import '../get_user_location.dart' as user_location;
+import '../permission/get_user_location.dart' as user_location;
 
 class HotelDetail extends StatefulWidget {
   const HotelDetail({Key? key, required this.model}) : super(key: key);

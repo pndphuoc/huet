@@ -29,6 +29,7 @@ class _CommentState extends State<Comment> with TickerProviderStateMixin{
     super.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -86,24 +87,30 @@ class _CommentState extends State<Comment> with TickerProviderStateMixin{
           IntrinsicWidth(child: Column(
             children: [
               HeartAnimation(
-                onEnd: () => setState(() => isHeartAnimating = false),
-                duration: Duration(milliseconds: 500),
-                isAnimating: isHeartAnimating,
+                isAnimating: isHeartAnimating, ////
                 child: IconButton(
-                  icon: isLiked?Icon(Icons.favorite,
-                    size: 15, color: Colors.red,): Icon(Icons.favorite_outline,
-                    size: 15,),
-                  onPressed: (){
+                  onPressed: () {
                     setState(() {
                       isLiked = !isLiked;
                       isHeartAnimating = !isHeartAnimating;
+                      _heartController.forward();
                     });
                   },
+                  icon: isLiked
+                      ? const Icon(
+                    Icons.favorite_rounded,
+                    color: Colors.red,
+                    size: 15,
+                  )
+                      : const Icon(
+                    Icons.favorite_outline_rounded,
+                    size: 15,
+                  ),
                   splashColor: Colors.transparent,
-                  hoverColor: Colors.transparent,
                   highlightColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
                   padding: EdgeInsets.zero,
-                  constraints: BoxConstraints(),
+                  constraints: const BoxConstraints(),
                 ),
               ),
               Text(

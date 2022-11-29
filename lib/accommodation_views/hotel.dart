@@ -13,7 +13,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/animation/show_up.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import '../fake_data.dart' as faker;
-import '../get_user_location.dart' as userLocation;
+import '../permission/get_user_location.dart' as userLocation;
 
 class HotelPage extends StatefulWidget {
   const HotelPage({Key? key}) : super(key: key);

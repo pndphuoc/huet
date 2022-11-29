@@ -7,7 +7,7 @@ import '../animation/show_right.dart';
 import '../colors.dart' as colors;
 import 'hotel_detail.dart';
 import '../fake_data.dart' as faker;
-import 'package:hue_t/get_user_location.dart' as user_location;
+import 'package:hue_t/permission/get_user_location.dart' as user_location;
 
 class HotelsPage extends StatefulWidget {
   const HotelsPage({Key? key}) : super(key: key);

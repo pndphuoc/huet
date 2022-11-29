@@ -93,30 +93,33 @@ List<CommentModel> commentList = [
 class _PostCommentsPageState extends State<PostCommentsPage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.black),
-        title: Text(
-          "Comments",
-          style: GoogleFonts.readexPro(color: Colors.black),
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+        appBar: AppBar(
+          iconTheme: const IconThemeData(color: Colors.black),
+          title: Text(
+            "Comments",
+            style: GoogleFonts.readexPro(color: Colors.black),
+          ),
+          backgroundColor: colors.backgroundColor,
+          elevation: 0,
         ),
         backgroundColor: colors.backgroundColor,
-        elevation: 0,
-      ),
-      backgroundColor: colors.backgroundColor,
-      body: SafeArea(
-        child: Stack(children: [
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                contentBlock(context),
-                ...commentList.map((e) => Comment(cmt: e)),
-                const SizedBox(height: 80, )
-              ],
+        body: SafeArea(
+          child: Stack(children: [
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  contentBlock(context),
+                  ...commentList.map((e) => Comment(cmt: e)),
+                  const SizedBox(height: 80, )
+                ],
+              ),
             ),
-          ),
-          commentBlock(context)
-        ]),
+            commentBlock(context)
+          ]),
+        ),
       ),
     );
   }

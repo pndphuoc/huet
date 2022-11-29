@@ -29,6 +29,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
   bool isLiked = false;
   bool isHeartAnimating = false;
   bool isHeartButtonAnimating = false;
+  bool isMark = false;
 
   @override
   void dispose() {
@@ -254,6 +255,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                                     builder: (context) => PostCommentsPage(
                                           post: widget.samplePost,
                                         )));
+                            FocusManager.instance.primaryFocus?.unfocus();
                           },
                           icon: const Icon(
                             Icons.mode_comment_outlined,
@@ -276,8 +278,16 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                   ),
                   Container(
                     child: IconButton(
-                      onPressed: () {},
-                      icon: const Icon(
+                      onPressed: () {
+                        setState(() {
+                          isMark = !isMark;
+                        });
+                      },
+                      icon: isMark?Icon(
+                        Icons.bookmark,
+                        size: 30,
+                        color: colors.primaryColor,
+                      ): const Icon(
                         Icons.bookmark_outline,
                         size: 30,
                       ),
