@@ -7,6 +7,7 @@ import 'package:hue_t/view/social_network_network/post.dart';
 
 import 'create_post.dart';
 
+
 class SocialNetWorkPage extends StatefulWidget {
   const SocialNetWorkPage({Key? key}) : super(key: key);
 
@@ -87,7 +88,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                   ),
                   ElevatedButton(onPressed: (){
                     Navigator.push(
-                        context, MaterialPageRoute(builder: (context) => CreatePostPage()));
+                        context, MaterialPageRoute(builder: (context) => CreatePost()));
                   }, child: Icon(Icons.add_circle_outline, size: 20, color: Colors.black,),
                     style: ElevatedButton.styleFrom(
                       shape: CircleBorder(),

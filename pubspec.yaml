@@ -65,6 +65,12 @@ dependencies:
   flutter_spinkit: ^5.1.0
   photo_manager: ^2.5.1+1
   oktoast:
+  video_player: ^2.4.8
+  image_gallery_saver: ^1.7.1
+  image_cropper: ^3.0.1
+  dio: ^4.0.6
+  fluttertoast: ^8.1.1
+  image_picker:
 
 dev_dependencies:
   flutter_test:
