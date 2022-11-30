@@ -87,7 +87,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
 
                   ),
                   ElevatedButton(onPressed: (){
-                    Navigator.push(
+                   Navigator.push(
                         context, MaterialPageRoute(builder: (context) => CreatePost()));
                   }, child: Icon(Icons.add_circle_outline, size: 20, color: Colors.black,),
                     style: ElevatedButton.styleFrom(

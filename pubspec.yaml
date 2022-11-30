@@ -71,6 +71,8 @@ dependencies:
   dio: ^4.0.6
   fluttertoast: ^8.1.1
   image_picker:
+  path: ^1.8.2
+  path_provider: ^2.0.11
 
 dev_dependencies:
   flutter_test:

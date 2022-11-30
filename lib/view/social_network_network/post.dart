@@ -72,30 +72,20 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                           style: GoogleFonts.readexPro(
                               fontSize: 15, fontWeight: FontWeight.bold),
                         ),
-                        Row(
-                          children: [
-                            Text(
-                              "at ",
-                              style: GoogleFonts.readexPro(color: Colors.black),
-                            ),
-                            Expanded(
-                              child: TextButton(
-                                  onPressed: () {},
-                                  child: Text("Trường Đại học Khoa học Huế",
-                                      style: GoogleFonts.readexPro(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.w500),
-                                      overflow: TextOverflow.ellipsis),
-                                  style: TextButton.styleFrom(
-                                    minimumSize: Size.zero,
-                                    padding: EdgeInsets.zero,
-                                    tapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                    splashFactory: NoSplash.splashFactory,
-                                  )),
-                            )
-                          ],
-                        )
+                        TextButton(
+                            onPressed: () {},
+                            child: Text("Trường Đại học Khoa học Huế",
+                                style: GoogleFonts.readexPro(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w500),
+                                overflow: TextOverflow.ellipsis),
+                            style: TextButton.styleFrom(
+                              minimumSize: Size.zero,
+                              padding: EdgeInsets.zero,
+                              tapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                              splashFactory: NoSplash.splashFactory,
+                            )),
                       ],
                     ),
                   ),
