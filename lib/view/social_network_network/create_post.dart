@@ -2,9 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:hue_t/colors.dart' as colors;
 
 class CreatePost extends StatefulWidget {
@@ -19,30 +17,45 @@ class _CreatePostState extends State<CreatePost> {
     final status = await Permission.storage.request();
   }
 
-  Future<void> selectMultiFile() async {
-    final ImagePicker _picker = ImagePicker();
-    final List<XFile>? images = await _picker.pickMultiImage();
-    print(images?.length.toString());
-  }
-  @override
-  void initState()  {
-    super.initState();
-    requestStoragePermission();
-    //selectMultiFile();
+  late String selectedImage;
+  late List<String> imageList;
+  late Directory directory;
+  late ScrollController _controller;
+  bool isScrolled = false;
+
+  _scrollListener() {
+    if (_controller.offset == _controller.position.minScrollExtent &&
+        !_controller.position.outOfRange) {
+      setState(() {
+        isScrolled = false;
+      });
+    }
+    if (_controller.offset > _controller.position.minScrollExtent - 50 &&
+        !_controller.position.outOfRange) {
+      setState(() {
+        isScrolled = true;
+      });
+    }
   }
 
-  final Directory directory = new Directory('/storage/emulated/0/Pictures/AdobeLightroom');
-  String selectedImage = '';
-  bool isScrolled = false;
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
+    _controller = ScrollController();
+    _controller.addListener(_scrollListener);
+    requestStoragePermission();
+    directory = Directory('/storage/emulated/0/Pictures/AdobeLightroom');
     List<String> extensionList = ['.jpg', '.png'];
-    var imageList = directory
+    imageList = directory
         .listSync()
         .map((item) => item.path)
         .where((item) => extensionList.any((element) => item.endsWith(element)))
         .toList(growable: false);
+    selectedImage = imageList.first;
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.black),
@@ -54,46 +67,55 @@ class _CreatePostState extends State<CreatePost> {
         elevation: 0,
       ),
       body: SafeArea(
-        child: Container(
-          child: Column(
-            children: [
-              AnimatedContainer(
-                duration: Duration(milliseconds: 500),
-                height: isScrolled?0: MediaQuery.of(context).size.height/2,
-                width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: FileImage(File(selectedImage)),
-                    fit: BoxFit.fitWidth
-                  )
+        child: Column(
+          children: [
+            SizedBox(
+              //height: MediaQuery.of(context).size.width,
+              width: MediaQuery.of(context).size.width,
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: Container(
+                  decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: FileImage(File(selectedImage)),
+                          fit: BoxFit.fitWidth)),
                 ),
               ),
-              Expanded(child: imagesGridView(context, imageList))
-            ],
-          )
+            ),
+            Expanded(
+                  child: imagesGridView(context, imageList)),
+
+          ],
         ),
       ),
     );
   }
-  
+
   Widget imagesGridView(BuildContext context, List<String> imageList) {
-    return GridView.count(crossAxisCount: 3,
-      children: [
-        ...imageList.map((e) => GestureDetector(
-                onTap: (){
+    return GridView.builder(
+        cacheExtent: 9999,
+        itemCount: imageList.length,
+        controller: _controller,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3, childAspectRatio: 1),
+        itemBuilder: (context, index) {
+          return Opacity(
+              opacity: selectedImage == imageList[index] ? 0.5 : 1,
+              child: GestureDetector(
+                onTap: () {
                   setState(() {
-                    selectedImage = e;
+                    selectedImage = imageList[index];
                   });
                 },
-                onDoubleTap: () {
-                  setState(() {
-                    isScrolled = !isScrolled;
-                  });
-                },
-                child: Opacity(
-                    opacity: selectedImage == e? 0.5:1,
-                    child: Image.file(File(e), scale: 1, fit: BoxFit.cover,))))
-      ],
-    );
+                child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(width: 1, color: Colors.black),
+                    ),
+                    child: Image(
+                      image: ResizeImage(FileImage(File(imageList[index])), width: 175),
+                      fit: BoxFit.cover,
+                    )),
+              ));
+        });
   }
 }
