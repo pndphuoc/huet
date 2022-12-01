@@ -11,11 +11,10 @@ Future<Position> getUserCurrentLocation() async {
     print("ERROR" + error.toString());
   });*/
 
-  if(await Permission.location.request().isGranted) {
+  if (await Permission.location.request().isGranted) {
     return await Geolocator.getCurrentPosition();
-  } else
-    {
-      await Permission.location.request();
-      return await Geolocator.getCurrentPosition();
-    }
+  } else {
+    await Permission.location.request();
+    return await Geolocator.getCurrentPosition();
+  }
 }
