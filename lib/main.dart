@@ -9,6 +9,7 @@ import 'package:hue_t/view/foodstore/foodstoredetail.dart';
 import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
 import 'package:hue_t/home.dart';
 import 'package:hue_t/accommodation_views/hotel.dart';
+import 'package:hue_t/view/profileuser/profile_user.dart';
 import 'accommodation_views/homestays_list.dart';
 import 'accommodation_views/hotels_list.dart';
 import 'accommodation_views/resorts_list.dart';
@@ -145,7 +146,8 @@ class _HueTState extends State<HueT> {
     HotelPage(),
     Foodstore(),
     HomePage(),
-    HotelsPage()
+    HotelsPage(),
+    ProfileUser()
   ];
 
   bottomNavigationBar(BuildContext context) {
