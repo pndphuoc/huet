@@ -45,11 +45,11 @@ class _HotelDetailState extends State<HotelDetail> {
   // on below line we have created the list of markers
   final List<Marker> _markers = <Marker>[];
 
-
   //reviews data
   List<reviewModel> reviewsList = [
     reviewModel(
         id: 1,
+        userId: 1,
         rating: 5,
         review: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         images: [
@@ -58,11 +58,13 @@ class _HotelDetailState extends State<HotelDetail> {
         reviewDate: DateTime(2022, 11, 15, 12, 56)),
     reviewModel(
         id: 2,
+        userId: 1,
         rating: 4,
         review: "Normal",
         reviewDate: DateTime(2022, 11, 15, 12, 56)),
     reviewModel(
         id: 3,
+        userId: 1,
         rating: 1,
         review: "Too bad",
         reviewDate: DateTime(2022, 11, 15, 12, 56))
@@ -72,7 +74,6 @@ class _HotelDetailState extends State<HotelDetail> {
   void initState() {
     super.initState();
     userLocation.getUserCurrentLocation().then((value) async {
-
       // marker added for hotels location
       _markers.add(Marker(
           markerId: MarkerId("3"),
@@ -80,25 +81,29 @@ class _HotelDetailState extends State<HotelDetail> {
               widget.model.accommodationLocation!.longitude),
           infoWindow: InfoWindow(title: "Hotel's Locations")));
 
-      double miny = (value.latitude <= widget.model.accommodationLocation!.latitude)
-          ? value.latitude
-          : widget.model.accommodationLocation!.latitude;
-      double minx = (value.longitude <= widget.model.accommodationLocation!.longitude)
-          ? value.longitude
-          : widget.model.accommodationLocation!.longitude;
-      double maxy = (value.latitude <= widget.model.accommodationLocation!.latitude)
-          ? widget.model.accommodationLocation!.latitude
-          : value.latitude;
-      double maxx = (value.longitude <= widget.model.accommodationLocation!.longitude)
-          ? widget.model.accommodationLocation!.longitude
-          : value.longitude;
+      double miny =
+          (value.latitude <= widget.model.accommodationLocation!.latitude)
+              ? value.latitude
+              : widget.model.accommodationLocation!.latitude;
+      double minx =
+          (value.longitude <= widget.model.accommodationLocation!.longitude)
+              ? value.longitude
+              : widget.model.accommodationLocation!.longitude;
+      double maxy =
+          (value.latitude <= widget.model.accommodationLocation!.latitude)
+              ? widget.model.accommodationLocation!.latitude
+              : value.latitude;
+      double maxx =
+          (value.longitude <= widget.model.accommodationLocation!.longitude)
+              ? widget.model.accommodationLocation!.longitude
+              : value.longitude;
 
       double southWestLatitude = miny;
       double southWestLongitude = minx;
 
       double northEastLatitude = maxy;
       double northEastLongitude = maxx;
-      setState(() { });
+      setState(() {});
       // specified current users location
       CameraPosition cameraPosition = new CameraPosition(
         target: LatLng(value.latitude, value.longitude),
@@ -116,7 +121,7 @@ class _HotelDetailState extends State<HotelDetail> {
 
       Timer(Duration(milliseconds: 1000), () async {
         controller.animateCamera(
-           CameraUpdate.newLatLngBounds(
+          CameraUpdate.newLatLngBounds(
               LatLngBounds(
                 northeast: LatLng(northEastLatitude, northEastLongitude),
                 southwest: LatLng(southWestLatitude, southWestLongitude),
@@ -124,14 +129,16 @@ class _HotelDetailState extends State<HotelDetail> {
               30),
         );
       });
-      setState(() { });
+      setState(() {});
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: colors.isDarkMode?colors.backgroundColorDarkMode:colors.hotelDetailBackgroundColor,
+      backgroundColor: colors.isDarkMode
+          ? colors.backgroundColorDarkMode
+          : colors.hotelDetailBackgroundColor,
       body: Stack(children: [
         SingleChildScrollView(
           child: Container(
@@ -214,7 +221,8 @@ class _HotelDetailState extends State<HotelDetail> {
                       child: Text(
                         widget.model.name,
                         style: GoogleFonts.quicksand(
-                            color: colors.isDarkMode?Colors.white:Colors.black,
+                            color:
+                                colors.isDarkMode ? Colors.white : Colors.black,
                             fontWeight: FontWeight.bold,
                             fontSize: 30),
                       ),
@@ -233,13 +241,16 @@ class _HotelDetailState extends State<HotelDetail> {
                               child: Icon(
                             Icons.pin_drop_outlined,
                             size: 20,
-                                color: colors.isDarkMode?Colors.white:Colors.black,
+                            color:
+                                colors.isDarkMode ? Colors.white : Colors.black,
                           )),
                           TextSpan(
                               text: " ${widget.model.address}",
                               style: GoogleFonts.nunitoSans(
                                   fontWeight: FontWeight.w600,
-                                  color: colors.isDarkMode?Colors.white:Colors.black,
+                                  color: colors.isDarkMode
+                                      ? Colors.white
+                                      : Colors.black,
                                   fontSize: 20))
                         ]),
                       ),
@@ -262,13 +273,17 @@ class _HotelDetailState extends State<HotelDetail> {
                               height: 40,
                               width: MediaQuery.of(context).size.width / 4,
                               decoration: BoxDecoration(
-                                  color: colors.isDarkMode?colors.categoryBlockColorDarkMode:colors.categoryBlockColor,
+                                  color: colors.isDarkMode
+                                      ? colors.categoryBlockColorDarkMode
+                                      : colors.categoryBlockColor,
                                   borderRadius: BorderRadius.circular(15)),
                               child: Center(
                                   child: Text(
                                 e.name,
-                                style:
-                                    GoogleFonts.quicksand(color: colors.isDarkMode?Colors.white:Colors.black),
+                                style: GoogleFonts.quicksand(
+                                    color: colors.isDarkMode
+                                        ? Colors.white
+                                        : Colors.black),
                               )),
                             ))
                       ],
@@ -283,7 +298,11 @@ class _HotelDetailState extends State<HotelDetail> {
                   child: ShowRight(
                       child: Text(
                         "Map",
-                        style: GoogleFonts.montserrat(fontSize: 25, color: colors.isDarkMode?Colors.white:Colors.black),
+                        style: GoogleFonts.montserrat(
+                            fontSize: 25,
+                            color: colors.isDarkMode
+                                ? Colors.white
+                                : Colors.black),
                       ),
                       delay: 600),
                 ),
@@ -298,7 +317,8 @@ class _HotelDetailState extends State<HotelDetail> {
                           await availableMaps.first.showDirections(
                               destination: map.Coords(
                                   widget.model.accommodationLocation!.latitude,
-                                  widget.model.accommodationLocation!.longitude));
+                                  widget
+                                      .model.accommodationLocation!.longitude));
 
 /*                          await availableMaps.first.showMarker(
                             coords: map.Coords(widget.model.hotelLocaton!.latitude, widget.model.hotelLocaton!.longitude),
@@ -319,7 +339,6 @@ class _HotelDetailState extends State<HotelDetail> {
                             child: Stack(
                               children: [
                                 GoogleMap(
-
                                   zoomControlsEnabled: false,
                                   // on below line setting camera position
                                   initialCameraPosition: _kGoogle,
@@ -346,7 +365,9 @@ class _HotelDetailState extends State<HotelDetail> {
                                       "Click to open direction in Google Map",
                                       textAlign: TextAlign.center,
                                       style: GoogleFonts.montserrat(
-                                          color: colors.isDarkMode?Colors.white:Colors.black),
+                                          color: colors.isDarkMode
+                                              ? Colors.white
+                                              : Colors.black),
                                     ),
                                     decoration: BoxDecoration(
                                         color: Colors.grey.withOpacity(0.7)),
@@ -378,7 +399,10 @@ class _HotelDetailState extends State<HotelDetail> {
                             Text(
                               "Reviews",
                               style: GoogleFonts.montserrat(
-                                  color: colors.isDarkMode?Colors.white:Colors.black, fontSize: 25),
+                                  color: colors.isDarkMode
+                                      ? Colors.white
+                                      : Colors.black,
+                                  fontSize: 25),
                             ),
                             Row(
                               children: [
@@ -402,7 +426,11 @@ class _HotelDetailState extends State<HotelDetail> {
                                   initialRating: widget.model.rating!,
                                 ),
                                 Text(
-                                  " ${widget.model.rating!}/5", style: GoogleFonts.poppins(color: colors.isDarkMode?Colors.white:Colors.black),
+                                  " ${widget.model.rating!}/5",
+                                  style: GoogleFonts.poppins(
+                                      color: colors.isDarkMode
+                                          ? Colors.white
+                                          : Colors.black),
                                 )
                               ],
                             )
