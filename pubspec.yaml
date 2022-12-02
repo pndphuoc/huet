@@ -74,6 +74,9 @@ dependencies:
   path: ^1.8.2
   path_provider: ^2.0.11
   scroll_to_index:
+  photo_gallery: ^1.1.1
+  transparent_image: ^2.0.0
+  sliding_up_panel: ^2.0.0+1
 
 dev_dependencies:
   flutter_test:
