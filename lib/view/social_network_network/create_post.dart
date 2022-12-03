@@ -5,7 +5,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:hue_t/colors.dart' as colors;
+import 'package:photo_manager/photo_manager.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+
+import 'image_item_widget.dart';
 
 class CreatePost extends StatefulWidget {
   const CreatePost({Key? key}) : super(key: key);
@@ -44,6 +47,137 @@ class _CreatePostState extends State<CreatePost> {
     }
     return imageList;
   }*/
+  final FilterOptionGroup _filterOptionGroup = FilterOptionGroup(
+    imageOption: const FilterOption(
+      sizeConstraint: SizeConstraint(ignoreSize: true),
+    ),
+  );
+  final int _sizePerPage = 50;
+
+  AssetPathEntity? _path;
+  List<AssetEntity>? _entities;
+  int _totalEntitiesCount = 0;
+
+  int _page = 0;
+  bool _isLoading = false;
+  bool _isLoadingMore = false;
+  bool _hasMoreToLoad = true;
+
+  Future<void> _requestAssets() async {
+    setState(() {
+      _isLoading = true;
+    });
+    // Request permissions.
+    final PermissionState ps = await PhotoManager.requestPermissionExtend();
+    if (!mounted) {
+      return;
+    }
+    // Further requests can be only proceed with authorized or limited.
+    if (!ps.hasAccess) {
+      setState(() {
+        _isLoading = false;
+      });
+      Fluttertoast.showToast(msg: 'Permission is not accessible.',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0);
+      return;
+    }
+    // Obtain assets using the path entity.
+    final List<AssetPathEntity> paths = await PhotoManager.getAssetPathList(
+      onlyAll: true,
+      filterOption: _filterOptionGroup,
+    );
+    if (!mounted) {
+      return;
+    }
+    // Return if not paths found.
+    if (paths.isEmpty) {
+      setState(() {
+        _isLoading = false;
+      });
+      Fluttertoast.showToast(msg: 'No paths found.',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0);
+      return;
+    }
+    setState(() {
+      _path = paths.first;
+    });
+    _totalEntitiesCount = await _path!.assetCountAsync;
+    final List<AssetEntity> entities = await _path!.getAssetListPaged(
+      page: 0,
+      size: _sizePerPage,
+    );
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _entities = entities;
+      _isLoading = false;
+      _hasMoreToLoad = _entities!.length < _totalEntitiesCount;
+    });
+  }
+  Future<void> _loadMoreAsset() async {
+    final List<AssetEntity> entities = await _path!.getAssetListPaged(
+      page: _page + 1,
+      size: _sizePerPage,
+    );
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _entities!.addAll(entities);
+      _page++;
+      _hasMoreToLoad = _entities!.length < _totalEntitiesCount;
+      _isLoadingMore = false;
+    });
+  }
+
+  Widget _buildBody(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator.adaptive());
+    }
+    if (_path == null) {
+      return const Center(child: Text('Request paths first.'));
+    }
+    if (_entities?.isNotEmpty != true) {
+      return const Center(child: Text('No assets found on this device.'));
+    }
+    return GridView.custom(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+      ),
+      childrenDelegate: SliverChildBuilderDelegate(
+            (BuildContext context, int index) {
+          if (index == _entities!.length - 8 &&
+              !_isLoadingMore &&
+              _hasMoreToLoad) {
+            _loadMoreAsset();
+          }
+          final AssetEntity entity = _entities![index];
+          return ImageItemWidget(
+            key: ValueKey<int>(index),
+            entity: entity,
+            option: const ThumbnailOption(size: ThumbnailSize.square(200)),
+          );
+        },
+        childCount: _entities!.length,
+        findChildIndexCallback: (Key key) {
+          // Re-use elements.
+          if (key is ValueKey<int>) {
+            return key.value;
+          }
+          return null;
+        },
+      ),
+    );
+  }
 
   Future<void> getAllPhoto(Directory dir) async {
     List<String> extensionList = ['.jpg', '.png'];
@@ -61,8 +195,8 @@ class _CreatePostState extends State<CreatePost> {
         viewportBoundaryGetter: () =>
             Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
         axis: Axis.vertical);
-    requestStoragePermission();
-
+    _requestAssets();
+/*
 
 
     List contents = directory.listSync();
@@ -85,7 +219,7 @@ class _CreatePostState extends State<CreatePost> {
       imageFileList.sort((a, b) => b.statSync().modified.compareTo(a.statSync().modified));
       imageList = imageFileList.map((e) => e.path).toList();
       selectedImage = imageList.first;
-    });
+    });*/
     /*(() async {
       await getAllPhoto(directory);
     })();*/
@@ -115,10 +249,10 @@ class _CreatePostState extends State<CreatePost> {
               child: AspectRatio(
                 aspectRatio: 1,
                 child: Container(
-                  decoration: BoxDecoration(
+                  /*decoration: BoxDecoration(
                       image: DecorationImage(
                           image: FileImage(File(selectedImage)),
-                          fit: BoxFit.fitWidth)),
+                          fit: BoxFit.fitWidth)),*/
                 ),
               ),
             ),
@@ -126,7 +260,7 @@ class _CreatePostState extends State<CreatePost> {
                 child: Column(
               children: [
                 controllerBar(context),
-                Expanded(child: imagesGridView(context, imageList))
+                Expanded(child: _buildBody(context))
               ],
             )),
           ],
@@ -291,7 +425,9 @@ class _CreatePostState extends State<CreatePost> {
                     hoverColor: Colors.transparent,
                     splashColor: Colors.transparent,
                     constraints: const BoxConstraints(),
-                    onPressed: () {},
+                    onPressed: () {
+                      _requestAssets();
+                    },
                     icon: const Icon(
                       Icons.camera_alt_outlined,
                       color: Colors.white,

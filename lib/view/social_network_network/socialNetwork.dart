@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
 import 'package:hue_t/model/social_network/postModel.dart';
 import 'package:hue_t/view/social_network_network/post.dart';
+import 'simple_example_page.dart' as cp2;
 
 import 'create_post.dart';
 
