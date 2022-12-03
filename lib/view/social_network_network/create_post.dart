@@ -22,7 +22,7 @@ class _CreatePostState extends State<CreatePost> {
   String selectedImage = '';
   List<File> imageFileList = [];
   List<String> imageList = [];
-  Directory directory = Directory('/storage/emulated/0/Pictures/');
+  Directory directory = Directory('/storage/emulated/0/Pictures');
   bool isScrolled = false;
   bool isMultiSelect = false;
   List<String> selectedList = [];
@@ -74,18 +74,18 @@ class _CreatePostState extends State<CreatePost> {
     }
 
     List<String> extensionList = ['.jpg', '.png'];
-/*    imageList = directory
+    imageList = directory
         .listSync()
         .map((item) => item.path)
         .where((item) => extensionList.any((element) => item.endsWith(element)))
-        .toList(growable: false);*/
-    /*getAllPhoto(directory).whenComplete(() {
+        .toList(growable: false);
+    getAllPhoto(directory).whenComplete(() {
       setState(() {
       });
       imageFileList.sort((a, b) => b.statSync().modified.compareTo(a.statSync().modified));
       imageList = imageFileList.map((e) => e.path).toList();
       selectedImage = imageList.first;
-    });*/
+    });
     /*(() async {
       await getAllPhoto(directory);
     })();*/
