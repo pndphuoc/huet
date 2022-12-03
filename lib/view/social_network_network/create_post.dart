@@ -51,22 +51,23 @@ class _CreatePostState extends State<CreatePost> {
         selectedAlbum = _albums.first;
       });
     }
+    await initAsyncMedia();
     setState(() {
       _loading = false;
+      isLoading = false;
+      print("aaaaaaaaaaaaaaaaaa");
+      print(selectedAlbum!.name);
     });
+
   }
 
-  void initAsyncMedia() async {
-    if(isFirstTime) {
-      await initAsync();
-        setState(() {
-          isFirstTime = false;
-        });
-    }
+  Future<void> initAsyncMedia() async {
+    print("bbbbbbbbbbbbbbbbbbba");
+    print(selectedAlbum!.name);
     MediaPage mediaPage = await selectedAlbum!.listMedia();
+    print("ccccccccc");
     setState(() {
       _media = mediaPage.items;
-      isLoading = false;
       selectedImage = _media!.first;
     });
   }
@@ -98,8 +99,8 @@ class _CreatePostState extends State<CreatePost> {
             Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
         axis: Axis.vertical);
     requestStoragePermission();
-    //initAsync();
-    initAsyncMedia();
+    initAsync();
+    //initAsyncMedia();
   }
 
   final panelController = PanelController();
