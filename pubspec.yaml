@@ -45,7 +45,6 @@ dependencies:
   loading_animation_widget:
   implicitly_animated_reorderable_list: ^0.4.2
   syncfusion_flutter_datepicker: ^20.3.56
-
   sticky_headers: ^0.3.0
   flutter_sticky_header: ^0.6.4
   hidable: ^1.0.3

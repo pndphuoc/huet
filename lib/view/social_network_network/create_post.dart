@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hue_t/view/social_network_network/grid_gallery.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:hue_t/colors.dart' as colors;
 import 'package:photo_manager/photo_manager.dart';
@@ -31,22 +32,6 @@ class _CreatePostState extends State<CreatePost> {
   List<String> selectedList = [];
   late AutoScrollController controller;
 
-/*  List<String> getAllPhoto(Directory dirPath) {
-    List contents = dirPath.listSync();
-    bool isExistSubDir = false;
-    List<String> extensionList = ['.jpg', '.png'];
-    List<String> imageList = dirPath.listSync().map((item) => item.path)
-        .where((item) => extensionList.any((element) => item.endsWith(element)))
-        .toList(growable: false);
-
-    for(var dir in contents) {
-      if(dir is Directory) {
-        imageList += getAllPhoto(dir);
-        isExistSubDir = true;
-      }
-    }
-    return imageList;
-  }*/
   final FilterOptionGroup _filterOptionGroup = FilterOptionGroup(
     imageOption: const FilterOption(
       sizeConstraint: SizeConstraint(ignoreSize: true),
@@ -87,6 +72,7 @@ class _CreatePostState extends State<CreatePost> {
     }
     // Obtain assets using the path entity.
     final List<AssetPathEntity> paths = await PhotoManager.getAssetPathList(
+      hasAll: true,
       onlyAll: true,
       filterOption: _filterOptionGroup,
     );
@@ -261,6 +247,7 @@ class _CreatePostState extends State<CreatePost> {
               children: [
                 controllerBar(context),
                 Expanded(child: _buildBody(context))
+                //const Expanded(child: GridGallery())
               ],
             )),
           ],
