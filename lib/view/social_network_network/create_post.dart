@@ -3,17 +3,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hue_t/view/social_network_network/panel.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:hue_t/view/social_network_network/grid_gallery.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:hue_t/colors.dart' as colors;
-import 'package:photo_gallery/photo_gallery.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:video_player/video_player.dart';
-
-Medium? selectedImage;
+import 'image_item_widget.dart';
 
 class CreatePost extends StatefulWidget {
   const CreatePost({Key? key}) : super(key: key);
@@ -29,56 +27,145 @@ class _CreatePostState extends State<CreatePost> {
 
   List<File> imageFileList = [];
   List<String> imageList = [];
-  Directory directory = Directory('/storage/emulated/0/Pictures/');
+  Directory directory = Directory('/storage/emulated/0/Pictures');
   bool isScrolled = false;
   bool isMultiSelect = false;
-  List<Medium> selectedList = [];
   late AutoScrollController controller;
-  Album? selectedAlbum;
-  late List<Album> _albums;
   bool _loading = false;
   bool isFirstTime = true;
-  List<Medium>? _media;
   bool isLoading = true;
 
-  Future<void> initAsync() async {
-    if (await _promptPermissionSetting()) {
-      List<Album> albums =
-          await PhotoGallery.listAlbums(mediumType: MediumType.image);
-      setState(() {
-        _albums = albums;
-        _loading = false;
-        selectedAlbum = _albums.first;
-      });
+  final FilterOptionGroup _filterOptionGroup = FilterOptionGroup(
+    imageOption: const FilterOption(
+      sizeConstraint: SizeConstraint(ignoreSize: true),
+    ),
+  );
+  final int _sizePerPage = 50;
+
+  AssetPathEntity? _path;
+  List<AssetEntity>? _entities;
+  int _totalEntitiesCount = 0;
+
+  int _page = 0;
+  bool _isLoading = false;
+  bool _isLoadingMore = false;
+  bool _hasMoreToLoad = true;
+
+  Future<void> _requestAssets() async {
+    setState(() {
+      _isLoading = true;
+    });
+    // Request permissions.
+    final PermissionState ps = await PhotoManager.requestPermissionExtend();
+    if (!mounted) {
+      return;
     }
-    await initAsyncMedia();
+    // Further requests can be only proceed with authorized or limited.
+    if (!ps.hasAccess) {
+      setState(() {
+        _isLoading = false;
+      });
+      Fluttertoast.showToast(msg: 'Permission is not accessible.',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0);
+      return;
+    }
+    // Obtain assets using the path entity.
+    final List<AssetPathEntity> paths = await PhotoManager.getAssetPathList(
+      hasAll: true,
+      onlyAll: true,
+      filterOption: _filterOptionGroup,
+    );
+    if (!mounted) {
+      return;
+    }
+    // Return if not paths found.
+    if (paths.isEmpty) {
+      setState(() {
+        _isLoading = false;
+      });
+      Fluttertoast.showToast(msg: 'No paths found.',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 1,
+          textColor: Colors.white,
+          fontSize: 16.0);
+      return;
+    }
     setState(() {
-      _loading = false;
-      isLoading = false;
-      print("aaaaaaaaaaaaaaaaaa");
-      print(selectedAlbum!.name);
+      _path = paths.first;
     });
-
+    _totalEntitiesCount = await _path!.assetCountAsync;
+    final List<AssetEntity> entities = await _path!.getAssetListPaged(
+      page: 0,
+      size: _sizePerPage,
+    );
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _entities = entities;
+      _isLoading = false;
+      _hasMoreToLoad = _entities!.length < _totalEntitiesCount;
+    });
+  }
+  Future<void> _loadMoreAsset() async {
+    final List<AssetEntity> entities = await _path!.getAssetListPaged(
+      page: _page + 1,
+      size: _sizePerPage,
+    );
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _entities!.addAll(entities);
+      _page++;
+      _hasMoreToLoad = _entities!.length < _totalEntitiesCount;
+      _isLoadingMore = false;
+    });
   }
 
-  Future<void> initAsyncMedia() async {
-    print("bbbbbbbbbbbbbbbbbbba");
-    print(selectedAlbum!.name);
-    MediaPage mediaPage = await selectedAlbum!.listMedia();
-    print("ccccccccc");
-    setState(() {
-      _media = mediaPage.items;
-      selectedImage = _media!.first;
-    });
-  }
-
-  void initAsyncMediaAlbum(Album album) async {
-    MediaPage mediaPage = await album.listMedia();
-    setState(() {
-      _media = mediaPage.items;
-      isLoading = false;
-      selectedImage = _media!.first;
-    });
+  Widget _buildBody(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator.adaptive());
+    }
+    if (_path == null) {
+      return const Center(child: Text('Request paths first.'));
+    }
+    if (_entities?.isNotEmpty != true) {
+      return const Center(child: Text('No assets found on this device.'));
+    }
+    return GridView.custom(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+      ),
+      childrenDelegate: SliverChildBuilderDelegate(
+            (BuildContext context, int index) {
+          if (index == _entities!.length - 8 &&
+              !_isLoadingMore &&
+              _hasMoreToLoad) {
+            _loadMoreAsset();
+          }
+          final AssetEntity entity = _entities![index];
+          return ImageItemWidget(
+            key: ValueKey<int>(index),
+            entity: entity,
+            option: const ThumbnailOption(size: ThumbnailSize.square(200)),
+          );
+        },
+        childCount: _entities!.length,
+        findChildIndexCallback: (Key key) {
+          // Re-use elements.
+          if (key is ValueKey<int>) {
+            return key.value;
+          }
+          return null;
+        },
+      ),
+    );
   }
 
   Future<bool> _promptPermissionSetting() async {
@@ -98,9 +185,7 @@ class _CreatePostState extends State<CreatePost> {
         viewportBoundaryGetter: () =>
             Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
         axis: Axis.vertical);
-    requestStoragePermission();
-    initAsync();
-    //initAsyncMedia();
+    _requestAssets();
   }
 
   final panelController = PanelController();
@@ -108,86 +193,44 @@ class _CreatePostState extends State<CreatePost> {
 
   @override
   Widget build(BuildContext context) {
-    return isLoading
-        ? Center(
-            child: LoadingAnimationWidget.staggeredDotsWave(
-                color: colors.primaryColor, size: 50),
-          )
-        : Scaffold(
-            body: SafeArea(
-              child: SlidingUpPanel(
-                borderRadius: BorderRadius.circular(20),
-                color: colors.SN_panelBackgroundColor,
-                defaultPanelState: PanelState.CLOSED,
-                controller: panelController,
-                minHeight: 0,
-                snapPoint: 0.5,
-                maxHeight: MediaQuery.of(context).size.height,
-                backdropEnabled: true,
-                backdropColor: Colors.black54,
-                panelBuilder: (controller) {
-                  return Panel(
-                    controller: panelScrollController,
-                    panelController: panelController,
-                    albums: _albums,
-                    callback: (value) {
-                      setState(() {
-                        selectedAlbum = value;
-                        initAsyncMedia();
-                      });
-                    },
-                  );
-                },
-                body: Scaffold(
-                  appBar: AppBar(
-                    iconTheme: const IconThemeData(color: Colors.black),
-                    title: Text(
-                      "New post",
-                      style: GoogleFonts.readexPro(color: Colors.black),
-                    ),
-                    backgroundColor: colors.backgroundColor,
-                    elevation: 0,
-                  ),
-                  body: Column(
-                    children: [
-                      SizedBox(
-                        //height: MediaQuery.of(context).size.width,
-                        width: MediaQuery.of(context).size.width,
-                        child: AspectRatio(
-                          aspectRatio: 1,
-                          child: Container(
-                            /*decoration: BoxDecoration(
-                          image: DecorationImage(
-                              image: FileImage(File(selectedImage)),
-                              fit: BoxFit.fitWidth)),*/
-                            child: selectedImage != null
-                                ? FadeInImage(
-                                    fit: BoxFit.cover,
-                                    placeholder: MemoryImage(kTransparentImage),
-                                    image: PhotoProvider(
-                                      mediumId: selectedImage!.id,
-                                    ),
-                                  )
-                                : Container(),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                          child: Column(
-                        children: [
-                          controllerBar(context),
-                          //Expanded(child: imagesGridView(context, imageList))
-                          Expanded(
-                              //child: AlbumPage(selectedAlbum!, key: UniqueKey(), isMultiSelect: isMultiSelect))
-                              child: imagesGirdView(context)),
-                        ],
-                      )),
-                    ],
-                  ),
+    return Scaffold(
+      appBar: AppBar(
+        iconTheme: const IconThemeData(color: Colors.black),
+        title: Text(
+          "New post",
+          style: GoogleFonts.readexPro(color: Colors.black),
+        ),
+        backgroundColor: colors.backgroundColor,
+        elevation: 0,
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            SizedBox(
+              //height: MediaQuery.of(context).size.width,
+              width: MediaQuery.of(context).size.width,
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: Container(
+                  /*decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: FileImage(File(selectedImage)),
+                          fit: BoxFit.fitWidth)),*/
                 ),
               ),
             ),
-          );
+            Expanded(
+                child: Column(
+              children: [
+                controllerBar(context),
+                Expanded(child: _buildBody(context))
+                //const Expanded(child: GridGallery())
+              ],
+            )),
+          ],
+        ),
+      ),
+    );
   }
 
 /*  Widget imagesGridView(BuildContext context, List<String> imageList) {
@@ -309,7 +352,7 @@ class _CreatePostState extends State<CreatePost> {
               child: RichText(
                 text: TextSpan(children: [
                   TextSpan(
-                      text: selectedAlbum!.name,
+                      text: "abc",
                       style:
                           const TextStyle(color: Colors.black, fontSize: 20)),
                   const WidgetSpan(
@@ -333,13 +376,7 @@ class _CreatePostState extends State<CreatePost> {
                     splashColor: Colors.transparent,
                     constraints: const BoxConstraints(),
                     onPressed: () {
-                      setState(() {
-                        isMultiSelect = !isMultiSelect;
-                        if (isMultiSelect) {
-                          selectedList.clear();
-                          //selectedList.add(selectedImage);
-                        }
-                      });
+                      setState(() {});
                     },
                     icon: const Icon(
                       Icons.layers_outlined,
@@ -358,7 +395,9 @@ class _CreatePostState extends State<CreatePost> {
                     hoverColor: Colors.transparent,
                     splashColor: Colors.transparent,
                     constraints: const BoxConstraints(),
-                    onPressed: () {},
+                    onPressed: () {
+                      _requestAssets();
+                    },
                     icon: const Icon(
                       Icons.camera_alt_outlined,
                       color: Colors.white,
@@ -371,7 +410,7 @@ class _CreatePostState extends State<CreatePost> {
     );
   }
 
-  Widget imagesGirdView(BuildContext context) {
+/*  Widget imagesGirdView(BuildContext context) {
     return GridView.builder(
         scrollDirection: Axis.vertical,
         controller: controller,
@@ -469,112 +508,6 @@ class _CreatePostState extends State<CreatePost> {
               )
           );
         });
-  }
+  }*/
 }
 
-class AlbumPage extends StatefulWidget {
-  final Album album;
-  final bool isMultiSelect;
-
-  //final Function selectedImage;
-  const AlbumPage(this.album, {Key? key, required this.isMultiSelect})
-      : super(key: key);
-
-  @override
-  State<StatefulWidget> createState() => AlbumPageState();
-}
-
-class AlbumPageState extends State<AlbumPage> {
-  List<Medium>? _media;
-
-  @override
-  void initState() {
-    super.initState();
-    initAsync();
-  }
-
-  void initAsync() async {
-    MediaPage mediaPage = await widget.album.listMedia();
-    setState(() {
-      _media = mediaPage.items;
-    });
-  }
-
-  List<Medium> selectedList = [];
-
-  @override
-  Widget build(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 4,
-      mainAxisSpacing: 1.0,
-      crossAxisSpacing: 1.0,
-      children: <Widget>[
-        ...?_media?.map(
-          (medium) => GestureDetector(
-            onTap: () {
-              setState(() {
-                selectedImage = medium;
-                if (!selectedList.contains(medium)) {
-                  selectedList.add(medium);
-                } else {
-                  selectedList.remove(medium);
-                }
-              });
-            },
-            child: widget.isMultiSelect == false
-                ? Container(
-                    color: Colors.grey[300],
-                    child: FadeInImage(
-                      fit: BoxFit.cover,
-                      placeholder: MemoryImage(kTransparentImage),
-                      image: ThumbnailProvider(
-                        mediumId: medium.id,
-                        mediumType: medium.mediumType,
-                        highQuality: true,
-                      ),
-                    ),
-                  )
-                : Stack(
-                    children: [
-                      Container(
-                        width: double.infinity,
-                        height: double.infinity,
-                        color: Colors.grey[300],
-                        child: FadeInImage(
-                          fit: BoxFit.cover,
-                          placeholder: MemoryImage(kTransparentImage),
-                          image: ThumbnailProvider(
-                            mediumId: medium.id,
-                            mediumType: medium.mediumType,
-                            highQuality: true,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 5,
-                        right: 5,
-                        child: Container(
-                          decoration: BoxDecoration(
-                              border: Border.all(color: Colors.white, width: 1),
-                              shape: BoxShape.circle,
-                              color: widget.isMultiSelect &&
-                                      selectedList.contains(medium)
-                                  ? colors.primaryColor
-                                  : Colors.white54),
-                          height: 20,
-                          width: 20,
-                          child: Center(
-                            child: Text(selectedList.contains(medium)
-                                ? "${selectedList.indexOf(medium) + 1}"
-                                : ""),
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-          ),
-        ),
-      ],
-    );
-  }
-}
