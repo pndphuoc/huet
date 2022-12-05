@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:hue_t/colors.dart' as colors;
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class CreatePost extends StatefulWidget {
   const CreatePost({Key? key}) : super(key: key);
@@ -16,6 +17,9 @@ class _CreatePostState extends State<CreatePost> {
   Future<void> requestStoragePermission() async {
     final status = await Permission.storage.request();
   }
+
+  ScrollController _singChildController = ScrollController();
+  ScrollController _gridViewController = ScrollController();
 
   late String selectedImage;
   late List<String> imageList;
@@ -83,7 +87,7 @@ class _CreatePostState extends State<CreatePost> {
               ),
             ),
             Expanded(
-                  child: imagesGridView(context, imageList)),
+                child: imagesGridView(context, imageList)),
 
           ],
         ),
@@ -92,30 +96,35 @@ class _CreatePostState extends State<CreatePost> {
   }
 
   Widget imagesGridView(BuildContext context, List<String> imageList) {
-    return GridView.builder(
-        cacheExtent: 9999,
-        itemCount: imageList.length,
-        controller: _controller,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3, childAspectRatio: 1),
-        itemBuilder: (context, index) {
-          return Opacity(
-              opacity: selectedImage == imageList[index] ? 0.5 : 1,
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    selectedImage = imageList[index];
-                  });
-                },
-                child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(width: 1, color: Colors.black),
-                    ),
-                    child: Image(
-                      image: ResizeImage(FileImage(File(imageList[index])), width: 175),
-                      fit: BoxFit.cover,
-                    )),
-              ));
-        });
+    return GestureDetector(
+      onVerticalDragUpdate: (details) {
+        print("phuoc");
+      },
+      child: GridView.builder(
+          cacheExtent: 9999,
+          itemCount: imageList.length,
+          controller: _controller,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3, childAspectRatio: 1),
+          itemBuilder: (context, index) {
+            return Opacity(
+                opacity: selectedImage == imageList[index] ? 0.5 : 1,
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      selectedImage = imageList[index];
+                    });
+                  },
+                  child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(width: 1, color: Colors.black),
+                      ),
+                      child: Image(
+                        image: ResizeImage(FileImage(File(imageList[index])), width: 175),
+                        fit: BoxFit.cover,
+                      )),
+                ));
+          }),
+    );
   }
 }
