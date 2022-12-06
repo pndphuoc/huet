@@ -1,16 +1,13 @@
 import 'dart:io';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hue_t/view/social_network_network/panel.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:hue_t/colors.dart' as colors;
 import 'package:photo_manager/photo_manager.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'package:transparent_image/transparent_image.dart';
 import 'package:video_player/video_player.dart';
 import 'image_item_widget.dart';
 
@@ -21,7 +18,7 @@ class CreatePost extends StatefulWidget {
   State<CreatePost> createState() => _CreatePostState();
 }
 
-class _CreatePostState extends State<CreatePost> {
+class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
   Future<void> requestStoragePermission() async {
     await Permission.storage.request();
   }
@@ -46,13 +43,15 @@ class _CreatePostState extends State<CreatePost> {
   int _totalEntitiesCount = 0;
   AssetPathEntity? selectedAlbum;
   List<AssetPathEntity> albumList = [];
-  AssetEntity? selectedImage;
+  AssetEntity? selectedMedia;
   List<AssetEntity> selectedList = [];
 
   int _page = 0;
   bool _isLoading = false;
   bool _isLoadingMore = false;
   bool _hasMoreToLoad = true;
+  late AnimationController animation;
+  late Animation<double> _fadeInFadeOut;
 
   Future<void> _requestAssets() async {
     setState(() {
@@ -111,16 +110,17 @@ class _CreatePostState extends State<CreatePost> {
     if (!mounted) {
       return;
     }
-    setState(() {
+    setState(() async {
       selectedAlbum = paths.first;
-      selectedImage = entities.first;
+      selectedMedia = entities.first;
+      await loadVideo(selectedMedia!);
       _entities = entities;
       _isLoading = false;
       _hasMoreToLoad = _entities!.length < _totalEntitiesCount;
     });
   }
 
-  Future<void> loadPhotosOfAlbum(AssetPathEntity path) async {
+  Future<void> loadMediasOfAlbum(AssetPathEntity path) async {
     videoController!.pause();
     final List<AssetEntity> entities = await path.getAssetListPaged(
       page: 0,
@@ -130,8 +130,8 @@ class _CreatePostState extends State<CreatePost> {
     setState(() {
       _entities = entities;
       _hasMoreToLoad = _entities!.length < _totalEntitiesCount;
-      selectedImage = entities.first;
-      loadVideo(selectedImage!);
+      selectedMedia = entities.first;
+      loadVideo(selectedMedia!);
     });
   }
 
@@ -168,6 +168,14 @@ class _CreatePostState extends State<CreatePost> {
         viewportBoundaryGetter: () =>
             Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
         axis: Axis.vertical);
+    animation = AnimationController(vsync: this, duration: const Duration(milliseconds: 500),);
+    _fadeInFadeOut = Tween<double>(begin: 0.5, end: 1).animate(animation);
+
+/*    animation.addStatusListener((status){
+        animation.forward();
+    });*/
+    animation.forward();
+
     _requestAssets();
   }
 
@@ -197,37 +205,9 @@ class _CreatePostState extends State<CreatePost> {
               body: SafeArea(
                 child: Column(
                   children: [
-                    SizedBox(
-                      //height: MediaQuery.of(context).size.width,
-                      width: MediaQuery.of(context).size.width,
-                      child: AspectRatio(
-                        aspectRatio: 1,
-                        child: (selectedImage?.type == AssetType.video)
-                            ? Center(
-                                child: videoController!.value.isInitialized
-                                    ? AspectRatio(
-                                        aspectRatio:
-                                            videoController!.value.aspectRatio,
-                                        child: VideoPlayer(videoController!),
-                                      )
-                                    : Container(),
-                              )
-                            : ImageItemWidget(
-                                entity: selectedImage!,
-                                option: const ThumbnailOption(
-                                  size: ThumbnailSize(1080, 1080),
-                                ),
-                              ),
-                      ),
-                    ),
-                    Expanded(
-                        child: Column(
-                      children: [
-                        controllerBar(context),
-                        Expanded(child: imagesGrid(context))
-                        //const Expanded(child: GridGallery())
-                      ],
-                    )),
+                    displayedMedia(context),
+                    controllerBar(context),
+                    Expanded(child: mediasGrid(context))
                   ],
                 ),
               ),
@@ -236,7 +216,9 @@ class _CreatePostState extends State<CreatePost> {
   }
 
   Future<void> loadVideo(AssetEntity entity) async {
-    if (entity.type == AssetType.video) {
+    if (entity.type != AssetType.video) {
+      return;
+    } else {
       File? file = await entity.file;
       videoController = VideoPlayerController.file(file!)
         ..initialize().then((_) {
@@ -250,7 +232,35 @@ class _CreatePostState extends State<CreatePost> {
     }
   }
 
-  Widget imagesGrid(BuildContext context) {
+  Widget displayedMedia(BuildContext context) {
+    return FadeTransition(
+      opacity:  _fadeInFadeOut,
+      child: SizedBox(
+        //height: MediaQuery.of(context).size.width,
+        width: MediaQuery.of(context).size.width,
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: (selectedMedia?.type == AssetType.video)
+              ? Center(
+            child: videoController!.value.isInitialized
+                ? AspectRatio(
+              aspectRatio:
+              videoController!.value.aspectRatio,
+              child: VideoPlayer(videoController!),
+            )
+                : Container(),
+          )
+              : ImageItemWidget(
+            entity: selectedMedia!,
+            option: const ThumbnailOption(
+              size: ThumbnailSize(1080, 1080),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  Widget mediasGrid(BuildContext context) {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator.adaptive());
     }
@@ -284,35 +294,22 @@ class _CreatePostState extends State<CreatePost> {
                 //Chuyến sang chế độ MultiSelect nếu =false khi nhấn giữ
                 if (isMultiSelect == false) {
                   selectedList.clear();
-                  selectedImage = entity;
+                  selectedMedia = entity;
                   selectedList.add(entity);
                   isMultiSelect = true;
                 }
               });
             },
             onTap: () async {
-              //Nếu file được chọn là Video
-             /* if (entity.type == AssetType.video) {
-                File? file = await entity.file;
-                videoController = VideoPlayerController.file(file!)
-                  ..initialize().then((_) {
-                    // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-                    setState(() {
-                      //Tự động phát video
-                      videoController.play();
-                    });
-                  });
-              }*/
+              if (videoController != null) {
+                videoController?.dispose();
+              }
               await loadVideo(entity);
               //nếu chọn mục khác video sẽ dừng
 
               //Thực hiện các thao tác khác
               setState(() {
-                if(videoController != null)
-                  {
-                    videoController!.pause();
-                  }
-                selectedImage = entity;
+                selectedMedia = entity;
                 if (isMultiSelect) {
                   if (selectedList.contains(entity)) {
                     selectedList.remove(entity);
@@ -331,8 +328,7 @@ class _CreatePostState extends State<CreatePost> {
                       selectedList.add(entity);
                     }
                   }
-                }
-                else {
+                } else {
                   controller.scrollToIndex(index,
                       preferPosition: AutoScrollPosition.begin);
                 }
@@ -340,7 +336,7 @@ class _CreatePostState extends State<CreatePost> {
             },
             child: isMultiSelect == false
                 ? Opacity(
-                    opacity: entity == selectedImage ? 0.5 : 1,
+                    opacity: entity == selectedMedia ? 0.5 : 1,
                     child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(width: 1, color: Colors.black),
@@ -356,7 +352,7 @@ class _CreatePostState extends State<CreatePost> {
                 : Stack(
                     children: [
                       Opacity(
-                          opacity: selectedImage == entity ? 0.5 : 1,
+                          opacity: selectedMedia == entity ? 0.5 : 1,
                           child: Container(
                               height: double.infinity,
                               width: double.infinity,
@@ -455,7 +451,7 @@ class _CreatePostState extends State<CreatePost> {
                       setState(() {
                         selectedList.clear();
                         isMultiSelect = !isMultiSelect;
-                        selectedList.add(selectedImage!);
+                        selectedList.add(selectedMedia!);
                       });
                     },
                     icon: const Icon(
@@ -520,7 +516,7 @@ class _CreatePostState extends State<CreatePost> {
                     panelController.close();
                     setState(() {
                       selectedAlbum = e;
-                      loadPhotosOfAlbum(e);
+                      loadMediasOfAlbum(e);
                     });
                   },
                   child: Container(
