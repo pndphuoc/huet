@@ -32,6 +32,7 @@ dependencies:
   im_animations: ^0.1.2
   flutter_snake_navigationbar:
   material_design_icons_flutter: ^6.0.7096
+  flutter_switch: ^0.3.2
   map_launcher: ^2.4.0
   google_maps_webservice: ^0.0.19
   flutter_polyline_points:
@@ -95,6 +96,7 @@ flutter:
   assets:
     - assets/
     - assets/images/
+    - assets/images/profileuser/
     - assets/images/hotel/
     - assets/images/socialNetwork/
     - assets/images/foodstore/

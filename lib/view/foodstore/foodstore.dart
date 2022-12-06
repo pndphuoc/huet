@@ -7,15 +7,19 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/view/foodstore/foodstoredetail.dart';
+import 'package:hue_t/view/foodstore/search_foodstore.dart';
 import 'package:hue_t/view/navigationbar/navigationbar.dart' as NavigationBar;
 import 'package:hue_t/model/foodstore/restaurant.dart' as restaurant;
 import 'package:hue_t/colors.dart' as color;
+import 'package:hue_t/api/foodstore/food_store_api.dart' as data;
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class Category {
+  String? id;
   String? name;
   String? image;
   Color? color;
-  Category({this.name, this.image, this.color});
+  Category({this.id, this.name, this.image, this.color});
 }
 
 class Foodstore extends StatefulWidget {
@@ -27,6 +31,7 @@ class Foodstore extends StatefulWidget {
 
 class _FoodstoreState extends State<Foodstore> {
   var popular1 = true;
+  bool isloading = true;
   List imageslide = [
     "assets/images/foodstore/food3.jpg",
     "assets/images/foodstore/food1.jpg",
@@ -36,61 +41,80 @@ class _FoodstoreState extends State<Foodstore> {
 
   List<Category> categories = [
     Category(
+        id: '3',
         name: "Coffee",
         image: "assets/images/foodstore/category/1.png",
         color: Color.fromARGB(255, 227, 245, 223)),
     Category(
+        id: '4',
         name: "Specialty food",
         image: "assets/images/foodstore/category/2.png",
         color: Color.fromARGB(255, 252, 225, 232)),
     Category(
+        id: '1',
         name: "Popular restaurant",
         image: "assets/images/foodstore/category/4.png",
         color: Color.fromARGB(255, 225, 233, 248)),
     Category(
+        id: '2',
         name: "Luxury restaurant",
         image: "assets/images/foodstore/category/3.png",
         color: Color.fromARGB(255, 250, 247, 220)),
   ];
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      restaurant.sort();
-    });
-  }
+  // @override
+  // void initState() {
+  //   // TODO: implement initState
+  //   super.initState();
+  //   WidgetsBinding.instance.addPostFrameCallback((_) async {
+  //
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
+    if (isloading) {
+      (() async {
+        await data.gettop();
+        await data.sort();
+
+        setState(() {
+          isloading = false;
+        });
+      })();
+    }
     return Scaffold(
-      body: Container(
-        height: double.maxFinite,
-        color: color.backgroundColor,
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: Column(
+      body: isloading
+          ? Center(
+              child: LoadingAnimationWidget.staggeredDotsWave(
+                  color: color.primaryColor, size: 50),
+            )
+          : Container(
+              height: double.maxFinite,
+              color: color.backgroundColor,
+              child: Stack(
                 children: [
-                  header(context),
-                  Padding(
-                    padding:
-                        const EdgeInsets.only(left: 20, right: 10, top: 15),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
                     child: Column(
                       children: [
-                        category(context),
-                        nearby(context),
+                        header(context),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              left: 20, right: 10, top: 15),
+                          child: Column(
+                            children: [
+                              category(context),
+                              nearby(context),
+                            ],
+                          ),
+                        ),
+                        popular(context),
                       ],
                     ),
                   ),
-                  popular(context),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -157,42 +181,51 @@ class _FoodstoreState extends State<Foodstore> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text("Category",
-                  style: GoogleFonts.poppins(
-                      fontSize: 18, fontWeight: FontWeight.bold)),
+                  style: GoogleFonts.readexPro(
+                      fontSize: 24, fontWeight: FontWeight.bold)),
             ],
           ),
           Container(
             margin: EdgeInsets.only(top: 25),
             width: MediaQuery.of(context).size.width,
-            height: 75,
+            height: 80,
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: [
-                ...categories.map((e) => Container(
-                      margin: EdgeInsets.only(right: 15),
-                      width: 120,
-                      decoration: BoxDecoration(
-                          color: e.color as Color,
-                          borderRadius: BorderRadius.circular(15)),
-                      child: Stack(
-                        children: [
-                          Positioned(
-                              top: 10,
-                              left: 10,
-                              child: Text(e.name.toString(),
-                                  style: GoogleFonts.poppins(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600))),
-                          Positioned(
-                              right: 0,
-                              bottom: 0,
-                              child: Image.asset(
-                                e.image.toString(),
-                                width: 60,
-                                height: 60,
-                                fit: BoxFit.contain,
-                              ))
-                        ],
+                ...categories.map((e) => GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SearchFoodStore(
+                                    searchValue: e.id.toString())));
+                      },
+                      child: Container(
+                        margin: EdgeInsets.only(right: 15),
+                        width: 170,
+                        decoration: BoxDecoration(
+                            color: e.color as Color,
+                            borderRadius: BorderRadius.circular(15)),
+                        child: Stack(
+                          children: [
+                            Positioned(
+                                top: 10,
+                                left: 10,
+                                child: Text(e.name.toString(),
+                                    style: GoogleFonts.readexPro(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600))),
+                            Positioned(
+                                right: 0,
+                                bottom: 0,
+                                child: Image.asset(
+                                  e.image.toString(),
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.contain,
+                                ))
+                          ],
+                        ),
                       ),
                     ))
               ],
@@ -212,11 +245,11 @@ class _FoodstoreState extends State<Foodstore> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text("Nearby Store",
-                  style: GoogleFonts.poppins(
-                      fontSize: 18, fontWeight: FontWeight.bold)),
+                  style: GoogleFonts.readexPro(
+                      fontSize: 24, fontWeight: FontWeight.bold)),
               Text("See All",
-                  style: GoogleFonts.poppins(
-                      fontSize: 14,
+                  style: GoogleFonts.readexPro(
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: Color.fromARGB(255, 104, 104, 172)))
             ],
@@ -228,8 +261,8 @@ class _FoodstoreState extends State<Foodstore> {
             Icon(Icons.location_on_outlined,
                 size: 20, color: Color.fromARGB(255, 102, 102, 102)),
             Text("Your Location: 102 Tuy Ly Vuong, TP Hue",
-                style: GoogleFonts.poppins(
-                    fontSize: 11,
+                style: GoogleFonts.readexPro(
+                    fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: Color.fromARGB(255, 87, 86, 86)))
           ]),
@@ -241,150 +274,166 @@ class _FoodstoreState extends State<Foodstore> {
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: [
-                ...restaurant.listrestaurant.map((e) => Container(
-                      margin: EdgeInsets.only(right: 20, bottom: 10),
-                      width: 180,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.2),
-                            spreadRadius: 1,
-                            blurRadius: 5,
-                            offset: Offset(3, 3), // changes position of shadow
-                          ),
-                        ],
-                      ),
-                      child: Stack(
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ClipRRect(
-                                  borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(15),
-                                      topRight: Radius.circular(15)),
-                                  child: Image.asset(
-                                    e.image![0].toString(),
-                                    width: double.infinity,
-                                    height: 140,
-                                    fit: BoxFit.cover,
-                                  )),
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(10.0),
-                                  child: Column(
+                ...data.list.map((e) => GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    FoodstoreDetail(item: e)));
+                      },
+                      child: Container(
+                        margin: EdgeInsets.only(right: 20, bottom: 10),
+                        width: 180,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              spreadRadius: 1,
+                              blurRadius: 5,
+                              offset:
+                                  Offset(3, 3), // changes position of shadow
+                            ),
+                          ],
+                        ),
+                        child: Stack(
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                ClipRRect(
+                                    borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(15),
+                                        topRight: Radius.circular(15)),
+                                    child: Image.network(
+                                      e.image.toString(),
+                                      width: double.infinity,
+                                      height: 140,
+                                      fit: BoxFit.cover,
+                                    )),
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(e.title.toString(),
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 2,
+                                            style: GoogleFonts.readexPro(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600)),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text("Opening",
+                                                style: GoogleFonts.readexPro(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Colors.lightGreen)),
+                                            SizedBox(
+                                              height: 5,
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons
+                                                          .location_on_outlined,
+                                                      color: Color.fromARGB(
+                                                          255, 247, 95, 95),
+                                                      size: 14,
+                                                    ),
+                                                    Text("0.3km",
+                                                        style: GoogleFonts
+                                                            .readexPro(
+                                                          fontSize: 13,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                        )),
+                                                  ],
+                                                ),
+                                                Text(
+                                                  "|",
+                                                  style: TextStyle(
+                                                      fontSize: 20,
+                                                      color: Colors.grey
+                                                          .withOpacity(0.6)),
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Icon(
+                                                      Icons.person_pin_outlined,
+                                                      size: 15,
+                                                    ),
+                                                    SizedBox(
+                                                      width: 5,
+                                                    ),
+                                                    Text(e.checkin.toString(),
+                                                        style: GoogleFonts
+                                                            .readexPro(
+                                                          fontSize: 13,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                        ))
+                                                  ],
+                                                )
+                                              ],
+                                            )
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                            Positioned(
+                                top: 10,
+                                left: 10,
+                                child: Container(
+                                  width: 50,
+                                  height: 30,
+                                  decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.4),
+                                      borderRadius: BorderRadius.circular(5)),
+                                  child: Row(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                        CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Text(e.title.toString(),
-                                          style: GoogleFonts.poppins(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600)),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text("Opening",
-                                              style: GoogleFonts.poppins(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: Colors.lightGreen)),
-                                          SizedBox(
-                                            height: 5,
-                                          ),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Icon(
-                                                    Icons.location_on_outlined,
-                                                    color: Color.fromARGB(
-                                                        255, 247, 95, 95),
-                                                    size: 14,
-                                                  ),
-                                                  Text("0.3km",
-                                                      style:
-                                                          GoogleFonts.poppins(
-                                                        fontSize: 11,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                      )),
-                                                ],
-                                              ),
-                                              Text(
-                                                "|",
-                                                style: TextStyle(
-                                                    fontSize: 18,
-                                                    color: Colors.grey
-                                                        .withOpacity(0.6)),
-                                              ),
-                                              Row(
-                                                children: [
-                                                  Icon(
-                                                    Icons.person_pin_outlined,
-                                                    size: 15,
-                                                  ),
-                                                  SizedBox(
-                                                    width: 5,
-                                                  ),
-                                                  Text(e.checkin.toString(),
-                                                      style:
-                                                          GoogleFonts.poppins(
-                                                        fontSize: 11,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                      ))
-                                                ],
-                                              )
-                                            ],
-                                          )
-                                        ],
-                                      )
+                                      Icon(
+                                        Icons.star,
+                                        color: Color.fromARGB(255, 255, 177, 59)
+                                            .withOpacity(0.8),
+                                        size: 15,
+                                      ),
+                                      SizedBox(
+                                        width: 3,
+                                      ),
+                                      Text(
+                                        (e.rating! - 5).toStringAsFixed(1),
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            color:
+                                                Colors.white.withOpacity(0.9),
+                                            fontSize: 12),
+                                      ),
                                     ],
                                   ),
-                                ),
-                              )
-                            ],
-                          ),
-                          Positioned(
-                              top: 10,
-                              left: 10,
-                              child: Container(
-                                width: 50,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.4),
-                                    borderRadius: BorderRadius.circular(5)),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.star,
-                                      color: Color.fromARGB(255, 255, 177, 59)
-                                          .withOpacity(0.8),
-                                      size: 15,
-                                    ),
-                                    SizedBox(
-                                      width: 3,
-                                    ),
-                                    Text(
-                                      e.rating.toString(),
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white.withOpacity(0.9),
-                                          fontSize: 12),
-                                    ),
-                                  ],
-                                ),
-                              ))
-                        ],
+                                ))
+                          ],
+                        ),
                       ),
                     ))
               ],
@@ -417,8 +466,8 @@ class _FoodstoreState extends State<Foodstore> {
                       decoration: BoxDecoration(),
                       child: Center(
                         child: Text("Hot",
-                            style: GoogleFonts.poppins(
-                                fontSize: 15,
+                            style: GoogleFonts.readexPro(
+                                fontSize: 17,
                                 fontWeight: FontWeight.w600,
                                 color: popular1
                                     ? Color.fromARGB(255, 104, 104, 172)
@@ -438,8 +487,8 @@ class _FoodstoreState extends State<Foodstore> {
                       decoration: BoxDecoration(),
                       child: Center(
                         child: Text("Rating",
-                            style: GoogleFonts.poppins(
-                                fontSize: 15,
+                            style: GoogleFonts.readexPro(
+                                fontSize: 17,
                                 fontWeight: FontWeight.w600,
                                 color: !popular1
                                     ? Color.fromARGB(255, 104, 104, 172)
@@ -468,16 +517,15 @@ class _FoodstoreState extends State<Foodstore> {
           ),
           popular1
               ? SingleChildScrollView(
-                  /*width: MediaQuery.of(context).size.width,
-                  height: 130 * (restaurant.listrestaurant.length as double),*/
                   child: Column(
                     children: [
-                      ...restaurant.listrestaurant.map((e) => GestureDetector(
+                      ...data.list.map((e) => GestureDetector(
                             onTap: () {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => FoodstoreDetail()));
+                                      builder: (context) =>
+                                          FoodstoreDetail(item: e)));
                             },
                             child: Container(
                               margin: EdgeInsets.only(bottom: 10),
@@ -490,7 +538,7 @@ class _FoodstoreState extends State<Foodstore> {
                                   children: [
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(5),
-                                      child: Image.asset(e.image![0].toString(),
+                                      child: Image.network(e.image.toString(),
                                           height: double.infinity,
                                           width: 90,
                                           fit: BoxFit.cover),
@@ -498,14 +546,16 @@ class _FoodstoreState extends State<Foodstore> {
                                     SizedBox(
                                       width: 15,
                                     ),
-                                    Container(
+                                    Expanded(
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(e.title.toString(),
-                                              style: GoogleFonts.poppins(
-                                                fontSize: 15,
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 2,
+                                              style: GoogleFonts.readexPro(
+                                                fontSize: 17,
                                                 fontWeight: FontWeight.w600,
                                               )),
                                           SizedBox(
@@ -525,10 +575,12 @@ class _FoodstoreState extends State<Foodstore> {
                                                   SizedBox(
                                                     width: 3,
                                                   ),
-                                                  Text(e.rating.toString(),
+                                                  Text(
+                                                      (e.rating! - 5)
+                                                          .toStringAsFixed(1),
                                                       style:
-                                                          GoogleFonts.poppins(
-                                                              fontSize: 13,
+                                                          GoogleFonts.readexPro(
+                                                              fontSize: 15,
                                                               fontWeight:
                                                                   FontWeight
                                                                       .w600,
@@ -542,7 +594,7 @@ class _FoodstoreState extends State<Foodstore> {
                                                 child: Text(
                                                   "|",
                                                   style: TextStyle(
-                                                      fontSize: 17,
+                                                      fontSize: 18,
                                                       color: Colors.grey),
                                                 ),
                                               ),
@@ -569,8 +621,8 @@ class _FoodstoreState extends State<Foodstore> {
                                                 ),
                                               ),
                                               Text("Closing",
-                                                  style: GoogleFonts.poppins(
-                                                      fontSize: 13,
+                                                  style: GoogleFonts.readexPro(
+                                                      fontSize: 15,
                                                       fontWeight:
                                                           FontWeight.w600,
                                                       color: Color.fromARGB(
@@ -595,8 +647,8 @@ class _FoodstoreState extends State<Foodstore> {
                                               Text(
                                                   "Checkin: " +
                                                       e.checkin.toString(),
-                                                  style: GoogleFonts.poppins(
-                                                      fontSize: 14,
+                                                  style: GoogleFonts.readexPro(
+                                                      fontSize: 16,
                                                       fontWeight:
                                                           FontWeight.w600,
                                                       color: Color.fromARGB(
@@ -617,12 +669,13 @@ class _FoodstoreState extends State<Foodstore> {
               : SingleChildScrollView(
                   child: Column(
                     children: [
-                      ...restaurant.listrestaurant2.map((e) => GestureDetector(
+                      ...data.list2.map((e) => GestureDetector(
                             onTap: () {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => FoodstoreDetail()));
+                                      builder: (context) =>
+                                          FoodstoreDetail(item: e)));
                             },
                             child: Container(
                               margin: EdgeInsets.only(bottom: 10),
@@ -635,7 +688,7 @@ class _FoodstoreState extends State<Foodstore> {
                                   children: [
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(5),
-                                      child: Image.asset(e.image![0].toString(),
+                                      child: Image.network(e.image.toString(),
                                           height: double.infinity,
                                           width: 90,
                                           fit: BoxFit.cover),
@@ -643,14 +696,14 @@ class _FoodstoreState extends State<Foodstore> {
                                     SizedBox(
                                       width: 15,
                                     ),
-                                    Container(
+                                    Expanded(
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(e.title.toString(),
-                                              style: GoogleFonts.poppins(
-                                                fontSize: 15,
+                                              style: GoogleFonts.readexPro(
+                                                fontSize: 17,
                                                 fontWeight: FontWeight.w600,
                                               )),
                                           SizedBox(
@@ -670,10 +723,12 @@ class _FoodstoreState extends State<Foodstore> {
                                                   SizedBox(
                                                     width: 3,
                                                   ),
-                                                  Text(e.rating.toString(),
+                                                  Text(
+                                                      (e.rating! - 5)
+                                                          .toStringAsFixed(1),
                                                       style:
-                                                          GoogleFonts.poppins(
-                                                              fontSize: 13,
+                                                          GoogleFonts.readexPro(
+                                                              fontSize: 15,
                                                               fontWeight:
                                                                   FontWeight
                                                                       .w600,
@@ -714,8 +769,8 @@ class _FoodstoreState extends State<Foodstore> {
                                                 ),
                                               ),
                                               Text("Closing",
-                                                  style: GoogleFonts.poppins(
-                                                      fontSize: 13,
+                                                  style: GoogleFonts.readexPro(
+                                                      fontSize: 15,
                                                       fontWeight:
                                                           FontWeight.w600,
                                                       color: Color.fromARGB(
@@ -740,8 +795,8 @@ class _FoodstoreState extends State<Foodstore> {
                                               Text(
                                                   "Checkin: " +
                                                       e.checkin.toString(),
-                                                  style: GoogleFonts.poppins(
-                                                      fontSize: 14,
+                                                  style: GoogleFonts.readexPro(
+                                                      fontSize: 16,
                                                       fontWeight:
                                                           FontWeight.w600,
                                                       color: Color.fromARGB(
