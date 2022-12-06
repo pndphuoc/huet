@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:video_player/video_player.dart';
 
 class ImageItemWidget extends StatelessWidget {
   const ImageItemWidget({
@@ -21,7 +23,7 @@ class ImageItemWidget extends StatelessWidget {
     }
     return _buildImageWidget(context, entity, option);
   }
-
+  
   Widget _buildImageWidget(
       BuildContext context,
       AssetEntity entity,
@@ -38,7 +40,11 @@ class ImageItemWidget extends StatelessWidget {
             fit: BoxFit.cover,
           ),
         ),
-        PositionedDirectional(
+        (entity.type == AssetType.video) ? Positioned(
+            bottom: 0,
+            right: 0,
+            child: Text("${entity.videoDuration.inMinutes.toString()}:${(entity.videoDuration.inSeconds)>=10?entity.videoDuration.inSeconds.toString(): "0" + entity.videoDuration.inSeconds.toString()}", style: GoogleFonts.readexPro(color: Colors.white, fontSize: 15),)):Container()
+        /*PositionedDirectional(
           bottom: 4,
           start: 0,
           end: 0,
@@ -105,7 +111,7 @@ class ImageItemWidget extends StatelessWidget {
               ),
             ],
           ),
-        ),
+        ),*/
       ],
     );
   }
