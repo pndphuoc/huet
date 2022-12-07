@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:hue_t/colors.dart' as colors;
 import 'package:photo_manager/photo_manager.dart';
@@ -110,10 +111,10 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
     if (!mounted) {
       return;
     }
-    setState(() async {
+    setState(() {
       selectedAlbum = paths.first;
       selectedMedia = entities.first;
-      await loadVideo(selectedMedia!);
+      loadVideo(selectedMedia!);
       _entities = entities;
       _isLoading = false;
       _hasMoreToLoad = _entities!.length < _totalEntitiesCount;
@@ -121,7 +122,9 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
   }
 
   Future<void> loadMediasOfAlbum(AssetPathEntity path) async {
-    videoController!.pause();
+    if (videoController != null) {
+      videoController!.dispose();
+    }
     final List<AssetEntity> entities = await path.getAssetListPaged(
       page: 0,
       size: _sizePerPage,
@@ -168,7 +171,10 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
         viewportBoundaryGetter: () =>
             Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
         axis: Axis.vertical);
-    animation = AnimationController(vsync: this, duration: const Duration(milliseconds: 500),);
+    animation = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
     _fadeInFadeOut = Tween<double>(begin: 0.5, end: 1).animate(animation);
 
 /*    animation.addStatusListener((status){
@@ -177,6 +183,14 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
     animation.forward();
 
     _requestAssets();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    videoController!.dispose();
+    panelController.close();
+    panelScrollController.dispose();
   }
 
   @override
@@ -202,14 +216,12 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
               minHeight: 0,
               maxHeight: MediaQuery.of(context).size.height / 2,
               panel: panel(panelScrollController, panelController, albumList),
-              body: SafeArea(
-                child: Column(
-                  children: [
-                    displayedMedia(context),
-                    controllerBar(context),
-                    Expanded(child: mediasGrid(context))
-                  ],
-                ),
+              body: Column(
+                children: [
+                  displayedMedia(context),
+                  controllerBar(context),
+                  Expanded(child: mediasGrid(context))
+                ],
               ),
             ),
           );
@@ -234,32 +246,37 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
 
   Widget displayedMedia(BuildContext context) {
     return FadeTransition(
-      opacity:  _fadeInFadeOut,
+      opacity: _fadeInFadeOut,
       child: SizedBox(
         //height: MediaQuery.of(context).size.width,
         width: MediaQuery.of(context).size.width,
         child: AspectRatio(
           aspectRatio: 1,
           child: (selectedMedia?.type == AssetType.video)
-              ? Center(
-            child: videoController!.value.isInitialized
-                ? AspectRatio(
-              aspectRatio:
-              videoController!.value.aspectRatio,
-              child: VideoPlayer(videoController!),
-            )
-                : Container(),
-          )
+              ? videoController != null
+                  ? Center(
+                      child: videoController!.value.isInitialized
+                          ? AspectRatio(
+                              aspectRatio: videoController!.value.aspectRatio,
+                              child: VideoPlayer(videoController!),
+                            )
+                          : Container(),
+                    )
+                  : Center(
+                      child: LoadingAnimationWidget.discreteCircle(
+                          color: colors.primaryColor, size: 30),
+                    )
               : ImageItemWidget(
-            entity: selectedMedia!,
-            option: const ThumbnailOption(
-              size: ThumbnailSize(1080, 1080),
-            ),
-          ),
+                  entity: selectedMedia!,
+                  option: const ThumbnailOption(
+                    size: ThumbnailSize(1080, 1080),
+                  ),
+                ),
         ),
       ),
     );
   }
+
   Widget mediasGrid(BuildContext context) {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator.adaptive());
@@ -304,7 +321,7 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
               if (videoController != null) {
                 videoController?.dispose();
               }
-              await loadVideo(entity);
+              loadVideo(entity);
               //nếu chọn mục khác video sẽ dừng
 
               //Thực hiện các thao tác khác
