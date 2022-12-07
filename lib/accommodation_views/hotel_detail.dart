@@ -13,7 +13,7 @@ import '../animation/show_right.dart';
 import '../colors.dart' as colors;
 import '../model/reviewModel.dart';
 import 'package:map_launcher/map_launcher.dart' as map;
-import '../permission/get_user_location.dart' as user_location;
+import '../permission/get_user_location.dart' as userLocation;
 
 class HotelDetail extends StatefulWidget {
   const HotelDetail({Key? key, required this.model}) : super(key: key);
@@ -45,11 +45,11 @@ class _HotelDetailState extends State<HotelDetail> {
   // on below line we have created the list of markers
   final List<Marker> _markers = <Marker>[];
 
-
   //reviews data
   List<reviewModel> reviewsList = [
     reviewModel(
         id: 1,
+        userId: 1,
         rating: 5,
         review: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         images: [
@@ -58,11 +58,13 @@ class _HotelDetailState extends State<HotelDetail> {
         reviewDate: DateTime(2022, 11, 15, 12, 56)),
     reviewModel(
         id: 2,
+        userId: 1,
         rating: 4,
         review: "Normal",
         reviewDate: DateTime(2022, 11, 15, 12, 56)),
     reviewModel(
         id: 3,
+        userId: 1,
         rating: 1,
         review: "Too bad",
         reviewDate: DateTime(2022, 11, 15, 12, 56))
@@ -71,8 +73,7 @@ class _HotelDetailState extends State<HotelDetail> {
   @override
   void initState() {
     super.initState();
-    user_location.getUserCurrentLocation().then((value) async {
-
+    userLocation.getUserCurrentLocation().then((value) async {
       // marker added for hotels location
       _markers.add(Marker(
           markerId: const MarkerId("3"),
@@ -80,25 +81,29 @@ class _HotelDetailState extends State<HotelDetail> {
               widget.model.accommodationLocation!.longitude),
           infoWindow: const InfoWindow(title: "Hotel's Locations")));
 
-      double miny = (value.latitude <= widget.model.accommodationLocation!.latitude)
-          ? value.latitude
-          : widget.model.accommodationLocation!.latitude;
-      double minx = (value.longitude <= widget.model.accommodationLocation!.longitude)
-          ? value.longitude
-          : widget.model.accommodationLocation!.longitude;
-      double maxy = (value.latitude <= widget.model.accommodationLocation!.latitude)
-          ? widget.model.accommodationLocation!.latitude
-          : value.latitude;
-      double maxx = (value.longitude <= widget.model.accommodationLocation!.longitude)
-          ? widget.model.accommodationLocation!.longitude
-          : value.longitude;
+      double miny =
+          (value.latitude <= widget.model.accommodationLocation!.latitude)
+              ? value.latitude
+              : widget.model.accommodationLocation!.latitude;
+      double minx =
+          (value.longitude <= widget.model.accommodationLocation!.longitude)
+              ? value.longitude
+              : widget.model.accommodationLocation!.longitude;
+      double maxy =
+          (value.latitude <= widget.model.accommodationLocation!.latitude)
+              ? widget.model.accommodationLocation!.latitude
+              : value.latitude;
+      double maxx =
+          (value.longitude <= widget.model.accommodationLocation!.longitude)
+              ? widget.model.accommodationLocation!.longitude
+              : value.longitude;
 
       double southWestLatitude = miny;
       double southWestLongitude = minx;
 
       double northEastLatitude = maxy;
       double northEastLongitude = maxx;
-      setState(() { });
+      setState(() {});
       // specified current users location
       CameraPosition cameraPosition = CameraPosition(
         target: LatLng(value.latitude, value.longitude),
@@ -116,7 +121,7 @@ class _HotelDetailState extends State<HotelDetail> {
 
       Timer(const Duration(milliseconds: 1000), () async {
         controller.animateCamera(
-           CameraUpdate.newLatLngBounds(
+          CameraUpdate.newLatLngBounds(
               LatLngBounds(
                 northeast: LatLng(northEastLatitude, northEastLongitude),
                 southwest: LatLng(southWestLatitude, southWestLongitude),
@@ -124,14 +129,16 @@ class _HotelDetailState extends State<HotelDetail> {
               30),
         );
       });
-      setState(() { });
+      setState(() {});
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: colors.isDarkMode?colors.backgroundColorDarkMode:colors.hotelDetailBackgroundColor,
+      backgroundColor: colors.isDarkMode
+          ? colors.backgroundColorDarkMode
+          : colors.hotelDetailBackgroundColor,
       body: Stack(children: [
         SingleChildScrollView(
           child: Column(

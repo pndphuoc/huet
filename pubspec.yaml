@@ -32,6 +32,7 @@ dependencies:
   im_animations: ^0.1.2
   flutter_snake_navigationbar:
   material_design_icons_flutter: ^6.0.7096
+  flutter_switch: ^0.3.2
   map_launcher: ^2.4.0
   google_maps_webservice: ^0.0.19
   flutter_polyline_points:
@@ -45,7 +46,6 @@ dependencies:
   loading_animation_widget:
   implicitly_animated_reorderable_list: ^0.4.2
   syncfusion_flutter_datepicker: ^20.3.56
-
   sticky_headers: ^0.3.0
   flutter_sticky_header: ^0.6.4
   hidable: ^1.0.3
@@ -66,7 +66,6 @@ dependencies:
   photo_manager: ^2.5.1+1
   oktoast:
   video_player: ^2.4.8
-  image_gallery_saver: ^1.7.1
   image_cropper: ^3.0.1
   dio: ^4.0.6
   fluttertoast: ^8.1.1
@@ -97,6 +96,7 @@ flutter:
   assets:
     - assets/
     - assets/images/
+    - assets/images/profileuser/
     - assets/images/hotel/
     - assets/images/socialNetwork/
     - assets/images/foodstore/

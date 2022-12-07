@@ -4,6 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
 import 'package:hue_t/model/social_network/postModel.dart';
 import 'package:hue_t/view/social_network_network/post.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'create_post_2.dart';
+import 'simple_example_page.dart' as cp2;
 
 import 'create_post.dart';
 
@@ -23,7 +26,15 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
     Post(samplePost: samplePost),
     Post(samplePost: samplePost),
   ];
+  Future<void> requestStoragePermission() async {
+    await Permission.storage.request();
+  }
 
+  @override
+  void initState() {
+    super.initState();
+    requestStoragePermission();
+  }
   late NavigatorState _navigator;
   @override
   void didChangeDependencies() {
@@ -88,7 +99,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                   ),
                   ElevatedButton(onPressed: (){
                    Navigator.push(
-                        context, MaterialPageRoute(builder: (context) => CreatePost()));
+                        context, MaterialPageRoute(builder: (context) => const CreatePost()));
                   }, child: Icon(Icons.add_circle_outline, size: 20, color: Colors.black,),
                     style: ElevatedButton.styleFrom(
                       shape: CircleBorder(),

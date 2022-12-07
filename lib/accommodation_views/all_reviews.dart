@@ -16,6 +16,7 @@ class AllReviews extends StatefulWidget {
 List<reviewModel> reviewsList = [
   reviewModel(
       id: 1,
+      userId: 1,
       rating: 5,
       review: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       images: [
@@ -24,16 +25,19 @@ List<reviewModel> reviewsList = [
       reviewDate: DateTime(2022, 11, 15, 12, 56)),
   reviewModel(
       id: 2,
+      userId: 1,
       rating: 4,
       review: "Normal",
       reviewDate: DateTime(2022, 11, 15, 12, 56)),
   reviewModel(
       id: 3,
+      userId: 1,
       rating: 1,
       review: "Too bad",
       reviewDate: DateTime(2022, 11, 15, 12, 56)),
   reviewModel(
       id: 1,
+      userId: 1,
       rating: 5,
       review: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       images: [
@@ -42,6 +46,7 @@ List<reviewModel> reviewsList = [
       reviewDate: DateTime(2022, 11, 15, 12, 56)),
   reviewModel(
       id: 1,
+      userId: 1,
       rating: 5,
       review: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       images: [
@@ -50,6 +55,7 @@ List<reviewModel> reviewsList = [
       reviewDate: DateTime(2022, 11, 15, 12, 56)),
   reviewModel(
       id: 1,
+      userId: 1,
       rating: 5,
       review: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       images: [
@@ -58,6 +64,7 @@ List<reviewModel> reviewsList = [
       reviewDate: DateTime(2022, 11, 15, 12, 56)),
   reviewModel(
       id: 1,
+      userId: 1,
       rating: 5,
       review: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       images: [

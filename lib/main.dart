@@ -11,11 +11,20 @@ import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
 import 'package:hue_t/home.dart';
 import 'package:hue_t/accommodation_views/hotel.dart';
 import 'package:hue_t/view/social_network_network/socialNetwork.dart';
+import 'package:hue_t/view/profileuser/profile_user.dart';
+import 'package:hue_t/view/foodstore/search_foodstore.dart';
 import 'accommodation_views/homestays_list.dart';
 import 'accommodation_views/hotels_list.dart';
 import 'accommodation_views/resorts_list.dart';
 import 'colors.dart' as colors;
 import 'fake_data.dart' as faker;
+import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
+import 'package:hue_t/home.dart';
+import 'package:hue_t/accommodation_views/hotel.dart';
+import 'accommodation_views/homestays_list.dart';
+import 'accommodation_views/hotels_list.dart';
+import 'accommodation_views/resorts_list.dart';
+import 'colors.dart' as colors;
 
 void main() => runApp(
       MyApp(), // Wrap your app
@@ -148,7 +157,7 @@ class _HueTState extends State<HueT> {
     Foodstore(),
     HomePage(),
     SocialNetWorkPage(),
-    HotelsPage()
+    ProfileUser()
   ];
 
   bottomNavigationBar(BuildContext context) {
@@ -196,7 +205,6 @@ class _HueTState extends State<HueT> {
             icon: Icon(Icons.person_outline),
             label: 'Personal Infomation',
             activeIcon: Icon(Icons.person)),
-
       ],
     );
   }
