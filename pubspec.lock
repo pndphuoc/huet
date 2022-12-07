@@ -623,6 +623,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.2"
+  photo_gallery:
+    dependency: "direct main"
+    description:
+      name: photo_gallery
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.1.1"
   photo_manager:
     dependency: "direct main"
     description:
@@ -665,6 +672,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.0"
+  scroll_to_index:
+    dependency: "direct main"
+    description:
+      name: scroll_to_index
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.1"
   shared_preferences:
     dependency: transitive
     description:
@@ -810,6 +824,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.4.12"
+  transparent_image:
+    dependency: "direct main"
+    description:
+      name: transparent_image
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0"
   typed_data:
     dependency: transitive
     description:
