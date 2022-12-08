@@ -114,7 +114,9 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
     setState(() {
       selectedAlbum = paths.first;
       selectedMedia = entities.first;
-      loadVideo(selectedMedia!);
+      if (entities.first.type == AssetType.video) {
+        loadVideo(entities.first);
+      }
       _entities = entities;
       _isLoading = false;
       _hasMoreToLoad = _entities!.length < _totalEntitiesCount;
@@ -122,19 +124,18 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
   }
 
   Future<void> loadMediasOfAlbum(AssetPathEntity path) async {
-    if (videoController != null) {
-      videoController!.dispose();
-    }
     final List<AssetEntity> entities = await path.getAssetListPaged(
       page: 0,
       size: _sizePerPage,
     );
     _totalEntitiesCount = await path.assetCountAsync;
+    if (entities.first.type == AssetType.video) {
+      loadVideo(entities.first);
+    }
     setState(() {
       _entities = entities;
       _hasMoreToLoad = _entities!.length < _totalEntitiesCount;
       selectedMedia = entities.first;
-      loadVideo(selectedMedia!);
     });
   }
 
@@ -228,9 +229,6 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
   }
 
   Future<void> loadVideo(AssetEntity entity) async {
-    if (entity.type != AssetType.video) {
-      return;
-    } else {
       File? file = await entity.file;
       videoController = VideoPlayerController.file(file!)
         ..initialize().then((_) {
@@ -241,7 +239,6 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
             videoController?.setLooping(true);
           });
         });
-    }
   }
 
   Widget displayedMedia(BuildContext context) {
@@ -253,18 +250,16 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
         child: AspectRatio(
           aspectRatio: 1,
           child: (selectedMedia?.type == AssetType.video)
-              ? videoController != null
-                  ? Center(
-                      child: videoController!.value.isInitialized
+              ? Center(
+                      child: videoController != null
                           ? AspectRatio(
                               aspectRatio: videoController!.value.aspectRatio,
                               child: VideoPlayer(videoController!),
                             )
-                          : Container(),
-                    )
-                  : Center(
-                      child: LoadingAnimationWidget.discreteCircle(
-                          color: colors.primaryColor, size: 30),
+                          : Center(
+                              child: LoadingAnimationWidget.discreteCircle(
+                                  color: colors.primaryColor, size: 30),
+                            ),
                     )
               : ImageItemWidget(
                   entity: selectedMedia!,
@@ -534,6 +529,8 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
                     setState(() {
                       selectedAlbum = e;
                       loadMediasOfAlbum(e);
+                      controller.scrollToIndex(0,
+                          preferPosition: AutoScrollPosition.begin);
                     });
                   },
                   child: Container(
