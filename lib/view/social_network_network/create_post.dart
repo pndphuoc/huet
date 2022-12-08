@@ -111,12 +111,13 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
     if (!mounted) {
       return;
     }
+    if (entities.first.type == AssetType.video) {
+      await loadVideo(entities.first);
+    }
     setState(() {
       selectedAlbum = paths.first;
       selectedMedia = entities.first;
-      if (entities.first.type == AssetType.video) {
-        loadVideo(entities.first);
-      }
+
       _entities = entities;
       _isLoading = false;
       _hasMoreToLoad = _entities!.length < _totalEntitiesCount;
@@ -124,13 +125,17 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
   }
 
   Future<void> loadMediasOfAlbum(AssetPathEntity path) async {
+    if(videoController != null)
+      {
+        videoController!.dispose();
+      }
     final List<AssetEntity> entities = await path.getAssetListPaged(
       page: 0,
       size: _sizePerPage,
     );
     _totalEntitiesCount = await path.assetCountAsync;
     if (entities.first.type == AssetType.video) {
-      loadVideo(entities.first);
+      await loadVideo(entities.first);
     }
     setState(() {
       _entities = entities;
@@ -229,16 +234,16 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
   }
 
   Future<void> loadVideo(AssetEntity entity) async {
-      File? file = await entity.file;
-      videoController = VideoPlayerController.file(file!)
-        ..initialize().then((_) {
-          // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-          setState(() {
-            //Tự động phát video
-            videoController!.play();
-            videoController?.setLooping(true);
-          });
+    File? file = await entity.file;
+    videoController = VideoPlayerController.file(file!)
+      ..initialize().then((_) {
+        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+        setState(() {
+          //Tự động phát video
+          videoController!.play();
+          videoController?.setLooping(true);
         });
+      });
   }
 
   Widget displayedMedia(BuildContext context) {
@@ -251,16 +256,16 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
           aspectRatio: 1,
           child: (selectedMedia?.type == AssetType.video)
               ? Center(
-                      child: videoController != null
-                          ? AspectRatio(
-                              aspectRatio: videoController!.value.aspectRatio,
-                              child: VideoPlayer(videoController!),
-                            )
-                          : Center(
-                              child: LoadingAnimationWidget.discreteCircle(
-                                  color: colors.primaryColor, size: 30),
-                            ),
-                    )
+                  child: videoController != null
+                      ? AspectRatio(
+                          aspectRatio: videoController!.value.aspectRatio,
+                          child: VideoPlayer(videoController!),
+                        )
+                      : Center(
+                          child: LoadingAnimationWidget.discreteCircle(
+                              color: colors.primaryColor, size: 30),
+                        ),
+                )
               : ImageItemWidget(
                   entity: selectedMedia!,
                   option: const ThumbnailOption(
@@ -316,16 +321,79 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
               if (videoController != null) {
                 videoController?.dispose();
               }
-              loadVideo(entity);
-              //nếu chọn mục khác video sẽ dừng
 
-              //Thực hiện các thao tác khác
-              setState(() {
+              if (isMultiSelect) {
+                if (selectedList.contains(entity)) {
+                  selectedList.remove(entity);
+                  if (selectedList.isNotEmpty) {
+                    if (selectedList.last.type == AssetType.video) {
+                      await loadVideo(selectedList.last);
+                    }
+                    setState(() {
+                      if(_entities!.contains(selectedList.last)) {
+                        controller.scrollToIndex(
+                            _entities!.indexOf(selectedList.last),
+                            preferPosition: AutoScrollPosition.begin);
+                      }
+                      selectedMedia = selectedList.last;
+                    });
+                  } else {
+                    if (_entities!.first.type == AssetType.video) {
+                      await loadVideo(_entities!.first);
+                    }
+                    setState(() {
+                      controller.scrollToIndex(
+                          _entities!.indexOf(_entities!.first),
+                          preferPosition: AutoScrollPosition.begin);
+                      selectedMedia = _entities!.first;
+                    });
+                  }
+                } else {
+                  if (selectedList.length == 10) {
+                    Fluttertoast.showToast(
+                        msg: "Limited to 10 photos or videos",
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.CENTER,
+                        timeInSecForIosWeb: 1,
+                        textColor: Colors.white,
+                        fontSize: 16.0);
+                  } else {
+                    selectedList.add(entity);
+                    if (entity.type == AssetType.video) {
+                      await loadVideo(entity);
+                    }
+                    setState(() {
+                      controller.scrollToIndex(index,
+                          preferPosition: AutoScrollPosition.begin);
+                      selectedMedia = entity;
+                    });
+                  }
+                }
+              } else {
+                if (entity.type == AssetType.video) {
+                  await loadVideo(entity);
+                }
+                setState(() {
+                  controller.scrollToIndex(index,
+                      preferPosition: AutoScrollPosition.begin);
+                  selectedMedia = entity;
+                });
+              }
+
+              /*setState(() {
                 selectedMedia = entity;
                 if (isMultiSelect) {
                   if (selectedList.contains(entity)) {
                     selectedList.remove(entity);
+                    if (videoController != null) {
+                      videoController?.dispose();
+                    }
+                    loadVideo(entity);
+                    selectedMedia = entity;
                   } else {
+                    if (videoController != null) {
+                      videoController?.dispose();
+                    }
                     if (selectedList.length >= 10) {
                       Fluttertoast.showToast(
                           msg: "Limited to 10 photos or videos",
@@ -341,10 +409,13 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
                     }
                   }
                 } else {
+                  if (videoController != null) {
+                    videoController?.dispose();
+                  }
                   controller.scrollToIndex(index,
                       preferPosition: AutoScrollPosition.begin);
                 }
-              });
+              });*/
             },
             child: isMultiSelect == false
                 ? Opacity(
