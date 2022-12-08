@@ -153,7 +153,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                         children: widget.samplePost.photos.map((e) {
                           int index = widget.samplePost.photos.indexOf(e);
                           return AnimatedContainer(
-                            duration: Duration(milliseconds: 100),
+                            duration: const Duration(milliseconds: 100),
                             width: currentPos == index ? 20 : 8.0,
                             height: 8.0,
                             margin: const EdgeInsets.symmetric(
@@ -185,10 +185,10 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                                 setState(() => isHeartAnimating = false),
                             duration: const Duration(milliseconds: 500),
                             isAnimating: isHeartAnimating,
-                            child: const Icon(
+                            child: Icon(
                               Icons.favorite,
                               color: Colors.white,
-                              size: 120,
+                              size: isHeartAnimating ? 120:0,
                             )),
                       ),
                     )
