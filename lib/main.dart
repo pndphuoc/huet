@@ -155,7 +155,8 @@ class _HueTState extends State<HueT> {
     Foodstore(),
     HomePage(),
     //SocialNetwork(),
-    HotelsPage()
+    HotelsPage(),
+    ProfileUser()
   ];
 
   bottomNavigationBar(BuildContext context) {
