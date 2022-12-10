@@ -48,7 +48,7 @@ class _ProfileUserState extends State<ProfileUser> {
         children: [
           Row(
             children: [
-              const Icon(leadingIcon,
+              Icon(leadingIcon,
                   color: Colors.black54),
               const SizedBox(
                 width: 10,
