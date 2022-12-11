@@ -1,16 +1,25 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:hue_t/accommodation_views/hotel_detail.dart';
+import 'package:hue_t/model/user/user.dart';
+import 'package:hue_t/provider/google_sign_in.dart';
 import 'package:hue_t/view/Foodstore/foodstore.dart';
 import 'package:hue_t/view/foodstore/foodstoredetail.dart';
 import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
 import 'package:hue_t/home.dart';
 import 'package:hue_t/accommodation_views/hotel.dart';
+import 'package:hue_t/view/profileuser/auth_service.dart';
+import 'package:hue_t/view/profileuser/login_user.dart';
+import 'package:hue_t/view/profileuser/loginin_page.dart';
 import 'package:hue_t/view/profileuser/profile_user.dart';
 import 'package:hue_t/view/foodstore/search_foodstore.dart';
+import 'package:hue_t/view/profileuser/temp_widget.dart';
+import 'package:provider/provider.dart';
 import 'accommodation_views/homestays_list.dart';
 import 'accommodation_views/hotels_list.dart';
 import 'accommodation_views/resorts_list.dart';
@@ -23,23 +32,32 @@ import 'accommodation_views/homestays_list.dart';
 import 'accommodation_views/hotels_list.dart';
 import 'accommodation_views/resorts_list.dart';
 import 'colors.dart' as colors;
+import 'constants/user_info.dart' as userConstant;
+import 'model/user/user.dart' as userModel;
 
-void main() => runApp(
-      MyApp(), // Wrap your app
-    );
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(MyApp());
+}
+// void main()
+// {
+//   runApp(MyApp());
+// }
 
 class MyApp extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      useInheritedMediaQuery: true,
-      locale: DevicePreview.locale(context),
-      builder: DevicePreview.appBuilder,
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
-      home: SplashScreen(),
-    );
-  }
+  Widget build(BuildContext context) => ChangeNotifierProvider(
+        create: (context) => GoogleSignInProvider(),
+        child: MaterialApp(
+          useInheritedMediaQuery: true,
+          locale: DevicePreview.locale(context),
+          builder: DevicePreview.appBuilder,
+          theme: ThemeData.light(),
+          darkTheme: ThemeData.dark(),
+          home: SplashScreen(),
+        ),
+      );
 }
 
 class SplashScreen extends StatefulWidget {
@@ -50,9 +68,14 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+
   @override
   void initState() {
+
     super.initState();
+    if(FirebaseAuth.instance.currentUser != null){
+      userConstant.user = userModel.User(name:  FirebaseAuth.instance.currentUser!.displayName!, mail:  FirebaseAuth.instance.currentUser!.email!, photoURL:  FirebaseAuth.instance.currentUser!.photoURL!, uid:  FirebaseAuth.instance.currentUser!.uid, phoneNumber: FirebaseAuth.instance.currentUser!.phoneNumber);
+    }
     Future.delayed(Duration(seconds: 4)).then((value) => Navigator.of(context)
         .pushReplacement(CupertinoPageRoute(builder: (ctx) => HueT())));
   }
@@ -150,14 +173,20 @@ class _HueTState extends State<HueT> {
   ];
 
   int _selectedItemPosition = 2;
-  final List<Widget> _children = [
+
+  late List<Widget> _children = [
     HotelPage(),
     Foodstore(),
     HomePage(),
     //SocialNetwork(),
     HotelsPage(),
-    ProfileUser()
+    //ProfileUser(),
+    //LoginPage()
+    //userConstant.user!=null? const ProfileUser(): AuthService().handleAuthState()
+    TempWidget()
   ];
+
+
 
   bottomNavigationBar(BuildContext context) {
     return SnakeNavigationBar.color(
@@ -182,7 +211,13 @@ class _HueTState extends State<HueT> {
       showSelectedLabels: showSelectedLabels,
 
       currentIndex: _selectedItemPosition,
-      onTap: (index) => setState(() => _selectedItemPosition = index),
+      onTap: (index) {
+        setState(() {
+        _selectedItemPosition = index;
+
+      });
+
+        },
       items: [
         BottomNavigationBarItem(
             icon: Icon(Icons.hotel_outlined),
@@ -217,6 +252,8 @@ class _HueTState extends State<HueT> {
       ),
       home: Scaffold(
         body: Stack(children: [
+          /* _selectedItemPosition!=4?_children[_selectedItemPosition]:userinfo!=null?const ProfileUser():const LoginPage(),
+         */
           _children[_selectedItemPosition],
           Positioned(
             bottom: 0,

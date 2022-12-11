@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as color;
@@ -27,20 +28,7 @@ class _ProfileUserState extends State<ProfileUser> {
     );
   }
 
-  Widget _buttonItem(
-      String title, IconData leadingIcon, void Function() onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Row(
-        children: [
-          Icon(leadingIcon),
-          Text(title),
-          const Icon(Icons.arrow_forward_ios_outlined),
-        ],
-      ),
-    );
-  }
-  Widget _buttonItem1(String title, IconData leadingIcon, void Function() onTap) {
+  Widget _buttonItem(String title, IconData leadingIcon, void Function() onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Row(
@@ -90,7 +78,7 @@ class _ProfileUserState extends State<ProfileUser> {
             child: ClipRRect(
                 borderRadius: BorderRadius.circular(150),
                 child: Image.network(
-                  "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/20220401_Lee_Min-ho_%EC%9D%B4%EB%AF%BC%ED%98%B8_ELLE_Taiwan_%283%29.jpg/640px-20220401_Lee_Min-ho_%EC%9D%B4%EB%AF%BC%ED%98%B8_ELLE_Taiwan_%283%29.jpg",
+                  FirebaseAuth.instance.currentUser!.photoURL.toString(),
                   width: 150,
                   height: 150,
                   fit: BoxFit.cover,
@@ -98,12 +86,12 @@ class _ProfileUserState extends State<ProfileUser> {
           ),
           const SizedBox(height: 5),
           Text(
-            'Leminhoo',
+            FirebaseAuth.instance.currentUser!.displayName!,
             style: GoogleFonts.readexPro(
                 fontSize: 19, fontWeight: FontWeight.w600),
           ),
           Text(
-            'leminhoth@gmail.com',
+            FirebaseAuth.instance.currentUser!.email.toString(),
             style: GoogleFonts.readexPro(
                 fontSize: 15, fontWeight: FontWeight.w100),
           ),
