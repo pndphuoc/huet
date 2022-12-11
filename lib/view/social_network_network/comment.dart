@@ -17,10 +17,6 @@ class _CommentState extends State<Comment> with TickerProviderStateMixin{
     duration: const Duration(milliseconds: 500),
     vsync: this,
   );
-  late final Animation<double> _animation = CurvedAnimation(
-    parent: _heartController,
-    curve: Curves.fastOutSlowIn,
-  );
   int currentPos = 0;
   bool isHeartAnimating = false;
   @override
@@ -33,13 +29,13 @@ class _CommentState extends State<Comment> with TickerProviderStateMixin{
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
       ),
-      margin: EdgeInsets.only(left: 20, right: 20, top: 20),
+      margin: const EdgeInsets.only(left: 20, right: 20, top: 20),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
+          const SizedBox(
             height: 45,
             width: 45,
             child: CircleAvatar(
@@ -48,7 +44,7 @@ class _CommentState extends State<Comment> with TickerProviderStateMixin{
               ),
             ),
           ),
-          SizedBox(
+          const SizedBox(
             width: 10,
           ),
           Expanded(
@@ -63,7 +59,7 @@ class _CommentState extends State<Comment> with TickerProviderStateMixin{
                       style: GoogleFonts.readexPro(
                           color: Colors.black, fontSize: 15),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 10,
                     ),
                     /*Text(
@@ -72,7 +68,7 @@ class _CommentState extends State<Comment> with TickerProviderStateMixin{
                     )*/
                   ],
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 5,
                 ),
                 Text(
@@ -83,7 +79,7 @@ class _CommentState extends State<Comment> with TickerProviderStateMixin{
               ],
             ),
           ),
-          SizedBox(width: 10,),
+          const SizedBox(width: 10,),
           IntrinsicWidth(child: Column(
             children: [
               HeartAnimation(

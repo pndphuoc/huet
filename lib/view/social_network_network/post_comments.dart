@@ -202,7 +202,7 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Container(
+                SizedBox(
                   height: 45,
                   width: 45,
                   child: const CircleAvatar(

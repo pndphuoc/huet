@@ -1,12 +1,9 @@
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
 import 'package:hue_t/model/social_network/postModel.dart';
 import 'package:hue_t/view/social_network_network/post.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'create_post_2.dart';
-import 'simple_example_page.dart' as cp2;
 
 import 'create_post.dart';
 
@@ -35,10 +32,8 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
     super.initState();
     requestStoragePermission();
   }
-  late NavigatorState _navigator;
   @override
   void didChangeDependencies() {
-    _navigator = Navigator.of(context);
     super.didChangeDependencies();
   }
 
@@ -50,15 +45,13 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
       body: SafeArea(
         child: Stack(
           children: [SingleChildScrollView(
-            child: Container(
-              child: Column(
-                children: [
-                  SizedBox(height: 70,),
-                  for(var item in postsList)
-                    item,
-                  SizedBox(height: 80,)
-                ],
-              ),
+            child: Column(
+              children: [
+                const SizedBox(height: 70,),
+                for(var item in postsList)
+                  item,
+                const SizedBox(height: 80,)
+              ],
             ),
           ),
             appBarBlock(context),
@@ -76,37 +69,37 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
       child: Container(
         height: 70,
         color: colors.backgroundColor,
-        padding: EdgeInsets.only(top: 10, bottom: 10),
+        padding: const EdgeInsets.only(top: 10, bottom: 10),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Container(
-              margin: EdgeInsets.only(left: 20),
+              margin: const EdgeInsets.only(left: 20),
               child: Text("Huegram", style: GoogleFonts.montserrat(color: Colors.black, fontSize: 25),),
             ),
             Container(
-              margin: EdgeInsets.only(right: 20),
+              margin: const EdgeInsets.only(right: 20),
               child: Row(
                 children: [
-                  ElevatedButton(onPressed: (){}, child: Icon(Icons.notifications_outlined, size: 20, color: Colors.black,),
+                  ElevatedButton(onPressed: (){},
                     style: ElevatedButton.styleFrom(
-                      shape: CircleBorder(),
+                      shape: const CircleBorder(),
                       backgroundColor: colors.SN_circleButton,
                       elevation: 0,
-                      minimumSize: Size(45, 45)
-                    ),
+                      minimumSize: const Size(45, 45)
+                    ), child: const Icon(Icons.notifications_outlined, size: 20, color: Colors.black,),
 
                   ),
                   ElevatedButton(onPressed: (){
                    Navigator.push(
                         context, MaterialPageRoute(builder: (context) => const CreatePost()));
-                  }, child: Icon(Icons.add_circle_outline, size: 20, color: Colors.black,),
+                  },
                     style: ElevatedButton.styleFrom(
-                      shape: CircleBorder(),
+                      shape: const CircleBorder(),
                       backgroundColor: colors.SN_circleButton,
                       elevation: 0,
-                        minimumSize: Size(45, 45)
-                    ),
+                        minimumSize: const Size(45, 45)
+                    ), child: const Icon(Icons.add_circle_outline, size: 20, color: Colors.black,),
                   ),
                 ],
               ),

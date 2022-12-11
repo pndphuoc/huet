@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hue_t/view/social_network_network/complete_upload.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:hue_t/colors.dart' as colors;
@@ -182,10 +183,6 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 500),
     );
     _fadeInFadeOut = Tween<double>(begin: 0.5, end: 1).animate(animation);
-
-/*    animation.addStatusListener((status){
-        animation.forward();
-    });*/
     animation.forward();
 
     _requestAssets();
@@ -212,6 +209,11 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
               ),
               backgroundColor: colors.backgroundColor,
               elevation: 0,
+              actions: [
+                IconButton(onPressed: (){
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => CompleteUploadPage(medias: isMultiSelect? selectedList:[selectedMedia!]),));
+                }, icon: Icon(Icons.arrow_forward, color: colors.primaryColor, size: 30,))
+              ],
             ),
             body: SlidingUpPanel(
               backdropTapClosesPanel: true,
@@ -608,7 +610,7 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
                     padding: const EdgeInsets.only(left: 20),
                     width: double.infinity,
                     child: Text(
-                      e.name ?? "Untitled",
+                      e.name,
                       style: GoogleFonts.readexPro(
                           color: Colors.black, fontSize: 20),
                     ),

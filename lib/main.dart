@@ -25,6 +25,7 @@ class MyApp extends StatelessWidget {
       builder: DevicePreview.appBuilder,
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
+      debugShowCheckedModeBanner: false,
       home: SplashScreen(),
     );
   }
@@ -77,7 +78,7 @@ class _SplashScreenState extends State<SplashScreen> {
               width: MediaQuery.of(context).size.width,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+                children: const [
                   SpinKitThreeBounce(
                     color: Colors.white,
                     duration: Duration(milliseconds: 1000),
