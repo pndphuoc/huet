@@ -76,6 +76,8 @@ dependencies:
   photo_gallery: ^1.1.1
   transparent_image: ^2.0.0
   sliding_up_panel: ^2.0.0+1
+  firebase_core: ^2.4.0
+  firebase_storage: ^11.0.7
 
 dev_dependencies:
   flutter_test:

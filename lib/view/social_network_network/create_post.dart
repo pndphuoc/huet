@@ -211,6 +211,10 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
               elevation: 0,
               actions: [
                 IconButton(onPressed: (){
+                  if (videoController != null)
+                    {
+                      videoController!.dispose();
+                    }
                   Navigator.push(context, MaterialPageRoute(builder: (context) => CompleteUploadPage(medias: isMultiSelect? selectedList:[selectedMedia!]),));
                 }, icon: Icon(Icons.arrow_forward, color: colors.primaryColor, size: 30,))
               ],
@@ -381,43 +385,6 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
                   selectedMedia = entity;
                 });
               }
-
-              /*setState(() {
-                selectedMedia = entity;
-                if (isMultiSelect) {
-                  if (selectedList.contains(entity)) {
-                    selectedList.remove(entity);
-                    if (videoController != null) {
-                      videoController?.dispose();
-                    }
-                    loadVideo(entity);
-                    selectedMedia = entity;
-                  } else {
-                    if (videoController != null) {
-                      videoController?.dispose();
-                    }
-                    if (selectedList.length >= 10) {
-                      Fluttertoast.showToast(
-                          msg: "Limited to 10 photos or videos",
-                          toastLength: Toast.LENGTH_SHORT,
-                          gravity: ToastGravity.CENTER,
-                          timeInSecForIosWeb: 1,
-                          textColor: Colors.white,
-                          fontSize: 16.0);
-                    } else {
-                      controller.scrollToIndex(index,
-                          preferPosition: AutoScrollPosition.begin);
-                      selectedList.add(entity);
-                    }
-                  }
-                } else {
-                  if (videoController != null) {
-                    videoController?.dispose();
-                  }
-                  controller.scrollToIndex(index,
-                      preferPosition: AutoScrollPosition.begin);
-                }
-              });*/
             },
             child: isMultiSelect == false
                 ? Opacity(

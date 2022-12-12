@@ -1,14 +1,20 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
 import 'package:hue_t/model/attraction/tourist_attraction.dart';
 import 'package:hue_t/view/social_network_network/search_tourist_attractions.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:hue_t/fake_data.dart' as faker;
-
+import 'package:video_player/video_player.dart';
+import 'dart:io';
 import 'image_item_widget.dart';
+import 'package:path/path.dart' as p;
+import '../../firebase_function/upload_media.dart' as upload_media;
 
 class CompleteUploadPage extends StatefulWidget {
   const CompleteUploadPage({Key? key, required this.medias}) : super(key: key);
@@ -22,6 +28,8 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
   int currentPos = 0;
   TouristAttaction? selectedAttraction;
 
+  VideoPlayerController? videoController;
+  UploadTask? uploadTask;
   set selected(TouristAttaction value) =>
       setState(() => selectedAttraction = value);
 
@@ -32,58 +40,156 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    videoController!.dispose();
+  }
+
+  Future<void> loadVideo(AssetEntity entity) async {
+    File? file = await entity.file;
+    videoController = VideoPlayerController.file(file!)
+      ..initialize().then((_) {
+        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+        setState(() {
+          //Tự động phát video
+          videoController!.play();
+          videoController?.setLooping(true);
+        });
+      });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: colors.backgroundColor,
-      appBar: AppBar(
-        backgroundColor: colors.backgroundColor,
-        elevation: 0,
-        leading: IconButton(onPressed: (){
+      appBar: appBar(context),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+            child: Column(
+              children: [
+                mediaListBlock(context),
+                captionBlock(context),
+                selectedAttraction != null
+                    ? selectedAttractionBlock(context, selectedAttraction!)
+                    : placeSelectorBlock(context),
+                const SizedBox(
+                  height: 50,
+                ),
+              ],
+            ),
+          ),
+            Center(
+              child: buildProgress(),
+            )
+          ]
+        ),
+      ),
+    );
+  }
+
+  void saveResizedImage(List<AssetEntity> list) async {
+   /* final directory = await getApplicationDocumentsDirectory();
+    for(int i=0; i<list.length; i++) {
+      File image = await list[i].file as File;
+
+
+     *//* imageLib.Image image = (await list[i].file) as imageLib.Image;
+      imageLib.Image thumbnail = imageLib.copyResize(image, width: 1080);
+      File('out/thumbnail-test${i}.png').writeAsBytesSync(imageLib.encodePng(thumbnail));*//*
+      //print(image);
+    }*/
+  }
+
+  Future<void> uploadMedia(List<AssetEntity> list) async {
+    const userID = 1;
+    for(int i=0; i<list.length; i++){
+      final media = await list[i].fileWithSubtype;
+      final type = p.extension(media!.path);
+      final path = "medias/${userID}${DateTime.now()}${type}";
+      final file = File(media!.path);
+
+      final ref = FirebaseStorage.instance.ref().child(path);
+      setState(() {
+        uploadTask = ref.putFile(file);
+      });
+
+      final snapshot = await uploadTask!.whenComplete(() {});
+
+      final urlDownload = await snapshot.ref.getDownloadURL();
+      setState(() {
+        uploadTask = null;
+      });
+      print(urlDownload);
+    }
+  }
+
+  Widget buildProgress() => StreamBuilder<TaskSnapshot>(
+      stream: uploadTask?.snapshotEvents,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final data = snapshot.data!;
+          double progress = data.bytesTransferred / data.totalBytes;
+          return LoadingAnimationWidget.discreteCircle(color: colors.primaryColor, size: 30); /*Stack(
+              fit: StackFit.expand,
+              children: [
+                LinearProgressIndicator(
+                  value: progress,
+                  backgroundColor: Colors.grey,
+                  color: Colors.green,
+                ),
+                Center(
+                  child: Text("${(100*progress).roundToDouble()}%", style: GoogleFonts.readexPro(color: Colors.white),),
+                )
+              ],
+            ),*/
+        }
+        else {
+          return const SizedBox(height: 50,);
+        }
+      });
+  AppBar appBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: colors.backgroundColor,
+      elevation: 0,
+      leading: IconButton(
+        onPressed: () {
           Navigator.pop(context);
         },
-          splashColor: Colors.transparent,
-          highlightColor: Colors.transparent,
-          hoverColor: Colors.transparent,
-          icon: const Icon(Icons.arrow_back, color: Colors.black,),
-        ),
-        title:
-            Text("New post", style: GoogleFonts.readexPro(color: Colors.black)),
-        actions: [
-          IconButton(
-              onPressed: () {
-                if (selectedAttraction == null) {
-                  Fluttertoast.showToast(
-                      msg: "Choose a tourist attraction first",
-                      toastLength: Toast.LENGTH_SHORT,
-                      gravity: ToastGravity.CENTER,
-                      timeInSecForIosWeb: 1,
-                      textColor: Colors.white,
-                      fontSize: 16.0);
-                }
-              },
-              icon: Icon(
-                Icons.check,
-                color: colors.primaryColor,
-                size: 30,
-              ))
-        ],
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              mediaListBlock(context),
-              captionBlock(context),
-              selectedAttraction != null
-                  ? selectedAttractionBlock(context, selectedAttraction!)
-                  : placeSelectorBlock(context),
-              const SizedBox(
-                height: 50,
-              )
-            ],
-          ),
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        hoverColor: Colors.transparent,
+        icon: const Icon(
+          Icons.arrow_back,
+          color: Colors.black,
         ),
       ),
+      title:
+          Text("New post", style: GoogleFonts.readexPro(color: Colors.black)),
+      actions: [
+        IconButton(
+            onPressed: () async {
+              if (selectedAttraction == null) {
+                Fluttertoast.showToast(
+                    msg: "Choose a tourist attraction first",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.CENTER,
+                    timeInSecForIosWeb: 1,
+                    textColor: Colors.white,
+                    fontSize: 16.0);
+              }
+              else {
+                await uploadMedia(widget.medias);
+
+              }
+            },
+            icon: Icon(
+              Icons.check,
+              color: colors.primaryColor,
+              size: 30,
+            ))
+      ],
     );
   }
 
@@ -144,20 +250,57 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
                   scrollPhysics: const BouncingScrollPhysics(),
                   enableInfiniteScroll: false,
                   viewportFraction: 1,
-                  onPageChanged: (index, reason) {
+                  onPageChanged: (index, reason) async {
+                    if (videoController != null) {
+                      videoController!.dispose();
+                    }
+                      await loadVideo(widget.medias[index]);
                     setState(() {
                       currentPos = index;
                     });
                   }),
               items: widget.medias.map((e) {
                 return Builder(builder: (BuildContext context) {
-                  return SizedBox(
-                      child: ImageItemWidget(
-                    entity: e,
-                    option: const ThumbnailOption(
-                      size: ThumbnailSize.square(1080),
-                    ),
-                  ));
+                  return e.type == AssetType.video
+                      ? videoController == null
+                          ? Center(
+                    child: LoadingAnimationWidget.discreteCircle(
+                        color: colors.primaryColor, size: 30),
+                  )
+                          : AspectRatio(
+                              aspectRatio: videoController!.value.aspectRatio,
+                              child: VideoPlayer(videoController!),
+                            )
+                      : SizedBox(
+                          child: ImageItemWidget(
+                          entity: e,
+                          option: const ThumbnailOption(
+                            size: ThumbnailSize.square(1080),
+                          ),
+                        ));
+
+                  /*if (e.type == AssetType.video){
+                    if(videoController != null) {
+                      videoController!.dispose();
+                    }
+                    loadVideo(e);
+                    return AspectRatio(
+                      aspectRatio: videoController!.value.aspectRatio,
+                      child: VideoPlayer(videoController!),
+                    );
+                  }
+                  else {
+                    if(videoController != null) {
+                      videoController!.dispose();
+                    }
+                    return SizedBox(
+                        child: ImageItemWidget(
+                          entity: e,
+                          option: const ThumbnailOption(
+                            size: ThumbnailSize.square(1080),
+                          ),
+                        ));
+                  }*/
                 });
               }).toList(),
             ),
@@ -194,7 +337,7 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
     return Container(
       margin: const EdgeInsets.only(right: 10),
       decoration: BoxDecoration(
-        color: colors.SN_postBackgroundColor,
+          color: colors.SN_postBackgroundColor,
           border: Border.all(width: 1, color: Colors.black),
           borderRadius: BorderRadius.circular(10)),
       child: TextButton(
@@ -273,7 +416,7 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
         width: MediaQuery.of(context).size.width,
         height: 50,
         decoration: BoxDecoration(
-          color: colors.SN_postBackgroundColor,
+            color: colors.SN_postBackgroundColor,
             //border: Border.all(color: colors.primaryColor, width: 2),
             borderRadius: BorderRadius.circular(20)),
         child: Row(

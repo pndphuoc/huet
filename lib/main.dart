@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
@@ -12,9 +13,13 @@ import 'package:hue_t/view/social_network_network/socialNetwork.dart';
 import 'package:hue_t/view/profileuser/profile_user.dart';
 import 'colors.dart' as colors;
 
-void main() => runApp(
-      MyApp(), // Wrap your app
-    );
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(
+    MyApp(), // Wrap your app
+  );
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -205,21 +210,25 @@ class _HueTState extends State<HueT> {
       ),
       home: Scaffold(
         body: GestureDetector(
-          onTap: (){
+          onTap: () {
             FocusScope.of(context).requestFocus(new FocusNode());
           },
           child: Stack(children: [
             _children[_selectedItemPosition],
-            MediaQuery.of(context).viewInsets.bottom != 0.0 ? Container():Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-                  return ShowUp(child: bottomNavigationBar(context), delay: 0);
-                },
-              ),
-            )
+            MediaQuery.of(context).viewInsets.bottom != 0.0
+                ? Container()
+                : Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: LayoutBuilder(
+                      builder:
+                          (BuildContext context, BoxConstraints constraints) {
+                        return ShowUp(
+                            child: bottomNavigationBar(context), delay: 0);
+                      },
+                    ),
+                  )
           ]),
         ),
       ),
