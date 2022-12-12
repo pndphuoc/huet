@@ -3,19 +3,23 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
 import 'package:hue_t/model/social_network/postModel.dart';
 import 'package:hue_t/view/social_network_network/post.dart';
+import 'package:hue_t/view/social_network_network/uploading_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:photo_manager/photo_manager.dart';
 
 import 'create_post.dart';
 
 
 class SocialNetWorkPage extends StatefulWidget {
-  const SocialNetWorkPage({Key? key}) : super(key: key);
-
+  const SocialNetWorkPage({Key? key, this.list, this.caption, this.attractionId}) : super(key: key);
+  final List<AssetEntity>? list;
+  final String? caption;
+  final int? attractionId;
   @override
   State<SocialNetWorkPage> createState() => _SocialNetWorkPageState();
 }
 
-PostModel samplePost = PostModel(postID: 1, content: "In the Hue",  userID: 1, placeID: 1, photos: ["assets/images/socialNetwork/img.png", "assets/images/socialNetwork/img1.png"], likeCount: 69, commentCount: 1, createDate: DateTime(2022, 11, 26), isDeleted: false);
+PostModel samplePost = PostModel(postID: '1', caption: "In the Hue",  userID: 1, attractionID: "1", medias: ["assets/images/socialNetwork/img.png", "assets/images/socialNetwork/img1.png"], likeCount: 69, commentCount: 1, createDate: DateTime(2022, 11, 26), isDeleted: false);
 
 class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
   List<Widget> postsList = [
@@ -48,6 +52,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
             child: Column(
               children: [
                 const SizedBox(height: 70,),
+                widget.list != null ? UploadingWidget(list: widget.list!, caption: widget.caption??"", attractionId: widget.attractionId.toString(),) : Container(),
                 for(var item in postsList)
                   item,
                 const SizedBox(height: 80,)

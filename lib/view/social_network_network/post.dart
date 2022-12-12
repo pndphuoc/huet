@@ -122,7 +122,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                             currentPos = index;
                           });
                         }),
-                    items: widget.samplePost.photos.map((e) {
+                    items: widget.samplePost.medias.map((e) {
                       return Builder(builder: (BuildContext context) {
                         return Container(
                             decoration: BoxDecoration(
@@ -140,8 +140,8 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                     right: 1,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: widget.samplePost.photos.map((e) {
-                        int index = widget.samplePost.photos.indexOf(e);
+                      children: widget.samplePost.medias.map((e) {
+                        int index = widget.samplePost.medias.indexOf(e);
                         return AnimatedContainer(
                           duration: const Duration(milliseconds: 100),
                           width: currentPos == index ? 20 : 8.0,
@@ -280,7 +280,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
           Container(
               padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
               child: Text(
-                widget.samplePost.content,
+                widget.samplePost.caption,
                 style: GoogleFonts.readexPro(color: Colors.black),
               )),
           Container(

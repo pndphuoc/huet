@@ -191,8 +191,9 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
   @override
   void dispose() {
     super.dispose();
-    videoController!.dispose();
-    panelController.close();
+    if (videoController != null) {
+      videoController!.dispose();
+    }
     panelScrollController.dispose();
   }
 

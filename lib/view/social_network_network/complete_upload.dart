@@ -6,6 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
 import 'package:hue_t/model/attraction/tourist_attraction.dart';
 import 'package:hue_t/view/social_network_network/search_tourist_attractions.dart';
+import 'package:hue_t/view/social_network_network/socialNetwork.dart';
+import 'package:hue_t/view/social_network_network/uploading_widget.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -14,7 +16,7 @@ import 'package:video_player/video_player.dart';
 import 'dart:io';
 import 'image_item_widget.dart';
 import 'package:path/path.dart' as p;
-import '../../firebase_function/upload_media.dart' as upload_media;
+import './uploading_widget.dart' as uploading_widget;
 
 class CompleteUploadPage extends StatefulWidget {
   const CompleteUploadPage({Key? key, required this.medias}) : super(key: key);
@@ -30,8 +32,12 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
 
   VideoPlayerController? videoController;
   UploadTask? uploadTask;
+
   set selected(TouristAttaction value) =>
       setState(() => selectedAttraction = value);
+  bool isUploading = false;
+
+  final captionController = TextEditingController();
 
   @override
   void initState() {
@@ -42,7 +48,7 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
   @override
   void dispose() {
     super.dispose();
-    videoController!.dispose();
+    //videoController!.dispose();
   }
 
   Future<void> loadVideo(AssetEntity entity) async {
@@ -64,91 +70,24 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
       backgroundColor: colors.backgroundColor,
       appBar: appBar(context),
       body: SafeArea(
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-            child: Column(
-              children: [
-                mediaListBlock(context),
-                captionBlock(context),
-                selectedAttraction != null
-                    ? selectedAttractionBlock(context, selectedAttraction!)
-                    : placeSelectorBlock(context),
-                const SizedBox(
-                  height: 50,
-                ),
-              ],
-            ),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              mediaListBlock(context),
+              captionBlock(context),
+              selectedAttraction != null
+                  ? selectedAttractionBlock(context, selectedAttraction!)
+                  : placeSelectorBlock(context),
+              const SizedBox(
+                height: 50,
+              ),
+            ],
           ),
-            Center(
-              child: buildProgress(),
-            )
-          ]
         ),
       ),
     );
   }
 
-  void saveResizedImage(List<AssetEntity> list) async {
-   /* final directory = await getApplicationDocumentsDirectory();
-    for(int i=0; i<list.length; i++) {
-      File image = await list[i].file as File;
-
-
-     *//* imageLib.Image image = (await list[i].file) as imageLib.Image;
-      imageLib.Image thumbnail = imageLib.copyResize(image, width: 1080);
-      File('out/thumbnail-test${i}.png').writeAsBytesSync(imageLib.encodePng(thumbnail));*//*
-      //print(image);
-    }*/
-  }
-
-  Future<void> uploadMedia(List<AssetEntity> list) async {
-    const userID = 1;
-    for(int i=0; i<list.length; i++){
-      final media = await list[i].fileWithSubtype;
-      final type = p.extension(media!.path);
-      final path = "medias/${userID}${DateTime.now()}${type}";
-      final file = File(media!.path);
-
-      final ref = FirebaseStorage.instance.ref().child(path);
-      setState(() {
-        uploadTask = ref.putFile(file);
-      });
-
-      final snapshot = await uploadTask!.whenComplete(() {});
-
-      final urlDownload = await snapshot.ref.getDownloadURL();
-      setState(() {
-        uploadTask = null;
-      });
-      print(urlDownload);
-    }
-  }
-
-  Widget buildProgress() => StreamBuilder<TaskSnapshot>(
-      stream: uploadTask?.snapshotEvents,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final data = snapshot.data!;
-          double progress = data.bytesTransferred / data.totalBytes;
-          return LoadingAnimationWidget.discreteCircle(color: colors.primaryColor, size: 30); /*Stack(
-              fit: StackFit.expand,
-              children: [
-                LinearProgressIndicator(
-                  value: progress,
-                  backgroundColor: Colors.grey,
-                  color: Colors.green,
-                ),
-                Center(
-                  child: Text("${(100*progress).roundToDouble()}%", style: GoogleFonts.readexPro(color: Colors.white),),
-                )
-              ],
-            ),*/
-        }
-        else {
-          return const SizedBox(height: 50,);
-        }
-      });
   AppBar appBar(BuildContext context) {
     return AppBar(
       backgroundColor: colors.backgroundColor,
@@ -178,10 +117,17 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
                     timeInSecForIosWeb: 1,
                     textColor: Colors.white,
                     fontSize: 16.0);
-              }
-              else {
-                await uploadMedia(widget.medias);
-
+              } else {
+                setState(() {
+                  isUploading = true;
+                });
+                //UploadingWidget(list: widget.medias,);
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          SocialNetWorkPage(list: widget.medias, caption: captionController.text, attractionId: selectedAttraction!.id),
+                    ));
               }
             },
             icon: Icon(
@@ -205,8 +151,8 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
             borderRadius: BorderRadius.circular(20)),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
-          children: const [
-            SizedBox(
+          children: [
+            const SizedBox(
               height: 45,
               width: 45,
               child: CircleAvatar(
@@ -215,15 +161,16 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
                 ),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               width: 10,
             ),
             Expanded(
                 child: TextField(
+              controller: captionController,
               textInputAction: TextInputAction.newline,
               keyboardType: TextInputType.multiline,
               maxLines: null,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                   contentPadding: EdgeInsets.fromLTRB(10, 15, 10, 10),
                   border: InputBorder.none,
                   hintStyle: TextStyle(color: Colors.black),
@@ -254,7 +201,7 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
                     if (videoController != null) {
                       videoController!.dispose();
                     }
-                      await loadVideo(widget.medias[index]);
+                    await loadVideo(widget.medias[index]);
                     setState(() {
                       currentPos = index;
                     });
@@ -264,9 +211,9 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
                   return e.type == AssetType.video
                       ? videoController == null
                           ? Center(
-                    child: LoadingAnimationWidget.discreteCircle(
-                        color: colors.primaryColor, size: 30),
-                  )
+                              child: LoadingAnimationWidget.discreteCircle(
+                                  color: colors.primaryColor, size: 30),
+                            )
                           : AspectRatio(
                               aspectRatio: videoController!.value.aspectRatio,
                               child: VideoPlayer(videoController!),
