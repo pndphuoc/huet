@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
+import 'dart:convert' as convert;
 import 'media_model.dart';
 
 class PostModel {
@@ -39,13 +39,12 @@ class PostModel {
 
   static PostModel fromJson(Map<String, dynamic> json) {
     List<Media> medias = [];
-/*    List.from(json['medias']).forEach((element) {
-      medias.add(Media.fromJson(element));
-    });*/
-    print(json['medias']);
+    for(Map<String, dynamic> e in List<Map<String, dynamic>>.from(json['medias'])) {
+      medias.add(Media.fromJson(e));
+    }
     return PostModel(
         postID: json['postID'], caption: json['caption'], userID: json['userID'], attractionID: json['attractionID'],
-        medias: medias, likeCount: json['likeCount'], commentCount: json['commentCount'],
+        medias:  medias, likeCount: json['likeCount'], commentCount: json['commentCount'],
         createDate: (json['createDate'] as Timestamp).toDate(), isDeleted: false);
   }
 }

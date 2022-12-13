@@ -27,6 +27,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
   void initState() {
     super.initState();
     requestStoragePermission();
+    print(readPosts().length);
   }
   @override
   void didChangeDependencies() {
@@ -35,8 +36,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
   Stream<List<PostModel>> readPosts() => FirebaseFirestore.instance.collection("post")
       .snapshots()
       .map((snapshot) => snapshot.docs.map((doc) {
-        final post =  PostModel.fromJson(doc.data());
-        return post;
+        return PostModel.fromJson(doc.data());
   }).toList());
 
   @override
@@ -57,10 +57,8 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                 StreamBuilder<List<PostModel>>(
                   stream: readPosts(),
                     builder: (context, snapshot) {
-                    print(readPosts().length);
                       if (snapshot.hasData) {
                         final posts = snapshot.data!;
-                        print(posts.first.medias.length);
                         return Column(
                           children: [
                             for(int i=0; i<posts.length; i++)
