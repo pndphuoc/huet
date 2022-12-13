@@ -220,7 +220,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                     ),
                   ),
                   Text(
-                    "4k",
+                    widget.samplePost.likeCount.toString(),
                     style: GoogleFonts.readexPro(
                       color: colors.SN_postTextColor,
                       fontSize: 15,
@@ -246,7 +246,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                     padding: EdgeInsets.zero,
                   ),
                   Text(
-                    "2.1k",
+                    widget.samplePost.commentCount.toString(),
                     style: GoogleFonts.readexPro(
                       color: colors.SN_postTextColor,
                       fontSize: 15,

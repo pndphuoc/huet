@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
@@ -6,6 +7,7 @@ import 'package:hue_t/view/social_network_network/post.dart';
 import 'package:hue_t/view/social_network_network/uploading_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
+import '../../provider/social_network/posts_provider.dart';
 
 import 'create_post.dart';
 
@@ -40,6 +42,12 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
   }
+  Stream<List<PostModel>> readPosts() => FirebaseFirestore.instance.collection("post")
+      .snapshots()
+      .map((snapshot) => snapshot.docs.map((doc) {
+        PostModel post = PostModel.fromJson(doc.data());
+        return PostModel.fromJson(doc.data());
+  }).toList());
 
   @override
   Widget build(BuildContext context) {
@@ -52,10 +60,25 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
             child: Column(
               children: [
                 const SizedBox(height: 70,),
-                widget.list != null ? UploadingWidget(list: widget.list!, caption: widget.caption??"", attractionId: widget.attractionId.toString(),) : Container(),
-                for(var item in postsList)
-                  item,
-                const SizedBox(height: 80,)
+                widget.list != null ? UploadingWidget(list: widget.list!, caption: widget.caption??"",
+                  attractionId: widget.attractionId.toString(),) : Container(),
+                StreamBuilder<List<PostModel>>(
+                  stream: readPosts(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        final posts = snapshot.data!;
+                        return Column(
+                          children: [
+
+                          ],
+                        );
+                      }
+                      else {
+                        return Container();
+                      }
+                    }
+                ),
+                const SizedBox(height: 80,),
               ],
             ),
           ),
