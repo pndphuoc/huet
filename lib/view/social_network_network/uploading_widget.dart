@@ -7,7 +7,8 @@ import 'package:photo_manager/photo_manager.dart';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:hue_t/colors.dart' as colors;
-
+import '../../model/social_network/media_model.dart';
+import 'constants.dart' as constants;
 import 'image_item_widget.dart';
 
 class UploadingWidget extends StatefulWidget {
@@ -22,16 +23,25 @@ class UploadingWidget extends StatefulWidget {
 class _UploadingWidgetState extends State<UploadingWidget> {
   UploadTask? uploadTask;
   bool isUploading = false;
-  Future<List<String>> uploadMedia() async {
+  Future<List<Media>> uploadMedia() async {
     setState(() {
       isUploading = true;
     });
-    List<String> mediaList = [];
+    List<Media> mediaList = [];
     const userID = 1;
     for(int i=0; i<widget.list.length; i++){
       final media = await widget.list[i].fileWithSubtype;
       final type = p.extension(media!.path);
-      final path = "medias/${userID}${DateTime.now()}${type}";
+      //Nếu là ảnh thì lưu vào thư mục photos, video thì vào thư mục videos
+      late var path;
+      late bool isPhoto;
+      if (widget.list[i].type == AssetType.image) {
+        path = "medias/photos/${userID}-${DateTime.now()}${type}";
+        isPhoto = true;
+      } else {
+        path = "medias/videos/${userID}-${DateTime.now()}${type}";
+        isPhoto = false;
+      }
       final file = File(media!.path);
 
       final ref = FirebaseStorage.instance.ref().child(path);
@@ -42,7 +52,9 @@ class _UploadingWidgetState extends State<UploadingWidget> {
       final snapshot = await uploadTask!.whenComplete(() {});
 
       final urlDownload = await snapshot.ref.getDownloadURL();
-      mediaList.add(urlDownload);
+
+
+      mediaList.add(Media(url: urlDownload, isPhoto: isPhoto));
       setState(() {
         uploadTask = null;
       });
@@ -54,9 +66,13 @@ class _UploadingWidgetState extends State<UploadingWidget> {
     return mediaList;
   }
 
-  Future uploadPostContent(List<String> mediaList) async {
-    final docPost = FirebaseFirestore.instance.collection('post').doc();
+  Future uploadPostContent(List<Media> mediaList) async {
+/*    List<Object> mediaJson = [];
+    for (int i=0 ; i<mediaList.length; i++) {
+      mediaJson.add(mediaList[i].toJson());
+    }*/
 
+    final docPost = FirebaseFirestore.instance.collection('post').doc();
     final post = PostModel(
       attractionID: widget.attractionId,
       userID: 1,
@@ -70,12 +86,13 @@ class _UploadingWidgetState extends State<UploadingWidget> {
     );
 
     final json = post.toJson();
-    print(json);
     return docPost.set(json);
   }
 
   Future<void> createPost() async {
-    uploadPostContent(await uploadMedia());
+    await uploadPostContent(await uploadMedia());
+    constants.isUploading = false;
+    constants.postInfomation = null;
   }
   @override
   void initState() {

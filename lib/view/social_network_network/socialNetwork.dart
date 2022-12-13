@@ -6,29 +6,19 @@ import 'package:hue_t/model/social_network/postModel.dart';
 import 'package:hue_t/view/social_network_network/post.dart';
 import 'package:hue_t/view/social_network_network/uploading_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:photo_manager/photo_manager.dart';
-import '../../provider/social_network/posts_provider.dart';
-
+import 'constants.dart' as constants;
 import 'create_post.dart';
 
 
 class SocialNetWorkPage extends StatefulWidget {
-  const SocialNetWorkPage({Key? key, this.list, this.caption, this.attractionId}) : super(key: key);
-  final List<AssetEntity>? list;
-  final String? caption;
-  final int? attractionId;
+  const SocialNetWorkPage({Key? key}) : super(key: key);
   @override
   State<SocialNetWorkPage> createState() => _SocialNetWorkPageState();
 }
 
-PostModel samplePost = PostModel(postID: '1', caption: "In the Hue",  userID: 1, attractionID: "1", medias: ["assets/images/socialNetwork/img.png", "assets/images/socialNetwork/img1.png"], likeCount: 69, commentCount: 1, createDate: DateTime(2022, 11, 26), isDeleted: false);
+//PostModel samplePost = PostModel(postID: '1', caption: "In the Hue",  userID: 1, attractionID: "1", medias: ["assets/images/socialNetwork/img.png", "assets/images/socialNetwork/img1.png"], likeCount: 69, commentCount: 1, createDate: DateTime(2022, 11, 26), isDeleted: false);
 
 class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
-  List<Widget> postsList = [
-    Post(samplePost: samplePost),
-    Post(samplePost: samplePost),
-    Post(samplePost: samplePost),
-  ];
   Future<void> requestStoragePermission() async {
     await Permission.storage.request();
   }
@@ -45,8 +35,8 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
   Stream<List<PostModel>> readPosts() => FirebaseFirestore.instance.collection("post")
       .snapshots()
       .map((snapshot) => snapshot.docs.map((doc) {
-        PostModel post = PostModel.fromJson(doc.data());
-        return PostModel.fromJson(doc.data());
+        final post =  PostModel.fromJson(doc.data());
+        return post;
   }).toList());
 
   @override
@@ -60,16 +50,21 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
             child: Column(
               children: [
                 const SizedBox(height: 70,),
-                widget.list != null ? UploadingWidget(list: widget.list!, caption: widget.caption??"",
-                  attractionId: widget.attractionId.toString(),) : Container(),
+                /*widget.list != null ? UploadingWidget(list: widget.list!, caption: widget.caption??"",
+                  attractionId: widget.attractionId.toString(),) : Container(),*/
+                constants.isUploading ? UploadingWidget(list: constants.postInfomation['medias'], caption: constants.postInfomation['caption'],
+        attractionId: constants.postInfomation['attractionID'].toString(),) : Container(),
                 StreamBuilder<List<PostModel>>(
                   stream: readPosts(),
                     builder: (context, snapshot) {
+                    print(readPosts().length);
                       if (snapshot.hasData) {
                         final posts = snapshot.data!;
+                        print(posts.first.medias.length);
                         return Column(
                           children: [
-
+                            for(int i=0; i<posts.length; i++)
+                              Post(samplePost: posts[i])
                           ],
                         );
                       }

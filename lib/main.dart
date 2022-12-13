@@ -98,8 +98,8 @@ class _SplashScreenState extends State<SplashScreen> {
 }
 
 class HueT extends StatefulWidget {
-  const HueT({super.key});
-
+  const HueT({super.key, this.index});
+  final int? index;
   @override
   State<HueT> createState() => _HueTState();
 }
@@ -214,7 +214,7 @@ class _HueTState extends State<HueT> {
             FocusScope.of(context).requestFocus(new FocusNode());
           },
           child: Stack(children: [
-            _children[_selectedItemPosition],
+            _children[widget.index != null ? widget.index! : _selectedItemPosition],
             MediaQuery.of(context).viewInsets.bottom != 0.0
                 ? Container()
                 : Positioned(

@@ -79,6 +79,9 @@ dependencies:
   firebase_core: ^2.4.0
   firebase_storage: ^11.0.7
   cloud_firestore: ^4.2.0
+  cached_network_image: ^3.2.3
+  flutter_cache_manager: ^3.3.0
+  cached_video_player: ^2.0.3
 
 dev_dependencies:
   flutter_test:

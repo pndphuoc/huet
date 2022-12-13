@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hue_t/model/social_network/postModel.dart';
 
 const kHeadTextStyle = TextStyle(
   color: Colors.black,
@@ -10,3 +11,6 @@ const kHeadSubtitleTextStyle = TextStyle(
   fontSize: 18,
   color: Colors.black87,
 );
+
+bool isUploading = false;
+var postInfomation;

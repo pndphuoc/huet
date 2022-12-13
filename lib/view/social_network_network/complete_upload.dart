@@ -4,19 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
+import 'package:hue_t/main.dart';
 import 'package:hue_t/model/attraction/tourist_attraction.dart';
 import 'package:hue_t/view/social_network_network/search_tourist_attractions.dart';
-import 'package:hue_t/view/social_network_network/socialNetwork.dart';
 import 'package:hue_t/view/social_network_network/uploading_widget.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:hue_t/fake_data.dart' as faker;
 import 'package:video_player/video_player.dart';
 import 'dart:io';
 import 'image_item_widget.dart';
-import 'package:path/path.dart' as p;
-import './uploading_widget.dart' as uploading_widget;
+import 'constants.dart' as constants;
 
 class CompleteUploadPage extends StatefulWidget {
   const CompleteUploadPage({Key? key, required this.medias}) : super(key: key);
@@ -122,12 +120,20 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
                   isUploading = true;
                 });
                 //UploadingWidget(list: widget.medias,);
-                Navigator.pushReplacement(
+                constants.isUploading = true;
+                constants.postInfomation = {
+                  'medias': widget.medias,
+                  'caption': captionController.text,
+                  'attractionID': selectedAttraction!.id
+                };
+                /*Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
                           SocialNetWorkPage(list: widget.medias, caption: captionController.text, attractionId: selectedAttraction!.id),
-                    ));
+                    ));*/
+                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) =>
+                    const HueT(index: 3,)), (Route<dynamic> route) => false);
               }
             },
             icon: Icon(

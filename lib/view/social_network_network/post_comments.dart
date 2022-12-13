@@ -175,7 +175,7 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
                 height: 5,
               ),
               Text(
-                widget.post.caption,
+                widget.post.caption!,
                 style:
                     GoogleFonts.montserrat(color: Colors.black, fontSize: 15),
               )
