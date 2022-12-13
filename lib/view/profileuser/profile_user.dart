@@ -3,7 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as color;
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:hue_t/main.dart';
 import 'package:hue_t/view/profileuser/edit_profile.dart';
+import 'package:hue_t/view/profileuser/loginin_page.dart';
+import 'package:hue_t/view/sign_in_out/register_user.dart';
+import 'package:hue_t/view/sign_in_out/sign_in_page.dart';
+import '../../constants/user_info.dart' as user_constants;
+import 'auth_service.dart';
+import 'package:hue_t/colors.dart' as colors;
 
 class ProfileUser extends StatefulWidget {
   const ProfileUser({Key? key}) : super(key: key);
@@ -14,6 +21,8 @@ class ProfileUser extends StatefulWidget {
 
 class _ProfileUserState extends State<ProfileUser> {
   bool status = false;
+  double sideLength = 50;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,7 +37,8 @@ class _ProfileUserState extends State<ProfileUser> {
     );
   }
 
-  Widget _buttonItem(String title, IconData leadingIcon, void Function() onTap) {
+  Widget _buttonItem(
+      String title, IconData leadingIcon, void Function() onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Row(
@@ -36,8 +46,7 @@ class _ProfileUserState extends State<ProfileUser> {
         children: [
           Row(
             children: [
-              Icon(leadingIcon,
-                  color: Colors.black54),
+              Icon(leadingIcon, color: Colors.black54),
               const SizedBox(
                 width: 10,
               ),
@@ -58,80 +67,174 @@ class _ProfileUserState extends State<ProfileUser> {
   }
 
   Widget header(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 80, bottom: 10),
-      child: Column(
-        children: [
-          Container(
-            width: 150,
-            height: 150,
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(150),
-                boxShadow: const [
+    return user_constants.user == null
+        ? Padding(
+            padding: const EdgeInsets.only(top: 80, bottom: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 150,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(150),
+                    /*boxShadow: const [
                   BoxShadow(
                     blurRadius: 7,
                     spreadRadius: 1,
                     color: Colors.grey,
                     offset: Offset(1, 3),
                   )
-                ]),
-            child: ClipRRect(
-                borderRadius: BorderRadius.circular(150),
-                child: Image.network(
-                  FirebaseAuth.instance.currentUser!.photoURL.toString(),
+                ]*/
+                  ),
+                  child: ClipRRect(
+                      borderRadius: BorderRadius.circular(150),
+                      child: Image.asset(
+                        "assets/images/hotel/avatar.png",
+                        width: 150,
+                        height: 150,
+                        fit: BoxFit.cover,
+                      )),
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 120,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          accountNavigator(context,  AuthService().handleAuthState(const HueT()));
+                        },
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          backgroundColor: colors.primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: Text(
+                          'Log in',
+                          style: GoogleFonts.readexPro(
+                              fontSize: 14, fontWeight: FontWeight.w400),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    SizedBox(
+                      width: 120,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          accountNavigator(context, const RegisterUser());
+                        },
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          backgroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            side: BorderSide(
+                                color: colors.primaryColor, width: 2),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: Text(
+                          'Register',
+                          style: GoogleFonts.readexPro(
+                              color: colors.primaryColor,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+              ],
+            ),
+          )
+        : Padding(
+            padding: const EdgeInsets.only(top: 80, bottom: 10),
+            child: Column(
+              children: [
+                Container(
                   width: 150,
                   height: 150,
-                  fit: BoxFit.cover,
-                )),
-          ),
-          const SizedBox(height: 5),
-          Text(
-            FirebaseAuth.instance.currentUser!.displayName!,
-            style: GoogleFonts.readexPro(
-                fontSize: 19, fontWeight: FontWeight.w600),
-          ),
-          Text(
-            FirebaseAuth.instance.currentUser!.email.toString(),
-            style: GoogleFonts.readexPro(
-                fontSize: 15, fontWeight: FontWeight.w100),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          ElevatedButton(
-            onPressed: () => editProfileAction(),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color.fromARGB(255, 104, 104, 172),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
-              ),
-            ),
-            child: SizedBox(
-              width: 115,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Edit Profile',
-                    style: GoogleFonts.readexPro(
-                        fontSize: 14, fontWeight: FontWeight.w400),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(150),
+                      boxShadow: const [
+                        BoxShadow(
+                          blurRadius: 7,
+                          spreadRadius: 1,
+                          color: Colors.grey,
+                          offset: Offset(1, 3),
+                        )
+                      ]),
+                  child: ClipRRect(
+                      borderRadius: BorderRadius.circular(150),
+                      child: Image.network(
+                        user_constants.user!.photoURL.toString(),
+                        width: 150,
+                        height: 150,
+                        fit: BoxFit.cover,
+                      )),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  user_constants.user!.name,
+                  style: GoogleFonts.readexPro(
+                      fontSize: 19, fontWeight: FontWeight.w600),
+                ),
+                Text(
+                  user_constants.user!.mail.toString(),
+                  style: GoogleFonts.readexPro(
+                      fontSize: 15, fontWeight: FontWeight.w100),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    accountNavigator(context, const EditProfile());
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 104, 104, 172),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(40),
+                    ),
                   ),
-                  const Icon(
-                    Icons.arrow_forward_ios_outlined,
-                    size: 17,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Edit Profile',
+                        style: GoogleFonts.readexPro(
+                            fontSize: 14, fontWeight: FontWeight.w400),
+                      ),
+                      const Padding(
+                        padding: const EdgeInsets.only(left: 5),
+                        child: const Icon(
+                          Icons.arrow_forward_ios_outlined,
+                          size: 17,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
-    );
+          );
   }
 
-  void editProfileAction() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const EditProfile()));
+  accountNavigator(BuildContext context, Widget page) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => page));
   }
 
   Widget content(BuildContext context) {
@@ -162,53 +265,70 @@ class _ProfileUserState extends State<ProfileUser> {
           ),
           child: Column(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.favorite_border_outlined,
-                          color: Colors.black54),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Text('Favorites',
+              GestureDetector(
+                onTap: () {
+                  /*user_constants.user == null
+                      ? accountNavigator(context,  AuthService().handleAuthState(FavoritePage()))
+                      : Container();*/
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.favorite_border_outlined,
+                            color: Colors.black54),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          'Favorites',
                           style: GoogleFonts.readexPro(
                               fontSize: 15,
                               fontWeight: FontWeight.w400,
-                              color: Colors.black54)),
-                    ],
-                  ),
+                              color: Colors.black54),
+                        ),
+                      ],
+                    ),
 
-                  const Icon(Icons.arrow_forward_ios_outlined,
-                      size: 17, color: Colors.black54),
-                  //Download
-                ],
+                    const Icon(Icons.arrow_forward_ios_outlined,
+                        size: 17, color: Colors.black54),
+                    //Download
+                  ],
+                ),
               ),
               const SizedBox(
                 height: 20,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.location_on_outlined, color: Colors.black54),
-                      const SizedBox(width: 10),
-                      Text('My Location',
-                          style: GoogleFonts.readexPro(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.black54)),
-                    ],
-                  ),
-                  const Icon(
-                    Icons.arrow_forward_ios_outlined,
-                    size: 17,
-                    color: Colors.black54,
-                  ),
-                  //Download
-                ],
+              GestureDetector(
+                onTap: () {
+                  user_constants.user == null
+                      ? accountNavigator(context, const SignInPage())
+                      : Container();
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on_outlined,
+                            color: Colors.black54),
+                        const SizedBox(width: 10),
+                        Text('My Location',
+                            style: GoogleFonts.readexPro(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.black54)),
+                      ],
+                    ),
+                    const Icon(
+                      Icons.arrow_forward_ios_outlined,
+                      size: 17,
+                      color: Colors.black54,
+                    ),
+                    //Download
+                  ],
+                ),
               ),
               const SizedBox(height: 20)
             ],
@@ -330,31 +450,35 @@ class _ProfileUserState extends State<ProfileUser> {
                 ],
               ),
               const SizedBox(
-                height: 20,
+                height: 5,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.logout_outlined,
-                        color: Colors.black54,
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      Text(
-                        'Log Out',
-                        style: GoogleFonts.readexPro(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.black54),
-                      ),
-                    ],
+              user_constants.user == null
+                  ? Container()
+                  : TextButton(
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.only(top: 10, bottom: 10),
+                      splashFactory: NoSplash.splashFactory
+                    ),
+                    onPressed: () {
+                      AuthService().signOut(context);
+                    },
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.logout_outlined,
+                          color: Colors.black54,
+                        ),
+                        const SizedBox(width: 10,),
+                        Text(
+                          'Log Out',
+                          style: GoogleFonts.readexPro(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.black54),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
             ],
           ),
         ),

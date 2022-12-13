@@ -34,7 +34,7 @@ class _LoginPageState extends State<LoginPage> {
                     fontSize: 30
                 )),
             GestureDetector(
-                onTap: () {
+                onTap: ()  {
                   AuthService().signInWithGoogle();
                 },
                 child: const Image(width: 100,height: 112, image: NetworkImage("https://images.unsplash.com/photo-1638136264464-2711f0078d1e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"))),

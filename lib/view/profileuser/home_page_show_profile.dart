@@ -45,7 +45,7 @@ class _HomePageState extends State<HomePage> {
                 style: TextStyle(color: Colors.white, fontSize: 15),
               ),
               onPressed: () {
-                AuthService().signOut();
+                AuthService().signOut(context);
               },
             ),
           ],

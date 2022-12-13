@@ -6,6 +6,7 @@ import 'package:device_preview/device_preview.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:hue_t/accommodation_views/hotel_detail.dart';
+import 'package:hue_t/animation/show_up.dart';
 import 'package:hue_t/model/user/user.dart';
 import 'package:hue_t/provider/google_sign_in.dart';
 import 'package:hue_t/view/Foodstore/foodstore.dart';
@@ -14,11 +15,9 @@ import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
 import 'package:hue_t/home.dart';
 import 'package:hue_t/accommodation_views/hotel.dart';
 import 'package:hue_t/view/profileuser/auth_service.dart';
-import 'package:hue_t/view/profileuser/login_user.dart';
 import 'package:hue_t/view/profileuser/loginin_page.dart';
 import 'package:hue_t/view/profileuser/profile_user.dart';
 import 'package:hue_t/view/foodstore/search_foodstore.dart';
-import 'package:hue_t/view/profileuser/temp_widget.dart';
 import 'package:provider/provider.dart';
 import 'accommodation_views/homestays_list.dart';
 import 'accommodation_views/hotels_list.dart';
@@ -183,7 +182,7 @@ class _HueTState extends State<HueT> {
     //ProfileUser(),
     //LoginPage()
     //userConstant.user!=null? const ProfileUser(): AuthService().handleAuthState()
-    TempWidget()
+    ProfileUser()
   ];
 
 
@@ -255,13 +254,14 @@ class _HueTState extends State<HueT> {
           /* _selectedItemPosition!=4?_children[_selectedItemPosition]:userinfo!=null?const ProfileUser():const LoginPage(),
          */
           _children[_selectedItemPosition],
+          MediaQuery.of(context).viewInsets.bottom != 0.0 ? Container() :
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
             child: LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
-                return bottomNavigationBar(context);
+                return ShowUp(child: bottomNavigationBar(context), delay: 0);
               },
             ),
           )
