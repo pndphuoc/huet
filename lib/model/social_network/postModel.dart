@@ -21,7 +21,6 @@ class PostModel {
   Map<String, dynamic> toJson() {
     var mediaJson = [];
     for(int i =0; i< medias.length; i++) {
-      final mediaString = medias[i].toJson();
       mediaJson.add(medias[i].toJson());
     }
     return {

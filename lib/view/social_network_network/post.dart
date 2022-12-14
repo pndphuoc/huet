@@ -168,7 +168,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
 /*                  if(!e.isPhoto) {
                     loadVideo(e.url);
                   }*/
-                print(e.url);
+                //print(e.url);
                   return Builder(builder: (BuildContext context) {
                     if (e.isPhoto) {
                       return CachedNetworkImage(
@@ -194,7 +194,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                         aspectRatio: _controller.value.aspectRatio,
                         child: VideoPlayer(_controller),
                       )
-                          : Container(child: Text("error"),);
+                          : const Text("error");
                   }
                   });
                 }).toList(),
@@ -464,7 +464,6 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    print(widget.samplePost.caption);
     return Container(
       margin: const EdgeInsets.only(bottom: 10, top: 10, left: 20, right: 20),
       width: MediaQuery

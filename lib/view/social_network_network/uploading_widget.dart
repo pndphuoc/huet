@@ -1,15 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/model/social_network/postModel.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:hue_t/colors.dart' as colors;
+import 'package:video_compress/video_compress.dart';
 import '../../model/social_network/media_model.dart';
 import 'constants.dart' as constants;
 import 'image_item_widget.dart';
+import 'dart:ui' as ui;
+import 'package:image/image.dart' as image;
 
 class UploadingWidget extends StatefulWidget {
   const UploadingWidget({Key? key, required this.list, this.caption, required this.attractionId}) : super(key: key);
@@ -23,6 +29,7 @@ class UploadingWidget extends StatefulWidget {
 class _UploadingWidgetState extends State<UploadingWidget> {
   UploadTask? uploadTask;
   bool isUploading = false;
+
   Future<List<Media>> uploadMedia() async {
     setState(() {
       isUploading = true;
@@ -31,18 +38,31 @@ class _UploadingWidgetState extends State<UploadingWidget> {
     const userID = 1;
     for(int i=0; i<widget.list.length; i++){
       final media = await widget.list[i].fileWithSubtype;
+      //Nén ảnh
+
       final type = p.extension(media!.path);
       //Nếu là ảnh thì lưu vào thư mục photos, video thì vào thư mục videos
       late var path;
+      File? compressedFile;
       late bool isPhoto;
       if (widget.list[i].type == AssetType.image) {
+        //Nén ảnh
+        compressedFile = await compressFile(media!);
         path = "medias/photos/${userID}-${DateTime.now()}${type}";
         isPhoto = true;
       } else {
+        //Nén video
+        MediaInfo? mediaInfo = await VideoCompress.compressVideo(
+          media.path,
+          quality: VideoQuality.HighestQuality,
+          deleteOrigin: false, // It's false by default
+        );
+        compressedFile = File(mediaInfo!.path!);
         path = "medias/videos/${userID}-${DateTime.now()}${type}";
         isPhoto = false;
+        await VideoCompress.deleteAllCache();
       }
-      final file = File(media!.path);
+      final file = File(compressedFile!.path);
 
       final ref = FirebaseStorage.instance.ref().child(path);
       setState(() {
@@ -53,12 +73,10 @@ class _UploadingWidgetState extends State<UploadingWidget> {
 
       final urlDownload = await snapshot.ref.getDownloadURL();
 
-
       mediaList.add(Media(url: urlDownload, isPhoto: isPhoto));
       setState(() {
         uploadTask = null;
       });
-      print(urlDownload);
     }
     setState(() {
       isUploading = false;
@@ -94,6 +112,25 @@ class _UploadingWidgetState extends State<UploadingWidget> {
     constants.isUploading = false;
     constants.postInfomation = null;
   }
+
+  Future<File?> compressFile(File file) async {
+    final filePath = file.absolute.path;
+    final type = p.extension(file!.path);
+    // Create output file path
+    // eg:- "Volume/VM/abcd_out.jpeg"
+    final lastIndex = filePath.lastIndexOf(RegExp(type));
+    final splitted = filePath.substring(0, (lastIndex));
+    final outPath = "${splitted}_resized${filePath.substring(lastIndex)}";
+    var result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path, outPath,
+      quality: 75
+    );
+
+    print(file.lengthSync());
+    print(result?.lengthSync());
+    return result;
+  }
+
   @override
   void initState() {
     super.initState();

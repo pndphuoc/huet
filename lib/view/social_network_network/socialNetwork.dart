@@ -50,8 +50,6 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
             child: Column(
               children: [
                 const SizedBox(height: 70,),
-                /*widget.list != null ? UploadingWidget(list: widget.list!, caption: widget.caption??"",
-                  attractionId: widget.attractionId.toString(),) : Container(),*/
                 constants.isUploading ? UploadingWidget(list: constants.postInfomation['medias'], caption: constants.postInfomation['caption'],
         attractionId: constants.postInfomation['attractionID'].toString(),) : Container(),
                 StreamBuilder<List<PostModel>>(

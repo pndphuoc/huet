@@ -214,8 +214,14 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
                   enableInfiniteScroll: false,
                   viewportFraction: 1,
                   onPageChanged: (index, reason) async {
-                    if (videoController != null) {
-                      videoController!.dispose();
+                    try {
+                      if (videoController != null) {
+                        videoController!.dispose();
+                      }
+                    } catch (e) {
+                      print(e);
+                    } finally {
+                      videoController = null;
                     }
                     setState(() {
                       loadVideo(widget.medias[index]);

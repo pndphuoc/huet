@@ -126,10 +126,9 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
   }
 
   Future<void> loadMediasOfAlbum(AssetPathEntity path) async {
-    if(videoController != null)
-      {
-        videoController!.dispose();
-      }
+    if (videoController != null) {
+      videoController!.dispose();
+    }
     final List<AssetEntity> entities = await path.getAssetListPaged(
       page: 0,
       size: _sizePerPage,
@@ -211,13 +210,25 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
               backgroundColor: colors.backgroundColor,
               elevation: 0,
               actions: [
-                IconButton(onPressed: (){
-                  if (videoController != null)
-                    {
-                      videoController!.dispose();
-                    }
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => CompleteUploadPage(medias: isMultiSelect? selectedList:[selectedMedia!]),));
-                }, icon: Icon(Icons.arrow_forward, color: colors.primaryColor, size: 30,))
+                IconButton(
+                    onPressed: () {
+                      if (videoController != null) {
+                        videoController!.dispose();
+                      }
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CompleteUploadPage(
+                                medias: isMultiSelect
+                                    ? selectedList
+                                    : [selectedMedia!]),
+                          ));
+                    },
+                    icon: Icon(
+                      Icons.arrow_forward,
+                      color: colors.primaryColor,
+                      size: 30,
+                    ))
               ],
             ),
             body: SlidingUpPanel(
@@ -241,6 +252,9 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
   }
 
   Future<void> loadVideo(AssetEntity entity) async {
+    if(entity.type == AssetType.image) {
+      return;
+    }
     File? file = await entity.file;
     videoController = VideoPlayerController.file(file!)
       ..initialize().then((_) {
@@ -263,16 +277,13 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
           aspectRatio: 1,
           child: (selectedMedia?.type == AssetType.video)
               ? Center(
-                  child: videoController != null
-                      ? AspectRatio(
+                  child: videoController == null
+                      ? LoadingAnimationWidget.discreteCircle(
+                          color: colors.primaryColor, size: 30)
+                      : AspectRatio(
                           aspectRatio: videoController!.value.aspectRatio,
                           child: VideoPlayer(videoController!),
-                        )
-                      : Center(
-                          child: LoadingAnimationWidget.discreteCircle(
-                              color: colors.primaryColor, size: 30),
-                        ),
-                )
+                        ))
               : ImageItemWidget(
                   entity: selectedMedia!,
                   option: const ThumbnailOption(
@@ -319,6 +330,7 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
                 if (isMultiSelect == false) {
                   selectedList.clear();
                   selectedMedia = entity;
+                  loadVideo(selectedMedia!);
                   selectedList.add(entity);
                   isMultiSelect = true;
                 }
@@ -327,8 +339,10 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
             onTap: () async {
               if (videoController != null) {
                 videoController?.dispose();
+                setState(() {
+                  videoController = null;
+                });
               }
-
               if (isMultiSelect) {
                 if (selectedList.contains(entity)) {
                   selectedList.remove(entity);
@@ -337,7 +351,7 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
                       await loadVideo(selectedList.last);
                     }
                     setState(() {
-                      if(_entities!.contains(selectedList.last)) {
+                      if (_entities!.contains(selectedList.last)) {
                         controller.scrollToIndex(
                             _entities!.indexOf(selectedList.last),
                             preferPosition: AutoScrollPosition.begin);
