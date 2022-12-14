@@ -202,6 +202,15 @@ class _HueTState extends State<HueT> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.index != null) {
+      setState(() {
+        _selectedItemPosition = widget.index!;
+      });
+    }
+  }
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Hue Travel',
@@ -214,7 +223,7 @@ class _HueTState extends State<HueT> {
             FocusScope.of(context).requestFocus(new FocusNode());
           },
           child: Stack(children: [
-            _children[widget.index != null ? widget.index! : _selectedItemPosition],
+            _children[_selectedItemPosition],
             MediaQuery.of(context).viewInsets.bottom != 0.0
                 ? Container()
                 : Positioned(

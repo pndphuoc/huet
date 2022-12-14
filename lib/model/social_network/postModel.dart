@@ -39,7 +39,7 @@ class PostModel {
 
   static PostModel fromJson(Map<String, dynamic> json) {
     List<Media> medias = [];
-    for(Map<String, dynamic> e in List<Map<String, dynamic>>.from(json['medias'])) {
+    for(var e in List.from(json['medias'])) {
       medias.add(Media.fromJson(e));
     }
     return PostModel(

@@ -7,7 +7,6 @@ import 'package:hue_t/colors.dart' as colors;
 import 'package:hue_t/main.dart';
 import 'package:hue_t/model/attraction/tourist_attraction.dart';
 import 'package:hue_t/view/social_network_network/search_tourist_attractions.dart';
-import 'package:hue_t/view/social_network_network/uploading_widget.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:hue_t/fake_data.dart' as faker;
@@ -41,15 +40,25 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    if (widget.medias.first.type == AssetType.video) {
+      (() async {
+        await loadVideo(widget.medias.first);
+      })();
+    }
   }
 
   @override
   void dispose() {
     super.dispose();
-    //videoController!.dispose();
+    if (videoController != null) {
+      videoController!.dispose();
+    }
   }
 
   Future<void> loadVideo(AssetEntity entity) async {
+    if (entity.type != AssetType.video) {
+      return;
+    }
     File? file = await entity.file;
     videoController = VideoPlayerController.file(file!)
       ..initialize().then((_) {
@@ -92,6 +101,9 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
       elevation: 0,
       leading: IconButton(
         onPressed: () {
+          if (videoController != null) {
+            videoController!.dispose();
+          }
           Navigator.pop(context);
         },
         splashColor: Colors.transparent,
@@ -126,14 +138,12 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
                   'caption': captionController.text,
                   'attractionID': selectedAttraction!.id
                 };
-                /*Navigator.pushReplacement(
-                    context,
+                Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(
-                      builder: (context) =>
-                          SocialNetWorkPage(list: widget.medias, caption: captionController.text, attractionId: selectedAttraction!.id),
-                    ));*/
-                Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) =>
-                    const HueT(index: 3,)), (Route<dynamic> route) => false);
+                        builder: (context) => const HueT(
+                              index: 3,
+                            )),
+                    (Route<dynamic> route) => false);
               }
             },
             icon: Icon(
@@ -207,15 +217,15 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
                     if (videoController != null) {
                       videoController!.dispose();
                     }
-                    await loadVideo(widget.medias[index]);
                     setState(() {
+                      loadVideo(widget.medias[index]);
                       currentPos = index;
                     });
                   }),
               items: widget.medias.map((e) {
                 return Builder(builder: (BuildContext context) {
                   return e.type == AssetType.video
-                      ? videoController == null
+                      ? videoController == null || !videoController!.value.isInitialized
                           ? Center(
                               child: LoadingAnimationWidget.discreteCircle(
                                   color: colors.primaryColor, size: 30),

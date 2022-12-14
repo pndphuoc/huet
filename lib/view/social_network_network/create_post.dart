@@ -365,10 +365,10 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
                         textColor: Colors.white,
                         fontSize: 16.0);
                   } else {
-                    selectedList.add(entity);
                     if (entity.type == AssetType.video) {
                       await loadVideo(entity);
                     }
+                    selectedList.add(entity);
                     setState(() {
                       controller.scrollToIndex(index,
                           preferPosition: AutoScrollPosition.begin);
