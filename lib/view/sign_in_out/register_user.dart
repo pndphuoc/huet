@@ -1,7 +1,10 @@
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/view/sign_in_out/sign_in_page.dart';
+import 'package:rive/rive.dart';
 
 import '../../colors.dart';
 import '../profileuser/auth_service.dart';
@@ -19,10 +22,38 @@ class _RegisterUserState extends State<RegisterUser> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      body: Stack(children: [
-        contentBlock(context),
-        backButton(context),
-      ]),
+      body: SingleChildScrollView(
+        child: Stack(children: [
+          Positioned(
+            width: MediaQuery.of(context).size.width * 1.7,
+            left: 100,
+            bottom: 100,
+            child: Image.asset(
+              "assets/Backgrounds/Spline.png",
+            ),
+          ),
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+              child: const SizedBox(),
+            ),
+          ),
+          const RiveAnimation.asset(
+            "assets/RiveAssets/shapes.riv",
+          ),
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+              child: const SizedBox(),
+            ),
+          ),
+          SizedBox(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            child: contentBlock(context),),
+          backButton(context),
+        ]),
+      ),
     );
   }
 
@@ -64,13 +95,13 @@ class _RegisterUserState extends State<RegisterUser> {
       children: [
         Image.asset(
           'assets/images/splashscreen/2.png',
-          width: MediaQuery.of(context).size.width / 1.15,
+          width: MediaQuery.of(context).size.width / 1.67,
           fit: BoxFit.cover,
         ),
         Text(
           'Register HueT',
           style: GoogleFonts.readexPro(
-              fontSize: 25, fontWeight: FontWeight.w500, color: Colors.black87),
+              fontSize: 27, fontWeight: FontWeight.w500, color: Colors.black87),
         ),
         const SizedBox(
           height: 10,
@@ -95,7 +126,7 @@ class _RegisterUserState extends State<RegisterUser> {
           borderSide: BorderSide.none,
           borderRadius: BorderRadius.all(Radius.circular(10)),
         ),
-        fillColor: const Color.fromARGB(255, 235, 235, 235),
+        fillColor: const Color.fromARGB(255, 235, 235, 235).withOpacity(0.8),
         hintText: hintDataText,
         labelText: labelDataText,
         labelStyle: const TextStyle(color: Colors.grey),
@@ -120,15 +151,22 @@ class _RegisterUserState extends State<RegisterUser> {
         padding: const EdgeInsets.only(left: 35, right: 35, top: 17),
         child: Column(
           children: [
+            inputInformationUser('User name','Name','Your user name'),
+            const SizedBox(
+              height: 15,
+            ),
             inputInformationUser('Enter your Email','Email','Your email'),
             const SizedBox(
               height: 15,
             ),
             inputInformationUser('Enter your password', 'Password', 'Your password'),
             const SizedBox(
-              height: 20,
+              height: 15,
             ),
-            inputInformationUser('Reenter your password', 'Password', 'Your password'),
+            inputInformationUser('Re-enter your password', 'Confirm password', 'Your password'),
+            const SizedBox(
+              height: 15,
+            ),
           ],
         ),
       ),

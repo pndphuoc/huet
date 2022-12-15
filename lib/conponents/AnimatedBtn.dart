@@ -30,7 +30,7 @@ class AnimatedBtn extends StatelessWidget {
             ),
             Positioned.fill(
               top: 8,
-              child: Center(child: Text(text, style: GoogleFonts.readexPro(fontWeight: FontWeight.w400, color: Colors.black))),
+              child: Center(child: Text(text, style: GoogleFonts.readexPro(fontWeight: FontWeight.w400, color: Colors.black87))),
             ),
 
           ],

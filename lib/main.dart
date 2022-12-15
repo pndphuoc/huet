@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
@@ -82,53 +84,72 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        child: Stack(
+    return Stack(
       children: [
-        Image.asset(
-          'assets/images/splashscreen/3.png',
+    Image.asset(
+      'assets/images/splashscreen/3.png',
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
+      fit: BoxFit.cover,
+    ),
+        Positioned(
+          width: MediaQuery.of(context).size.width * 1.7,
+          left: 100,
+          bottom: 100,
+          child: Image.asset(
+            "assets/Backgrounds/Spline.png",
+          ),
+        ),
+        Positioned.fill(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: const SizedBox(),
+          ),
+        ),
+    const rive.RiveAnimation.asset(
+      fit: BoxFit.fitWidth,
+      "assets/RiveAssets/shapesscreen.riv",
+    ),
+        Positioned.fill(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+            child: const SizedBox(),
+          ),
+        ),
+    Positioned(
+        top: 330,
+        child: Image.asset(
+          'assets/images/splashscreen/5.png',
           width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          fit: BoxFit.cover,
-        ),
-
-        const rive.RiveAnimation.asset(
-          "assets/RiveAssets/shapes.riv",
-        ),
-        Positioned(
-            top: 330,
-            child: Image.asset(
-              'assets/images/splashscreen/5.png',
-              width: MediaQuery.of(context).size.width,
-            )),
-        Positioned(
-            top: 100,
-            child: ElasticInUp(
-              duration: Duration(milliseconds: 3000),
-              child: Image.asset(
-                'assets/images/splashscreen/2.png',
-                width: MediaQuery.of(context).size.width,
+        )),
+    Positioned(
+        top: 100,
+        child: ElasticInUp(
+          duration: Duration(milliseconds: 3000),
+          child: Image.asset(
+            'assets/images/splashscreen/2.png',
+            width: MediaQuery.of(context).size.width,
+          ),
+        )),
+    Positioned(
+        top: 700,
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SpinKitThreeBounce(
+                color: Colors.white,
+                duration: Duration(milliseconds: 1000),
+                size: 40,
               ),
-            )),
-        Positioned(
-            top: 700,
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SpinKitThreeBounce(
-                    color: Colors.white,
-                    duration: Duration(milliseconds: 1000),
-                    size: 40,
-                  ),
-                ],
-              ),
-            )),
-        //Add animation
+            ],
+          ),
+        )),
+    //Add animation
 
       ],
-    ));
+    );
   }
 }
 

@@ -202,11 +202,18 @@ class _SignInPageState extends State<SignInPage> {
           height: 10,
         ),
         AnimatedBtn(
-          text: "LOGIN",
+            text: "LOGIN",
             btnAnimationController: _btnAnimationController,
             press: (){
               _btnAnimationController.isActive = true;
-            Future.delayed(const Duration(milliseconds: 1500), () => Navigator.push(context,MaterialPageRoute(builder: (context) => const HueT())),);
+              Future.doWhile(() async {
+                const RiveAnimation.asset(
+                  "assets/RiveAssets/success.riv",
+                );
+                await Future.delayed(const Duration(milliseconds: 1500), () => Navigator.push(context,MaterialPageRoute(builder: (context) => const HueT())),);
+                return true;
+              }
+              );
             }
         ),
         const SizedBox(
@@ -215,7 +222,7 @@ class _SignInPageState extends State<SignInPage> {
         Text(
           'OR',
           style: GoogleFonts.readexPro(
-              fontWeight: FontWeight.w300, color: Colors.black87),
+              fontWeight: FontWeight.w300, color: Colors.white),
         ),
         const SizedBox(
           height: 10,
