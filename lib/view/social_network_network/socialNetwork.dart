@@ -62,6 +62,12 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
   }).toList());
 
   @override
+  void dispose(){
+    super.dispose();
+    _refreshController.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: colors.backgroundColor,
