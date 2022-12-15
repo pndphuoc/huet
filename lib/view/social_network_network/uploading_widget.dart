@@ -1,11 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/model/social_network/postModel.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'dart:io';
 import 'package:path/path.dart' as p;
@@ -14,14 +12,15 @@ import 'package:video_compress/video_compress.dart';
 import '../../model/social_network/media_model.dart';
 import 'constants.dart' as constants;
 import 'image_item_widget.dart';
-import 'dart:ui' as ui;
-import 'package:image/image.dart' as image;
+
+typedef void ResultCallback(bool val);
 
 class UploadingWidget extends StatefulWidget {
-  const UploadingWidget({Key? key, required this.list, this.caption, required this.attractionId}) : super(key: key);
+  const UploadingWidget({Key? key, required this.list, this.caption, required this.attractionId, required this.callback}) : super(key: key);
   final List<AssetEntity> list;
   final String? caption;
   final String attractionId;
+  final ResultCallback callback;
   @override
   State<UploadingWidget> createState() => _UploadingWidgetState();
 }
@@ -142,6 +141,8 @@ class _UploadingWidgetState extends State<UploadingWidget> {
   void initState() {
     super.initState();
     createPost();
+
+    widget.callback(true);
   }
 
   Widget buildUploadingProgress(BuildContext context, double progress) {

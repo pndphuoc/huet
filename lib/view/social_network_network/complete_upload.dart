@@ -26,7 +26,6 @@ class CompleteUploadPage extends StatefulWidget {
 class _CompleteUploadPageState extends State<CompleteUploadPage> {
   int currentPos = 0;
   TouristAttaction? selectedAttraction;
-
   VideoPlayerController? videoController;
   UploadTask? uploadTask;
 
@@ -143,7 +142,7 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
                         builder: (context) => const HueT(
                               index: 3,
                             )),
-                    (Route<dynamic> route) => false);
+                    (route) => false);
               }
             },
             icon: Icon(
@@ -231,7 +230,8 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
               items: widget.medias.map((e) {
                 return Builder(builder: (BuildContext context) {
                   return e.type == AssetType.video
-                      ? videoController == null || !videoController!.value.isInitialized
+                      ? videoController == null ||
+                              !videoController!.value.isInitialized
                           ? Center(
                               child: LoadingAnimationWidget.discreteCircle(
                                   color: colors.primaryColor, size: 30),

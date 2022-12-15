@@ -10,6 +10,7 @@ import 'package:hue_t/animation/heart_animation.dart';
 import 'package:hue_t/colors.dart' as colors;
 import 'package:hue_t/model/social_network/postModel.dart';
 import 'package:hue_t/view/social_network_network/post_comments.dart';
+import 'package:hue_t/view/social_network_network/video_widget.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:intl/intl.dart';
 import 'package:video_player/video_player.dart';
@@ -17,9 +18,9 @@ import 'package:video_player/video_player.dart';
 import '../../model/social_network/media_model.dart';
 
 class Post extends StatefulWidget {
-  const Post({Key? key, required this.samplePost}) : super(key: key);
+  const Post({Key? key, required this.samplePost, required this.isInView}) : super(key: key);
   final PostModel samplePost;
-
+  final bool isInView;
   @override
   State<Post> createState() => _PostState();
 }
@@ -61,10 +62,24 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
     _controller = CachedVideoPlayerController.network(media.url)
       ..initialize().then((_) {
         // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-        _controller!.play();
+        if(widget.isInView){
+          _controller!.play();
+        }
+        else {
+          _controller!.pause();
+        }
         setState(() {});
       });
     setState(() {});
+  }
+
+  void initializeVideoController(String url) {
+    _controller = CachedVideoPlayerController.network(url)
+      ..initialize().then((_) {
+        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+        _controller!.play();
+        setState(() {});
+      });
   }
 
   @override
@@ -176,10 +191,13 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                       );
                     } else {
                       return _controller!.value.isInitialized
-                          ? AspectRatio(
+                          ? /*AspectRatio(
                               aspectRatio: _controller!.value.aspectRatio,
                               child: CachedVideoPlayer(_controller!),
-                            )
+                            )*/
+                      AspectRatio(aspectRatio: 1,
+                      child: VideoWidget(url: e.url, play: true),
+                      )
                           : Center(
                               child: LoadingAnimationWidget.discreteCircle(
                                   color: colors.primaryColor, size: 30),

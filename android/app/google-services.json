@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "542914300169",
-    "project_id": "huet2-4f852",
-    "storage_bucket": "huet2-4f852.appspot.com"
+    "project_number": "745827001091",
+    "project_id": "huet3-a65f7",
+    "storage_bucket": "huet3-a65f7.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:542914300169:android:639d231500d65bf7cb6bd8",
+        "mobilesdk_app_id": "1:745827001091:android:2225cbd4f0bc8a21a63f36",
         "android_client_info": {
           "package_name": "com.example.hue_t"
         }
       },
       "oauth_client": [
         {
-          "client_id": "542914300169-47lj031aam1s69mcplbcfs3bfbttttoa.apps.googleusercontent.com",
+          "client_id": "745827001091-55bf9f9chlem62b8f1brdhv3sf171ujq.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDPiubvE8qH8s4ovDA-_mQgDmAnmWZlxEA"
+          "current_key": "AIzaSyBVfjyxnSVGmUDowoRLKuonPkrVbrSVsso"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "542914300169-47lj031aam1s69mcplbcfs3bfbttttoa.apps.googleusercontent.com",
+              "client_id": "745827001091-55bf9f9chlem62b8f1brdhv3sf171ujq.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
