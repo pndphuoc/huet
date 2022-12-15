@@ -14,6 +14,8 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:intl/intl.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../model/social_network/media_model.dart';
+
 class Post extends StatefulWidget {
   const Post({Key? key, required this.samplePost}) : super(key: key);
   final PostModel samplePost;
@@ -27,7 +29,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
     duration: const Duration(milliseconds: 500),
     vsync: this,
   );
-  late VideoPlayerController _controller;
+  CachedVideoPlayerController? _controller;
   int currentPos = 0;
   bool isLiked = false;
   bool isHeartAnimating = false;
@@ -45,34 +47,31 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
   @override
   void dispose() {
     _heartController.dispose();
-    _controller.dispose();
+    _controller!.dispose();
     super.dispose();
   }
 
-  void loadVideo(String url) {
-    _controller = VideoPlayerController.network(
-      "https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4"
-    )
+  void loadVideo(Media media) {
+    if (media.isPhoto) {
+      return;
+    }
+    if(_controller != null) {
+      _controller!.dispose();
+    }
+    _controller = CachedVideoPlayerController.network(media.url)
       ..initialize().then((_) {
         // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-        //_controller.play();
+        _controller!.play();
         setState(() {});
       });
+    setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.network(
-      "https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4"
-    )
-      ..initialize().then((_) {
-        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-        //_controller.play();
-        setState(() {});
-      });
+    loadVideo(widget.samplePost.medias.first);
   }
-
   Widget buildNameAndAttraction(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(left: 15, right: 15, top: 15),
@@ -85,7 +84,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
               width: 50,
               child: const CircleAvatar(
                 backgroundImage:
-                AssetImage("assets/images/socialNetwork/jennieAvatar.png"),
+                    AssetImage("assets/images/socialNetwork/jennieAvatar.png"),
               )),
           Expanded(
             child: Column(
@@ -153,49 +152,39 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                     enableInfiniteScroll: false,
                     viewportFraction: 1,
                     onPageChanged: (index, reason) async {
-/*                      if (controller.value.isInitialized)
-                        {
-                          controller.dispose();
-                        }*/
-/*                      if (widget.samplePost.medias[index].isPhoto == false) {
-                        await loadVideo(widget.samplePost.medias[index].url);
-                      }*/
+                      loadVideo(widget.samplePost.medias[index]);
                       setState(() {
                         currentPos = index;
                       });
                     }),
                 items: widget.samplePost.medias.map((e) {
-/*                  if(!e.isPhoto) {
-                    loadVideo(e.url);
-                  }*/
-                //print(e.url);
                   return Builder(builder: (BuildContext context) {
                     if (e.isPhoto) {
                       return CachedNetworkImage(
                         imageUrl: e.url,
-                        imageBuilder: (context, imageProvider) =>
-                            Image(
-                              image: CachedNetworkImageProvider(e.url),
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                            ),
-                        placeholder: (context, url) =>
-                            Center(
-                              child: LoadingAnimationWidget.discreteCircle(
-                                  color: colors.primaryColor, size: 40),
-                            ),
+                        imageBuilder: (context, imageProvider) => Image(
+                          image: CachedNetworkImageProvider(e.url),
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                        placeholder: (context, url) => Center(
+                          child: LoadingAnimationWidget.discreteCircle(
+                              color: colors.primaryColor, size: 40),
+                        ),
                         errorWidget: (context, url, error) =>
-                        const Icon(Icons.error),
+                            const Icon(Icons.error),
                       );
-                    }
-                    else {
-                      return _controller.value.isInitialized
+                    } else {
+                      return _controller!.value.isInitialized
                           ? AspectRatio(
-                        aspectRatio: _controller.value.aspectRatio,
-                        child: VideoPlayer(_controller),
-                      )
-                          : const Text("error");
-                  }
+                              aspectRatio: _controller!.value.aspectRatio,
+                              child: CachedVideoPlayer(_controller!),
+                            )
+                          : Center(
+                              child: LoadingAnimationWidget.discreteCircle(
+                                  color: colors.primaryColor, size: 30),
+                            );
+                    }
                   });
                 }).toList(),
               ),
@@ -275,14 +264,14 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                   },
                   icon: isLiked
                       ? const Icon(
-                    Icons.favorite_rounded,
-                    color: Colors.red,
-                    size: 30,
-                  )
+                          Icons.favorite_rounded,
+                          color: Colors.red,
+                          size: 30,
+                        )
                       : const Icon(
-                    Icons.favorite_outline_rounded,
-                    size: 30,
-                  ),
+                          Icons.favorite_outline_rounded,
+                          size: 30,
+                        ),
                   splashColor: Colors.transparent,
                   highlightColor: Colors.transparent,
                   hoverColor: Colors.transparent,
@@ -309,8 +298,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>
-                              PostCommentsPage(
+                          builder: (context) => PostCommentsPage(
                                 post: widget.samplePost,
                               )));
                   FocusManager.instance.primaryFocus?.unfocus();
@@ -344,14 +332,14 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
             },
             icon: isMark
                 ? Icon(
-              Icons.bookmark,
-              size: 30,
-              color: colors.primaryColor,
-            )
+                    Icons.bookmark,
+                    size: 30,
+                    color: colors.primaryColor,
+                  )
                 : const Icon(
-              Icons.bookmark_outline,
-              size: 30,
-            ),
+                    Icons.bookmark_outline,
+                    size: 30,
+                  ),
             splashColor: Colors.transparent,
             hoverColor: Colors.transparent,
             highlightColor: Colors.transparent,
@@ -391,16 +379,16 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
           ),
           const Expanded(
               child: SizedBox(
-                child: TextField(
-                  textInputAction: TextInputAction.send,
-                  keyboardType: TextInputType.multiline,
-                  maxLines: null,
-                  decoration: InputDecoration(
-                      contentPadding: EdgeInsets.fromLTRB(10, 15, 10, 0),
-                      hintText: "Write a comment",
-                      border: InputBorder.none),
-                ),
-              )),
+            child: TextField(
+              textInputAction: TextInputAction.send,
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
+              decoration: InputDecoration(
+                  contentPadding: EdgeInsets.fromLTRB(10, 15, 10, 0),
+                  hintText: "Write a comment",
+                  border: InputBorder.none),
+            ),
+          )),
           const SizedBox(
             width: 10,
           ),
@@ -429,26 +417,35 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
   }
 
   Widget buildDateFormat(DateTime createDate) {
-    return Text( // 86400
-      daysBetween(createDate, DateTime.now()) < 60 ?
-      //Nếu dưới 60 giây
-      "${daysBetween(createDate, DateTime.now())} seconds ago" :
-      // Trên 60 giây, đổi sang phút
-      (daysBetween(createDate, DateTime.now()) / 60).round() < 60 ?
-      //Dưới 60 phút
-      "${(daysBetween(createDate, DateTime.now()) / 60).round()} minutes ago" :
-      //Trên 60 phút, đổi sang giờ
-      (daysBetween(createDate, DateTime.now()) / (60 * 60)).round() < 24 ?
-      //Dưới 24 giờ
-      "${(daysBetween(createDate, DateTime.now()) / (60 * 60))
-          .round()} hours ago" :
-      //Trên 24 giờ, đổi sang ngày
-      (daysBetween(createDate, DateTime.now()) / (24 * 60 * 60)).round() < 7 ?
-      //Dưới 7 ngày
-      "${(daysBetween(createDate, DateTime.now()) / (24 * 60 * 60))
-          .round()} days ago" :
-      //Trên 7 ngày
-      DateFormat('dd-MM-yy').format(createDate),
+    return Text(
+      // 86400
+      daysBetween(createDate, DateTime.now()) < 60
+          ?
+          //Nếu dưới 60 giây
+          "${daysBetween(createDate, DateTime.now())} seconds ago"
+          :
+          // Trên 60 giây, đổi sang phút
+          (daysBetween(createDate, DateTime.now()) / 60).round() < 60
+              ?
+              //Dưới 60 phút
+              "${(daysBetween(createDate, DateTime.now()) / 60).round()} minutes ago"
+              :
+              //Trên 60 phút, đổi sang giờ
+              (daysBetween(createDate, DateTime.now()) / (60 * 60)).round() < 24
+                  ?
+                  //Dưới 24 giờ
+                  "${(daysBetween(createDate, DateTime.now()) / (60 * 60)).round()} hours ago"
+                  :
+                  //Trên 24 giờ, đổi sang ngày
+                  (daysBetween(createDate, DateTime.now()) / (24 * 60 * 60))
+                              .round() <
+                          7
+                      ?
+                      //Dưới 7 ngày
+                      "${(daysBetween(createDate, DateTime.now()) / (24 * 60 * 60)).round()} days ago"
+                      :
+                      //Trên 7 ngày
+                      DateFormat('dd-MM-yy').format(createDate),
       style: GoogleFonts.readexPro(fontSize: 10, color: Colors.grey),
     );
   }
@@ -457,19 +454,14 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
     from = DateTime(
         from.year, from.month, from.day, from.hour, from.minute, from.second);
     to = DateTime(to.year, to.month, to.day, to.hour, to.minute, to.second);
-    return (to
-        .difference(from)
-        .inSeconds);
+    return (to.difference(from).inSeconds);
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10, top: 10, left: 20, right: 20),
-      width: MediaQuery
-          .of(context)
-          .size
-          .width,
+      width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
           color: colors.SN_postBackgroundColor,
           borderRadius: BorderRadius.circular(30)),

@@ -6,6 +6,7 @@ import 'package:hue_t/model/social_network/postModel.dart';
 import 'package:hue_t/view/social_network_network/post.dart';
 import 'package:hue_t/view/social_network_network/uploading_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'constants.dart' as constants;
 import 'create_post.dart';
 
@@ -23,11 +24,32 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
     await Permission.storage.request();
   }
 
+  RefreshController _refreshController =
+  RefreshController(initialRefresh: false);
+
+  void _onRefresh() async{
+    // monitor network fetch
+    await Future.delayed(Duration(milliseconds: 1000));
+    // if failed,use refreshFailed()
+    _refreshController.refreshCompleted();
+  }
+
+  void _onLoading() async{
+    // monitor network fetch
+    await Future.delayed(Duration(milliseconds: 1000));
+    // if failed,use loadFailed(),if no data return,use LoadNodata()
+    //items.add((items.length+1).toString());
+    if(mounted) {
+        setState(() {
+      });
+    }
+    _refreshController.loadComplete();
+  }
+
   @override
   void initState() {
     super.initState();
     requestStoragePermission();
-    print(readPosts().length);
   }
   @override
   void didChangeDependencies() {
@@ -44,37 +66,44 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
     return Scaffold(
       backgroundColor: colors.backgroundColor,
       resizeToAvoidBottomInset: true,
-      body: SafeArea(
-        child: Stack(
-          children: [SingleChildScrollView(
-            child: Column(
-              children: [
-                const SizedBox(height: 70,),
-                constants.isUploading ? UploadingWidget(list: constants.postInfomation['medias'], caption: constants.postInfomation['caption'],
-        attractionId: constants.postInfomation['attractionID'].toString(),) : Container(),
-                StreamBuilder<List<PostModel>>(
-                  stream: readPosts(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        final posts = snapshot.data!;
-                        return Column(
-                          children: [
-                            for(int i=0; i<posts.length; i++)
-                              Post(samplePost: posts[i])
-                          ],
-                        );
+      body: SmartRefresher(
+        enablePullDown: true,
+        header: const WaterDropHeader(),
+        controller: _refreshController,
+        onRefresh: _onRefresh,
+        onLoading: _onLoading,
+        child: SafeArea(
+          child: Stack(
+            children: [SingleChildScrollView(
+              child: Column(
+                children: [
+                  const SizedBox(height: 70,),
+                  constants.isUploading ? UploadingWidget(list: constants.postInfomation['medias'], caption: constants.postInfomation['caption'],
+          attractionId: constants.postInfomation['attractionID'].toString(),) : Container(),
+                  StreamBuilder<List<PostModel>>(
+                    stream: readPosts(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          final posts = snapshot.data!;
+                          return Column(
+                            children: [
+                              for(int i=0; i<posts.length; i++)
+                                Post(samplePost: posts[i])
+                            ],
+                          );
+                        }
+                        else {
+                          return Container();
+                        }
                       }
-                      else {
-                        return Container();
-                      }
-                    }
-                ),
-                const SizedBox(height: 80,),
-              ],
+                  ),
+                  const SizedBox(height: 80,),
+                ],
+              ),
             ),
+              appBarBlock(context),
+            ]
           ),
-            appBarBlock(context),
-          ]
         ),
       ),
     );
@@ -110,6 +139,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
 
                   ),
                   ElevatedButton(onPressed: (){
+
                    Navigator.push(
                         context, MaterialPageRoute(builder: (context) => const CreatePost()));
                   },

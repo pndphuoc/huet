@@ -29,7 +29,7 @@ class UploadingWidget extends StatefulWidget {
 class _UploadingWidgetState extends State<UploadingWidget> {
   UploadTask? uploadTask;
   bool isUploading = false;
-
+  bool isCompressing = false;
   Future<List<Media>> uploadMedia() async {
     setState(() {
       isUploading = true;
@@ -47,23 +47,29 @@ class _UploadingWidgetState extends State<UploadingWidget> {
       late bool isPhoto;
       if (widget.list[i].type == AssetType.image) {
         //Nén ảnh
-        compressedFile = await compressFile(media!);
+        compressedFile = await compressFile(media);
         path = "medias/photos/${userID}-${DateTime.now()}${type}";
         isPhoto = true;
-      } else {
+      }
+      else {
+        setState(() {
+          isCompressing = true;
+        });
         //Nén video
         MediaInfo? mediaInfo = await VideoCompress.compressVideo(
           media.path,
-          quality: VideoQuality.HighestQuality,
+          quality: VideoQuality.DefaultQuality,
           deleteOrigin: false, // It's false by default
         );
+        setState(() {
+          isCompressing = false;
+        });
         compressedFile = File(mediaInfo!.path!);
         path = "medias/videos/${userID}-${DateTime.now()}${type}";
         isPhoto = false;
-        await VideoCompress.deleteAllCache();
+
       }
       final file = File(compressedFile!.path);
-
       final ref = FirebaseStorage.instance.ref().child(path);
       setState(() {
         uploadTask = ref.putFile(file);
@@ -81,6 +87,7 @@ class _UploadingWidgetState extends State<UploadingWidget> {
     setState(() {
       isUploading = false;
     });
+    await VideoCompress.deleteAllCache();
     return mediaList;
   }
 
@@ -137,55 +144,104 @@ class _UploadingWidgetState extends State<UploadingWidget> {
     createPost();
   }
 
+  Widget buildUploadingProgress(BuildContext context, double progress) {
+    return Container(
+      height: 60,
+      margin: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
+      padding: const EdgeInsets.only(left: 20, right: 20),
+      decoration: BoxDecoration(
+          color: colors.SN_postBackgroundColor,
+          borderRadius: BorderRadius.circular(20)
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            height: 40,
+            width: 40,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(5),
+              child: ImageItemWidget(
+                entity: widget.list.first,
+                option: const ThumbnailOption(
+                  size: ThumbnailSize.square(200),
+                ),
+              ),
+            ),),
+          const SizedBox(width: 10,),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Uploading...", style: GoogleFonts.readexPro(color: Colors.black, fontSize: 15),),
+                const SizedBox(height: 10,),
+                LinearProgressIndicator(
+                  value: progress,
+                  backgroundColor: Colors.grey,
+                  color: colors.primaryColor,
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget buildCompressingProgress(BuildContext context) {
+    return Container(
+      height: 60,
+      margin: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
+      padding: const EdgeInsets.only(left: 20, right: 20),
+      decoration: BoxDecoration(
+          color: colors.SN_postBackgroundColor,
+          borderRadius: BorderRadius.circular(20)
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            height: 40,
+            width: 40,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(5),
+              child: ImageItemWidget(
+                entity: widget.list.first,
+                option: const ThumbnailOption(
+                  size: ThumbnailSize.square(200),
+                ),
+              ),
+            ),),
+          const SizedBox(width: 10,),
+          Center(child: Text("Compressing...", style: GoogleFonts.readexPro(color: Colors.black, fontSize: 20),)),
+          /*Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Uploading...", style: GoogleFonts.readexPro(color: Colors.black, fontSize: 15),),
+                const SizedBox(height: 10,),
+                LinearProgressIndicator(
+                  value: progress,
+                  backgroundColor: Colors.grey,
+                  color: colors.primaryColor,
+                ),
+              ],
+            ),
+          )*/
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return isUploading ? StreamBuilder<TaskSnapshot>(
+    return isCompressing ? buildCompressingProgress(context) : isUploading ? StreamBuilder<TaskSnapshot>(
         stream: uploadTask?.snapshotEvents,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final data = snapshot.data!;
             double progress = data.bytesTransferred / data.totalBytes;
-            return Container(
-              height: 60,
-              margin: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
-              padding: const EdgeInsets.only(left: 20, right: 20),
-              decoration: BoxDecoration(
-                color: colors.SN_postBackgroundColor,
-                borderRadius: BorderRadius.circular(20)
-              ),
-              child: Row(
-                children: [
-                  SizedBox(
-                    height: 40,
-                    width: 40,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(5),
-                      child: ImageItemWidget(
-                      entity: widget.list.first,
-                      option: const ThumbnailOption(
-                        size: ThumbnailSize.square(200),
-                      ),
-                  ),
-                    ),),
-                  const SizedBox(width: 10,),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text("Uploading...", style: GoogleFonts.readexPro(color: Colors.black, fontSize: 15),),
-                        const SizedBox(height: 10,),
-                        LinearProgressIndicator(
-                          value: progress,
-                          backgroundColor: Colors.grey,
-                          color: colors.primaryColor,
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            );
+            return buildUploadingProgress(context, progress);
           }
           else {
             return Container();

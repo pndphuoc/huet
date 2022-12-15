@@ -14,3 +14,4 @@ const kHeadSubtitleTextStyle = TextStyle(
 
 bool isUploading = false;
 var postInfomation;
+bool isCompressing = false;

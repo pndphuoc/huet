@@ -255,6 +255,9 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
     if(entity.type == AssetType.image) {
       return;
     }
+    if (videoController != null) {
+      videoController!.dispose();
+    }
     File? file = await entity.file;
     videoController = VideoPlayerController.file(file!)
       ..initialize().then((_) {
