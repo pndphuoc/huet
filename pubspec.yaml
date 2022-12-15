@@ -87,6 +87,7 @@ dependencies:
   video_compress: ^3.1.2
   pull_to_refresh: ^2.0.0
   visibility_detector: ^0.3.3
+  inview_notifier_list: ^3.0.0
 
 dev_dependencies:
   flutter_test:

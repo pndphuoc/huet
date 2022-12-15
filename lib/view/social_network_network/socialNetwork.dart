@@ -24,19 +24,21 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
     await Permission.storage.request();
   }
 
-  RefreshController _refreshController =
+  final RefreshController _refreshController =
   RefreshController(initialRefresh: false);
+
+  static const int postLimit = 10;
 
   void _onRefresh() async{
     // monitor network fetch
-    await Future.delayed(Duration(milliseconds: 1000));
+    await Future.delayed(const Duration(milliseconds: 1000));
     // if failed,use refreshFailed()
     _refreshController.refreshCompleted();
   }
 
   void _onLoading() async{
     // monitor network fetch
-    await Future.delayed(Duration(milliseconds: 1000));
+    await Future.delayed(const Duration(milliseconds: 1000));
     // if failed,use loadFailed(),if no data return,use LoadNodata()
     //items.add((items.length+1).toString());
     if(mounted) {
@@ -55,7 +57,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
   }
-  Stream<List<PostModel>> readPosts() => FirebaseFirestore.instance.collection("post")
+  Stream<List<PostModel>> readPosts() => FirebaseFirestore.instance.collection("post").where('isDeleted', isEqualTo: false)
       .snapshots()
       .map((snapshot) => snapshot.docs.map((doc) {
         return PostModel.fromJson(doc.data());
@@ -72,43 +74,42 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
     return Scaffold(
       backgroundColor: colors.backgroundColor,
       resizeToAvoidBottomInset: true,
+      appBar:  PreferredSize(
+          preferredSize: const Size.fromHeight(100.0),
+          child: SafeArea(
+            child: appBarBlock(context),
+          ),
+      ),
       body: SmartRefresher(
         enablePullDown: true,
-        header: const WaterDropHeader(),
+        header: WaterDropMaterialHeader(backgroundColor: colors.backgroundColor, color: colors.primaryColor,),
         controller: _refreshController,
         onRefresh: _onRefresh,
         onLoading: _onLoading,
-        child: SafeArea(
-          child: Stack(
-            children: [SingleChildScrollView(
-              child: Column(
-                children: [
-                  const SizedBox(height: 70,),
-                  constants.isUploading ? UploadingWidget(list: constants.postInfomation['medias'], caption: constants.postInfomation['caption'],
-          attractionId: constants.postInfomation['attractionID'].toString(),) : Container(),
-                  StreamBuilder<List<PostModel>>(
-                    stream: readPosts(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          final posts = snapshot.data!;
-                          return Column(
-                            children: [
-                              for(int i=0; i<posts.length; i++)
-                                Post(samplePost: posts[i])
-                            ],
-                          );
-                        }
-                        else {
-                          return Container();
-                        }
-                      }
-                  ),
-                  const SizedBox(height: 80,),
-                ],
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              constants.isUploading ? UploadingWidget(list: constants.postInfomation['medias'], caption: constants.postInfomation['caption'],
+                attractionId: constants.postInfomation['attractionID'].toString(),) : Container(),
+              StreamBuilder<List<PostModel>>(
+                  stream: readPosts(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      final posts = snapshot.data!;
+                      return Column(
+                        children: [
+                          for(int i=0; i<posts.length; i++)
+                            Post(samplePost: posts[i])
+                        ],
+                      );
+                    }
+                    else {
+                      return Container();
+                    }
+                  }
               ),
-            ),
-              appBarBlock(context),
-            ]
+              const SizedBox(height: 80,),
+            ],
           ),
         ),
       ),
@@ -116,51 +117,46 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
   }
 
   appBarBlock(BuildContext context) {
-    return Positioned(
-      top: 0,
-      right: 0,
-      left: 0,
-      child: Container(
-        height: 70,
-        color: colors.backgroundColor,
-        padding: const EdgeInsets.only(top: 10, bottom: 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Container(
-              margin: const EdgeInsets.only(left: 20),
-              child: Text("Huegram", style: GoogleFonts.montserrat(color: Colors.black, fontSize: 25),),
-            ),
-            Container(
-              margin: const EdgeInsets.only(right: 20),
-              child: Row(
-                children: [
-                  ElevatedButton(onPressed: (){},
-                    style: ElevatedButton.styleFrom(
-                      shape: const CircleBorder(),
-                      backgroundColor: colors.SN_circleButton,
-                      elevation: 0,
+    return Container(
+      height: 70,
+      color: colors.backgroundColor,
+      padding: const EdgeInsets.only(top: 10, bottom: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            margin: const EdgeInsets.only(left: 20),
+            child: Text("Huegram", style: GoogleFonts.montserrat(color: Colors.black, fontSize: 25),),
+          ),
+          Container(
+            margin: const EdgeInsets.only(right: 20),
+            child: Row(
+              children: [
+                ElevatedButton(onPressed: (){},
+                  style: ElevatedButton.styleFrom(
+                    shape: const CircleBorder(),
+                    backgroundColor: colors.SN_circleButton,
+                    elevation: 0,
+                    minimumSize: const Size(45, 45)
+                  ), child: const Icon(Icons.notifications_outlined, size: 20, color: Colors.black,),
+
+                ),
+                ElevatedButton(onPressed: (){
+
+                 Navigator.push(
+                      context, MaterialPageRoute(builder: (context) => const CreatePost()));
+                },
+                  style: ElevatedButton.styleFrom(
+                    shape: const CircleBorder(),
+                    backgroundColor: colors.SN_circleButton,
+                    elevation: 0,
                       minimumSize: const Size(45, 45)
-                    ), child: const Icon(Icons.notifications_outlined, size: 20, color: Colors.black,),
-
-                  ),
-                  ElevatedButton(onPressed: (){
-
-                   Navigator.push(
-                        context, MaterialPageRoute(builder: (context) => const CreatePost()));
-                  },
-                    style: ElevatedButton.styleFrom(
-                      shape: const CircleBorder(),
-                      backgroundColor: colors.SN_circleButton,
-                      elevation: 0,
-                        minimumSize: const Size(45, 45)
-                    ), child: const Icon(Icons.add_circle_outline, size: 20, color: Colors.black,),
-                  ),
-                ],
-              ),
-            )
-          ],
-        ),
+                  ), child: const Icon(Icons.add_circle_outline, size: 20, color: Colors.black,),
+                ),
+              ],
+            ),
+          )
+        ],
       ),
     );
   }
