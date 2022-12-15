@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hue_t/view/profileuser/auth_service.dart';
+import 'package:rive/rive.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -10,6 +11,18 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  late RiveAnimationController _btnAnimationController;
+  bool isShowSignInDialog = false;
+
+  @override
+  void initState() {
+    _btnAnimationController = OneShotAnimation(
+      "active",
+      autoplay: false,
+    );
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;

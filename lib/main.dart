@@ -19,6 +19,7 @@ import 'package:hue_t/view/profileuser/loginin_page.dart';
 import 'package:hue_t/view/profileuser/profile_user.dart';
 import 'package:hue_t/view/foodstore/search_foodstore.dart';
 import 'package:provider/provider.dart';
+import 'package:rive/rive.dart' as rive;
 import 'accommodation_views/homestays_list.dart';
 import 'accommodation_views/hotels_list.dart';
 import 'accommodation_views/resorts_list.dart';
@@ -90,6 +91,10 @@ class _SplashScreenState extends State<SplashScreen> {
           height: MediaQuery.of(context).size.height,
           fit: BoxFit.cover,
         ),
+
+        const rive.RiveAnimation.asset(
+          "assets/RiveAssets/shapes.riv",
+        ),
         Positioned(
             top: 330,
             child: Image.asset(
@@ -119,7 +124,9 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                 ],
               ),
-            ))
+            )),
+        //Add animation
+
       ],
     ));
   }

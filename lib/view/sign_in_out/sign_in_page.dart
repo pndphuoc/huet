@@ -1,7 +1,13 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart';
 import 'package:hue_t/view/sign_in_out/register_user.dart';
+import 'package:rive/rive.dart';
+import '../../conponents/AnimatedBtn.dart';
+import '../../main.dart';
+import 'package:hue_t/colors.dart';
 import '../profileuser/auth_service.dart';
 
 class SignInPage extends StatefulWidget {
@@ -11,27 +17,67 @@ class SignInPage extends StatefulWidget {
   State<SignInPage> createState() => _SignInPageState();
 }
 
+
 class _SignInPageState extends State<SignInPage> {
+  late RiveAnimationController _btnAnimationController;
+  bool isShowSignInDialog = false;
+
+  @override
+  void initState() {
+    _btnAnimationController = OneShotAnimation(
+      "active",
+      autoplay: false,
+    );
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: primaryColor,
       resizeToAvoidBottomInset: true,
-      body: Stack(children: [
-        contentBlock(context),
-        backButton(context),
-      ]),
+      body: SingleChildScrollView(
+        child: Stack(children: [
+          Positioned(
+            width: MediaQuery.of(context).size.width * 1.7,
+            left: 100,
+            bottom: 100,
+            child: Image.asset(
+              "assets/Backgrounds/Spline.png",
+            ),
+          ),
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+              child: const SizedBox(),
+            ),
+          ),
+          const RiveAnimation.asset(
+            "assets/RiveAssets/shapes.riv",
+          ),
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+              child: const SizedBox(),
+            ),
+          ),
+          SizedBox(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+              child: contentBlock(context),),
+          backButton(context),
+        ]),
+      ),
     );
   }
 
   contentBlock(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          headerLogin(context),
-          labelInput(context),
-          buttonLogin(context)
-        ],
-      ),
+    return Column(
+      children: [
+        headerLogin(context),
+        labelInput(context),
+        buttonLogin(context)
+      ],
     );
   }
 
@@ -66,7 +112,7 @@ class _SignInPageState extends State<SignInPage> {
         Text(
           'Login HueT',
           style: GoogleFonts.readexPro(
-              fontSize: 25, fontWeight: FontWeight.w500, color: Colors.black87),
+              fontSize: 28, fontWeight: FontWeight.w500, color: Colors.white),
         ),
         const SizedBox(
           height: 10,
@@ -74,7 +120,7 @@ class _SignInPageState extends State<SignInPage> {
         Text(
           'Please enter the details below to continue.',
           style: GoogleFonts.readexPro(
-              color: Colors.black54, fontWeight: FontWeight.w200, fontSize: 14),
+              color: Colors.white, fontWeight: FontWeight.w200, fontSize: 14),
         ),
       ],
     );
@@ -87,20 +133,20 @@ class _SignInPageState extends State<SignInPage> {
         child: Column(
           children: [
             TextFormField(
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 focusedBorder:
-                    UnderlineInputBorder(borderSide: BorderSide.none),
+                    UnderlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
                 filled: true,
-                enabledBorder: OutlineInputBorder(
+                enabledBorder: const OutlineInputBorder(
                   borderSide: BorderSide.none,
                   borderRadius: BorderRadius.all(Radius.circular(10)),
                 ),
-                fillColor: Color.fromARGB(255, 235, 235, 235),
+                fillColor: const Color.fromARGB(255, 235, 235, 235).withOpacity(0.6),
                 hintText: 'Enter your mail',
-                labelStyle: TextStyle(color: Colors.grey),
+                labelStyle: const TextStyle(color: Colors.black54),
                 labelText: 'Email',
-                focusColor: Colors.grey,
-                border: OutlineInputBorder(
+                focusColor: Colors.black54,
+                border: const OutlineInputBorder(
                   borderSide: BorderSide.none,
                 ),
               ),
@@ -115,20 +161,21 @@ class _SignInPageState extends State<SignInPage> {
               height: 15,
             ),
             TextFormField(
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 focusedBorder:
-                    UnderlineInputBorder(borderSide: BorderSide.none),
+                UnderlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+
                 filled: true,
-                enabledBorder: OutlineInputBorder(
+                enabledBorder: const OutlineInputBorder(
                   borderSide: BorderSide.none,
                   borderRadius: BorderRadius.all(Radius.circular(10)),
                 ),
-                fillColor: Color.fromARGB(255, 235, 235, 235),
+                fillColor: const Color.fromARGB(255, 235, 235, 235).withOpacity(0.6),
                 hintText: 'Enter your password',
-                labelStyle: TextStyle(color: Colors.grey),
+                labelStyle: const TextStyle(color: Colors.black54),
                 labelText: 'Password',
-                focusColor: Colors.grey,
-                border: OutlineInputBorder(
+                focusColor: Colors.black54,
+                border: const OutlineInputBorder(
                   borderSide: BorderSide.none,
                 ),
               ),
@@ -154,29 +201,13 @@ class _SignInPageState extends State<SignInPage> {
         const SizedBox(
           height: 10,
         ),
-        ElevatedButton(
-          onPressed: () {},
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color.fromARGB(255, 104, 104, 172),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(40),
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.only(
-                top: 20, bottom: 20, right: 130, left: 130),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'LOGIN',
-                  style: GoogleFonts.readexPro(
-                      fontSize: 14, fontWeight: FontWeight.w400),
-                ),
-              ],
-            ),
-          ),
+        AnimatedBtn(
+          text: "LOGIN",
+            btnAnimationController: _btnAnimationController,
+            press: (){
+              _btnAnimationController.isActive = true;
+            Future.delayed(const Duration(milliseconds: 1500), () => Navigator.push(context,MaterialPageRoute(builder: (context) => const HueT())),);
+            }
         ),
         const SizedBox(
           height: 10,
@@ -184,7 +215,7 @@ class _SignInPageState extends State<SignInPage> {
         Text(
           'OR',
           style: GoogleFonts.readexPro(
-              fontWeight: FontWeight.w300, color: Colors.grey),
+              fontWeight: FontWeight.w300, color: Colors.black87),
         ),
         const SizedBox(
           height: 10,
@@ -232,8 +263,8 @@ class _SignInPageState extends State<SignInPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("Don't have an account? ", style: GoogleFonts.readexPro(fontWeight: FontWeight.w300, color: Colors.grey),),
-              Text("Register Now", style: GoogleFonts.readexPro(fontWeight: FontWeight.w500, color: primaryColor),)
+              Text("Don't have an account? ", style: GoogleFonts.readexPro(fontWeight: FontWeight.w300, color: Colors.white),),
+              Text("Register Now", style: GoogleFonts.readexPro(fontWeight: FontWeight.w500, color: Colors.black87),)
             ],
           ),
         ),

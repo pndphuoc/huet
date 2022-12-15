@@ -65,6 +65,10 @@ dependencies:
   cupertino_icons: ^1.0.2
   device_preview: ^1.1.0
 
+  #Animation
+  rive: ^0.9.1
+  flutter_svg: ^1.1.6
+
   google_fonts: ^3.0.1
   google_maps_flutter_web: ^0.4.0+3
   card_swiper: ^2.0.4
@@ -96,6 +100,10 @@ flutter:
     - assets/images/splashscreen/
     - assets/images/foodstore/category/
     - assets/images/foodstore/restaurant/
+    - assets/Backgrounds/
+    - assets/icons/
+    - assets/RiveAssets/
+    - assets/Fonts/
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

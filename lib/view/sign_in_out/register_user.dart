@@ -46,7 +46,8 @@ class _RegisterUserState extends State<RegisterUser> {
       margin: const EdgeInsets.only(top: 40, left: 20),
       child: IconButton(
           onPressed: () {
-            Navigator.push(context,MaterialPageRoute(builder: (context) => const ProfileUser()));
+            Navigator.pop(context);/*
+            Navigator.push(context,MaterialPageRoute(builder: (context) => const ProfileUser()));*/
           },
           icon: const Icon(
             Icons.arrow_back_outlined,
@@ -83,23 +84,23 @@ class _RegisterUserState extends State<RegisterUser> {
     );
   }
 
-  Widget inputInformationUser( String validatorValue){
+  Widget inputInformationUser(String hintDataText,String labelDataText, String validatorValue){
     return TextFormField(
       keyboardType: TextInputType.text,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         focusedBorder:
-        UnderlineInputBorder(borderSide: BorderSide.none),
+        const UnderlineInputBorder(borderSide: BorderSide.none),
         filled: true,
-        enabledBorder: OutlineInputBorder(
+        enabledBorder: const OutlineInputBorder(
           borderSide: BorderSide.none,
           borderRadius: BorderRadius.all(Radius.circular(10)),
         ),
-        fillColor: Color.fromARGB(255, 235, 235, 235),
-        hintText: 'Enter your email',
-        labelText: 'Email',
-        labelStyle: TextStyle(color: Colors.grey),
+        fillColor: const Color.fromARGB(255, 235, 235, 235),
+        hintText: hintDataText,
+        labelText: labelDataText,
+        labelStyle: const TextStyle(color: Colors.grey),
         focusColor: Colors.grey,
-        border: OutlineInputBorder(
+        border: const OutlineInputBorder(
           borderSide: BorderSide.none,
         ),
       ),
@@ -119,39 +120,15 @@ class _RegisterUserState extends State<RegisterUser> {
         padding: const EdgeInsets.only(left: 35, right: 35, top: 17),
         child: Column(
           children: [
-            inputInformationUser('Your email'),
+            inputInformationUser('Enter your Email','Email','Your email'),
             const SizedBox(
               height: 15,
             ),
-            TextFormField(
-              textInputAction: TextInputAction.send,
-              decoration: const InputDecoration(
-                focusedBorder:
-                UnderlineInputBorder(borderSide: BorderSide.none),
-                filled: true,
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide.none,
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                ),
-                fillColor: Color.fromARGB(255, 235, 235, 235),
-                hintText: 'Enter your password',
-                labelStyle: TextStyle(color: Colors.grey),
-                labelText: 'Password',
-                focusColor: Colors.grey,
-                border: OutlineInputBorder(
-                  borderSide: BorderSide.none,
-                ),
-              ),
-              validator: (value) {
-                if (value == null) {
-                  return 'Your Password';
-                }
-                return null;
-              },
-            ),
+            inputInformationUser('Enter your password', 'Password', 'Your password'),
             const SizedBox(
               height: 20,
-            )
+            ),
+            inputInformationUser('Reenter your password', 'Password', 'Your password'),
           ],
         ),
       ),
