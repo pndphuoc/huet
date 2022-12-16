@@ -1,32 +1,24 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:hue_t/accommodation_views/hotel_detail.dart';
+import 'package:hue_t/animation/show_up.dart';
 import 'package:hue_t/view/Foodstore/foodstore.dart';
-import 'package:hue_t/view/foodstore/foodstoredetail.dart';
 import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
 import 'package:hue_t/home.dart';
 import 'package:hue_t/accommodation_views/hotel.dart';
 import 'package:hue_t/view/profileuser/profile_user.dart';
-import 'package:hue_t/view/foodstore/search_foodstore.dart';
-import 'accommodation_views/homestays_list.dart';
-import 'accommodation_views/hotels_list.dart';
-import 'accommodation_views/resorts_list.dart';
-import 'colors.dart' as colors;
-import 'fake_data.dart' as faker;
-import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
-import 'package:hue_t/home.dart';
-import 'package:hue_t/accommodation_views/hotel.dart';
-import 'accommodation_views/homestays_list.dart';
-import 'accommodation_views/hotels_list.dart';
-import 'accommodation_views/resorts_list.dart';
 import 'colors.dart' as colors;
 
-void main() => runApp(
-      MyApp(), // Wrap your app
-    );
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(
+    MyApp(), // Wrap your app
+  );
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -37,6 +29,7 @@ class MyApp extends StatelessWidget {
       builder: DevicePreview.appBuilder,
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
+      debugShowCheckedModeBanner: false,
       home: SplashScreen(),
     );
   }
@@ -61,51 +54,51 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Container(
         child: Stack(
-      children: [
-        Image.asset(
-          'assets/images/splashscreen/3.png',
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          fit: BoxFit.cover,
-        ),
-        Positioned(
-            top: 330,
-            child: Image.asset(
-              'assets/images/splashscreen/5.png',
+          children: [
+            Image.asset(
+              'assets/images/splashscreen/3.png',
               width: MediaQuery.of(context).size.width,
-            )),
-        Positioned(
-            top: 100,
-            child: ElasticInUp(
-              duration: Duration(milliseconds: 3000),
-              child: Image.asset(
-                'assets/images/splashscreen/2.png',
-                width: MediaQuery.of(context).size.width,
-              ),
-            )),
-        Positioned(
-            top: 700,
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SpinKitThreeBounce(
-                    color: Colors.white,
-                    duration: Duration(milliseconds: 1000),
-                    size: 40,
+              height: MediaQuery.of(context).size.height,
+              fit: BoxFit.cover,
+            ),
+            Positioned(
+                top: 330,
+                child: Image.asset(
+                  'assets/images/splashscreen/5.png',
+                  width: MediaQuery.of(context).size.width,
+                )),
+            Positioned(
+                top: 100,
+                child: ElasticInUp(
+                  duration: Duration(milliseconds: 3000),
+                  child: Image.asset(
+                    'assets/images/splashscreen/2.png',
+                    width: MediaQuery.of(context).size.width,
                   ),
-                ],
-              ),
-            ))
-      ],
-    ));
+                )),
+            Positioned(
+                top: 700,
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      SpinKitThreeBounce(
+                        color: Colors.white,
+                        duration: Duration(milliseconds: 1000),
+                        size: 40,
+                      ),
+                    ],
+                  ),
+                ))
+          ],
+        ));
   }
 }
 
 class HueT extends StatefulWidget {
-  const HueT({super.key});
-
+  const HueT({super.key, this.index});
+  final int? index;
   @override
   State<HueT> createState() => _HueTState();
 }
@@ -135,10 +128,10 @@ class _HueTState extends State<HueT> {
   Color unselectedColor = Colors.blueGrey;
 
   Gradient selectedGradient =
-      const LinearGradient(colors: [Colors.red, Colors.amber]);
+  const LinearGradient(colors: [Colors.red, Colors.amber]);
 
   Gradient unselectedGradient =
-      const LinearGradient(colors: [Colors.red, Colors.blueGrey]);
+  const LinearGradient(colors: [Colors.red, Colors.blueGrey]);
 
   Color? containerColor;
 
@@ -154,8 +147,8 @@ class _HueTState extends State<HueT> {
     HotelPage(),
     Foodstore(),
     HomePage(),
-    //SocialNetwork(),
-    HotelsPage()
+    //SocialNetWorkPage(),
+    ProfileUser()
   ];
 
   bottomNavigationBar(BuildContext context) {
@@ -169,7 +162,7 @@ class _HueTState extends State<HueT> {
       ///configuration for SnakeNavigationBar.color
       snakeViewColor: colors.primaryColor,
       selectedItemColor:
-          snakeShape == SnakeShape.indicator ? selectedColor : null,
+      snakeShape == SnakeShape.indicator ? selectedColor : null,
       unselectedItemColor: Colors.black,
 
       ///configuration for SnakeNavigationBar.gradient
@@ -208,6 +201,15 @@ class _HueTState extends State<HueT> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.index != null) {
+      setState(() {
+        _selectedItemPosition = widget.index!;
+      });
+    }
+  }
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Hue Travel',
@@ -215,19 +217,28 @@ class _HueTState extends State<HueT> {
         primarySwatch: Colors.blue,
       ),
       home: Scaffold(
-        body: Stack(children: [
-          _children[_selectedItemPosition],
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                return bottomNavigationBar(context);
-              },
-            ),
-          )
-        ]),
+        body: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).requestFocus(new FocusNode());
+          },
+          child: Stack(children: [
+            _children[_selectedItemPosition],
+            MediaQuery.of(context).viewInsets.bottom != 0.0
+                ? Container()
+                : Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: LayoutBuilder(
+                builder:
+                    (BuildContext context, BoxConstraints constraints) {
+                  return ShowUp(
+                      child: bottomNavigationBar(context), delay: 0);
+                },
+              ),
+            )
+          ]),
+        ),
       ),
     );
   }
