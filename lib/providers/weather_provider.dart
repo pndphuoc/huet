@@ -14,7 +14,11 @@ class Weather {
 }
 
 class WeatherProvider extends ChangeNotifier {
-  Weather? currentweather;
+  Weather currentweather = Weather(weather: [
+    {'main': '...'}
+  ], main: {
+    'feels_like': 0
+  });
   Future<void> getWeather() async {
     String apiURL =
         "https://openweathermap.org/data/2.5/weather?id=1580240&appid=439d4b804bc8187953eb36d2a8c26a02";

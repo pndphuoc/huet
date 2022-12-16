@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/accommodation_views/hotel.dart';
 import 'package:hue_t/colors.dart' as color;
+import 'package:hue_t/main.dart';
 import 'package:hue_t/providers/weather_provider.dart';
 import 'package:hue_t/view/events/events.dart';
 import 'package:hue_t/view/foodstore/foodstore.dart';
@@ -228,7 +229,7 @@ class _HomePageState extends State<HomePage> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      value.currentweather!.main['feels_like']
+                                      value.currentweather.main['feels_like']
                                               .toStringAsFixed(0) +
                                           "\u2103",
                                       style: GoogleFonts.readexPro(
@@ -238,7 +239,7 @@ class _HomePageState extends State<HomePage> {
                                               255, 63, 63, 63)),
                                     ),
                                     Text(
-                                      value.currentweather!.weather[0]['main'],
+                                      value.currentweather.weather[0]['main'],
                                       style: GoogleFonts.readexPro(
                                           fontSize: 15,
                                           fontWeight: FontWeight.w500,
@@ -276,22 +277,28 @@ class _HomePageState extends State<HomePage> {
               context,
               "https://cdn-icons-png.flaticon.com/512/9198/9198907.png",
               "Ở đâu ?",
-              const HotelPage()),
+              const HueT(
+                index: 0,
+              )),
           buttonLink(
               context,
               "https://cdn-icons-png.flaticon.com/512/2934/2934108.png",
               "Ăn gì ?",
-              const Foodstore()),
+              const HueT(index: 1)),
           buttonLink(
               context,
               "https://cdn-icons-png.flaticon.com/512/2972/2972857.png",
               "Đi đâu ?",
-              const TouristAttraction()),
+              const HueT(
+                index: 5,
+              )),
           buttonLink(
               context,
               "https://cdn-icons-png.flaticon.com/512/4612/4612366.png",
               "Có gì hot ?",
-              null),
+              const HueT(
+                index: 3,
+              )),
         ]),
       ),
     );
@@ -345,7 +352,8 @@ class _HomePageState extends State<HomePage> {
       BuildContext context, String image, String name, Widget? page) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => page!));
+        Navigator.pushAndRemoveUntil(context,
+            MaterialPageRoute(builder: (context) => page!), (route) => false);
       },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -458,8 +466,13 @@ class _HomePageState extends State<HomePage> {
             items: listSlider.map((e) {
               return Builder(builder: (BuildContext context) {
                 return GestureDetector(
-                  onTap: () => Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => const Events())),
+                  onTap: () => Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const HueT(
+                                index: 6,
+                              )),
+                      (route) => false),
                   child: Container(
                     width: MediaQuery.of(context).size.width,
                     margin: const EdgeInsets.only(right: 8),
