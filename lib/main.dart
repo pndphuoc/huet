@@ -4,40 +4,58 @@ import 'package:device_preview/device_preview.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:hue_t/accommodation_views/hotel_detail.dart';
+import 'package:hue_t/providers/event_provider.dart';
+import 'package:hue_t/providers/foodstore_provider.dart';
+import 'package:hue_t/providers/tourist_provider.dart';
+import 'package:hue_t/providers/weather_provider.dart';
 import 'package:hue_t/view/Foodstore/foodstore.dart';
+import 'package:hue_t/view/events/events.dart';
 import 'package:hue_t/view/foodstore/foodstoredetail.dart';
 import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
-import 'package:hue_t/home.dart';
+import 'package:hue_t/view/home/home.dart';
 import 'package:hue_t/accommodation_views/hotel.dart';
 import 'package:hue_t/view/profileuser/profile_user.dart';
 import 'package:hue_t/view/foodstore/search_foodstore.dart';
+import 'package:hue_t/view/tourist_attraction/tourist_attraction.dart';
 import 'accommodation_views/homestays_list.dart';
 import 'accommodation_views/hotels_list.dart';
 import 'accommodation_views/resorts_list.dart';
 import 'colors.dart' as colors;
 import 'fake_data.dart' as faker;
 import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
-import 'package:hue_t/home.dart';
+import 'package:hue_t/view/home/home.dart';
 import 'package:hue_t/accommodation_views/hotel.dart';
 import 'accommodation_views/homestays_list.dart';
 import 'accommodation_views/hotels_list.dart';
 import 'accommodation_views/resorts_list.dart';
 import 'colors.dart' as colors;
+import 'package:provider/provider.dart';
 
 void main() => runApp(
       MyApp(), // Wrap your app
     );
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      useInheritedMediaQuery: true,
-      locale: DevicePreview.locale(context),
-      builder: DevicePreview.appBuilder,
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
-      home: SplashScreen(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => FoodstoreProvider()),
+        ChangeNotifierProvider(create: (context) => EventProvider()),
+        ChangeNotifierProvider(
+            create: (context) => TouristAttractionProvider()),
+        ChangeNotifierProvider(create: (context) => WeatherProvider()),
+      ],
+      child: MaterialApp(
+        useInheritedMediaQuery: true,
+        locale: DevicePreview.locale(context),
+        builder: DevicePreview.appBuilder,
+        theme: ThemeData.light(),
+        darkTheme: ThemeData.dark(),
+        home: const SplashScreen(),
+      ),
     );
   }
 }
@@ -53,14 +71,15 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(seconds: 4)).then((value) => Navigator.of(context)
-        .pushReplacement(CupertinoPageRoute(builder: (ctx) => HueT())));
+
+    Future.delayed(const Duration(seconds: 4)).then((value) =>
+        Navigator.of(context).pushReplacement(
+            CupertinoPageRoute(builder: (ctx) => const HueT())));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        child: Stack(
+    return Stack(
       children: [
         Image.asset(
           'assets/images/splashscreen/3.png',
@@ -85,11 +104,11 @@ class _SplashScreenState extends State<SplashScreen> {
             )),
         Positioned(
             top: 700,
-            child: Container(
+            child: SizedBox(
               width: MediaQuery.of(context).size.width,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+                children: const [
                   SpinKitThreeBounce(
                     color: Colors.white,
                     duration: Duration(milliseconds: 1000),
@@ -99,7 +118,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ))
       ],
-    ));
+    );
   }
 }
 
@@ -151,11 +170,11 @@ class _HueTState extends State<HueT> {
 
   int _selectedItemPosition = 2;
   final List<Widget> _children = [
-    HotelPage(),
-    Foodstore(),
-    HomePage(),
-    //SocialNetwork(),
-    HotelsPage()
+    const HotelPage(),
+    const Foodstore(),
+    const HomePage(),
+    const TouristAttraction(),
+    const ProfileUser()
   ];
 
   bottomNavigationBar(BuildContext context) {
@@ -182,7 +201,7 @@ class _HueTState extends State<HueT> {
 
       currentIndex: _selectedItemPosition,
       onTap: (index) => setState(() => _selectedItemPosition = index),
-      items: [
+      items: const [
         BottomNavigationBarItem(
             icon: Icon(Icons.hotel_outlined),
             label: 'Accommodations',
@@ -209,26 +228,18 @@ class _HueTState extends State<HueT> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Hue Travel',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: Scaffold(
-        body: Stack(children: [
-          _children[_selectedItemPosition],
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
-                return bottomNavigationBar(context);
-              },
-            ),
-          )
-        ]),
-      ),
-    );
+    return Stack(children: [
+      _children[_selectedItemPosition],
+      Positioned(
+        bottom: 0,
+        left: 0,
+        right: 0,
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return bottomNavigationBar(context);
+          },
+        ),
+      )
+    ]);
   }
 }
