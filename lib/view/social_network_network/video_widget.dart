@@ -1,6 +1,6 @@
+import 'package:cached_video_player/cached_video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:video_player/video_player.dart';
 import 'dart:io';
 
 class VideoWidget extends StatefulWidget {
@@ -11,25 +11,25 @@ class VideoWidget extends StatefulWidget {
   const VideoWidget({Key? key, this.url = "", required this.play, this.file})
       : super(key: key);
   @override
-  _VideoWidgetState createState() => _VideoWidgetState();
+  VideoWidgetState createState() => VideoWidgetState();
 }
 
-class _VideoWidgetState extends State<VideoWidget> {
-  late VideoPlayerController _controller;
+class VideoWidgetState extends State<VideoWidget> {
+  late CachedVideoPlayerController _controller;
   late Future<void> _initializeVideoPlayerFuture;
 
   @override
   void initState() {
     super.initState();
-    if (widget.url! != "") {
-      _controller = VideoPlayerController.network(widget.url);
+    if (widget.url != "") {
+      _controller = CachedVideoPlayerController.network(widget.url);
     }
     else {
       late File? file;
       (()async {
         file = await widget.file!.fileWithSubtype;
       })();
-      _controller = VideoPlayerController.file(file!);
+      _controller = CachedVideoPlayerController.file(file!);
     }
 
     _initializeVideoPlayerFuture = _controller.initialize().then((_) {
@@ -68,9 +68,9 @@ class _VideoWidgetState extends State<VideoWidget> {
       future: _initializeVideoPlayerFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          return VideoPlayer(_controller);
+          return CachedVideoPlayer(_controller);
         } else {
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(),
           );
         }

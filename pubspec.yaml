@@ -89,6 +89,9 @@ dependencies:
   visibility_detector: ^0.3.3
   inview_notifier_list: ^3.0.0
   lazy_load_scrollview: ^1.3.0
+  video_thumbnail: ^0.5.3
+  dropdown_button2: ^1.9.2
+  quickalert: ^1.0.1
 
 dev_dependencies:
   flutter_test:

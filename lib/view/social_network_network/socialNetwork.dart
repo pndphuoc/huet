@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
@@ -10,9 +11,10 @@ import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'constants.dart' as constants;
 import 'create_post.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SocialNetWorkPage extends StatefulWidget {
   const SocialNetWorkPage({Key? key}) : super(key: key);
@@ -28,27 +30,20 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
     await Permission.storage.request();
   }
 
-  final RefreshController _refreshController =
+  late RefreshController _refreshController =
       RefreshController(initialRefresh: false);
 
   static const int postsLimit = 2;
 
   void _onRefresh() async {
+    _posts.clear();
+    setState(() {
+      _morePostsAvailable = true;
+    });
     // monitor network fetch
-    await Future.delayed(const Duration(milliseconds: 1000));
+    await _getPosts();
     // if failed,use refreshFailed()
     _refreshController.refreshCompleted();
-  }
-
-  void _onLoading() async {
-    // monitor network fetch
-    await Future.delayed(const Duration(milliseconds: 1000));
-    // if failed,use loadFailed(),if no data return,use LoadNodata()
-    //items.add((items.length+1).toString());
-    if (mounted) {
-      setState(() {});
-    }
-    _refreshController.loadComplete();
   }
 
   @override
@@ -63,23 +58,9 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
     super.didChangeDependencies();
   }
 
-  Stream<List<PostModel>> readPosts() {
-    Stream<List<PostModel>> loadedPostsList = FirebaseFirestore.instance
-        .collection("post")
-        .where('isDeleted', isEqualTo: false)
-        .limit(postsLimit)
-        .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) {
-              return PostModel.fromJson(doc.data());
-            }).toList());
-    return loadedPostsList;
-  }
-
-  FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<DocumentSnapshot> _posts = [];
-  bool _loadingPosts = false;
   DocumentSnapshot? _lastDocument;
-  bool _gettingMorePosts = false;
   bool _morePostsAvailable = true;
 
   _getPosts() async {
@@ -87,23 +68,17 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
         .collection('post')
         .where('isDeleted', isEqualTo: false)
         .limit(postsLimit);
-    setState(() {
-      _loadingPosts = true;
-    });
     QuerySnapshot querySnapshot = await q.get();
     _posts = querySnapshot.docs;
     _lastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
-    setState(() {
-      _loadingPosts = false;
-    });
+    setState(() {});
   }
 
   _getMorePosts() async {
     if (_morePostsAvailable == false) {
+      _refreshController.loadComplete();
       return;
     }
-
-    _gettingMorePosts = true;
 
     Query q = _firestore
         .collection('post')
@@ -112,7 +87,10 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
         .limit(postsLimit);
 
     QuerySnapshot querySnapshot = await q.get();
-
+    if (querySnapshot.docs.length == 0) {
+      _morePostsAvailable = false;
+      _refreshController.loadComplete();
+    }
     if (querySnapshot.docs.length < postsLimit) {
       _morePostsAvailable = false;
     }
@@ -121,7 +99,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
     _posts.addAll(querySnapshot.docs);
 
     setState(() {});
-    _gettingMorePosts = false;
+    _refreshController.loadComplete();
   }
 
   @override
@@ -129,6 +107,36 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
     super.dispose();
     _refreshController.dispose();
   }
+
+  Card buildButton({
+    required onTap,
+    required title,
+    required text,
+    required leadingImage,
+  }) {
+    return Card(
+      shape: const StadiumBorder(),
+      margin: const EdgeInsets.symmetric(
+        horizontal: 20,
+      ),
+      clipBehavior: Clip.antiAlias,
+      elevation: 1,
+      child: ListTile(
+        onTap: onTap,
+        leading: CircleAvatar(
+          backgroundImage: AssetImage(
+            leadingImage,
+          ),
+        ),
+        title: Text(title ?? ""),
+        subtitle: Text(text ?? ""),
+        trailing: const Icon(
+          Icons.keyboard_arrow_right_rounded,
+        ),
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -145,101 +153,164 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
         children: [
           constants.isUploading
               ? UploadingWidget(
-            callback: (val) {
-              setState(() {
-                _getPosts();
-              });
-            },
-            list: constants.postInfomation['medias'],
-            caption: constants.postInfomation['caption'],
-            attractionId:
-            constants.postInfomation['attractionID'].toString(),
-          )
+                  callback: (val) {
+                    _getPosts();
+                  },
+                  list: constants.postInfomation['medias'],
+                  caption: constants.postInfomation['caption'],
+                  attractionId:
+                      constants.postInfomation['attractionID'].toString(),
+                )
               : Container(),
           Expanded(
-            child: SmartRefresher(
-              enablePullDown: true,
-              header: WaterDropMaterialHeader(
-                backgroundColor: colors.backgroundColor,
-                color: colors.primaryColor,
-              ),
-              controller: _refreshController,
-              onRefresh: _onRefresh,
-              onLoading: _onLoading,
-              /*child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    constants.isUploading
-                        ? UploadingWidget(
-                            list: constants.postInfomation['medias'],
-                            caption: constants.postInfomation['caption'],
-                            attractionId:
-                                constants.postInfomation['attractionID'].toString(),
-                          )
-                        : Container(),
-                    StreamBuilder<List<PostModel>>(
-                        stream: readPosts(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            final posts = snapshot.data!;
-                            return Column(
-                              children: [
-                                for (int i = 0; i < posts.length; i++)
-                                  Post(samplePost: posts[i])
-                              ],
+              child: InViewNotifierCustomScrollView(
+            isInViewPortCondition:
+                (double deltaTop, double deltaBottom, double vpHeight) {
+              return deltaTop < (0.5 * vpHeight) &&
+                  deltaBottom > (0.5 * vpHeight);
+            },
+            slivers: [
+              SliverFillRemaining(
+                child: SmartRefresher(
+                  enablePullDown: true,
+                  enablePullUp: true,
+                  header: WaterDropMaterialHeader(
+                    backgroundColor: colors.backgroundColor,
+                    color: colors.primaryColor,
+                  ),
+                  controller: _refreshController,
+                  onRefresh: _onRefresh,
+                  onLoading: _morePostsAvailable
+                      ? _getMorePosts
+                      : () {
+                          _refreshController.loadComplete();
+                        },
+                  child: ListView.builder(
+                      itemCount: _posts.length,
+                      itemBuilder: (context, index) {
+                        return InViewNotifierWidget(
+                          id: '$index',
+                          builder: (BuildContext context, bool isInView,
+                              Widget? child) {
+                            PostModel post = PostModel.fromJson(
+                              _posts[index].data()
+                              as Map<String, dynamic>,
                             );
-                          } else {
-                            return Container();
-                          }
-                        }),
-                    const SizedBox(
-                      height: 80,
-                    ),
-                  ],
-                ),
-              ),*/
-              child: _loadingPosts
-                  ? Center(
-                      child: LoadingAnimationWidget.discreteCircle(
-                          color: colors.primaryColor, size: 40),
-                    )
-                  : _posts.isEmpty
-                      ? const Center(
-                          child: Text("Have no post"),
-                        )
-                      : _gettingMorePosts
-                          ? const Center(
-                              child: Text("Load them"),
-                            )
-                          : LazyLoadScrollView(
-                              onEndOfPage: () => _getMorePosts(),
-                              child: InViewNotifierList(
-                                isInViewPortCondition: (double deltaTop,
-                                    double deltaBottom, double vpHeight) {
-                                  return deltaTop < (0.5 * vpHeight) &&
-                                      deltaBottom > (0.5* vpHeight);
-                                },
-                                itemCount: _posts.length,
-                                builder: (BuildContext context, int index) {
-                                  return InViewNotifierWidget(
-                                    id: '$index',
-                                    builder: (BuildContext context, bool isInView,
-                                        Widget? child) {
-                                      return isInView ? Post(
-                                        samplePost: PostModel.fromJson(_posts[index]
-                                            .data() as Map<String, dynamic>),
-                                        isInView: true,
-                                      ) :  Post(
-                                        samplePost: PostModel.fromJson(_posts[index]
-                                            .data() as Map<String, dynamic>),
-                                        isInView: false,
-                                      );
+                            return isInView
+                                ? Post(
+                                    samplePost: post,
+                                    isInView: true,
+                                    documentSnapshot: _posts[index],
+                                    callback: (val) async {
+                                       bool deletePost = await showDialog(
+                                           context: context,
+                                           builder: (BuildContext context) {
+                                             return AlertDialog(
+                                               shape: RoundedRectangleBorder(
+                                                 borderRadius: BorderRadius.circular(20)
+                                               ),
+                                               title: Text("Delete this post?", style: GoogleFonts.readexPro(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 25), textAlign: TextAlign.center,),
+                                               content: Text("You can restore this post within 30 days. After that, it will be permanently deleted", style: GoogleFonts.readexPro(color: Colors.grey,), textAlign: TextAlign.center,),
+                                               actionsAlignment: MainAxisAlignment.center,
+                                               actions: [
+                                                 ElevatedButton(onPressed: (){
+                                                   Navigator.of(context).pop(false);
+                                                 },
+                                                   style: ElevatedButton.styleFrom(
+                                                     elevation: 0,
+                                                       padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
+                                                       backgroundColor: Colors.white,
+                                                       shape: RoundedRectangleBorder(
+                                                           borderRadius: BorderRadius.circular(20)
+                                                       )
+                                                   ), child: Text("Cancel", style: GoogleFonts.readexPro(color: Colors.grey),),
+                                                 ),
+                                                 ElevatedButton(onPressed: (){
+                                                   Navigator.of(context).pop(true);
+                                                 },
+                                                   style: ElevatedButton.styleFrom(
+                                                     padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
+                                                     backgroundColor: Colors.red,
+                                                     shape: RoundedRectangleBorder(
+                                                       borderRadius: BorderRadius.circular(20)
+                                                     )
+                                                   ), child: const Text("Delete"),
+                                                 ),
+                                               ],
+                                             );
+                                           }
+                                       );
+                                       if(deletePost) {
+                                         FirebaseFirestore.instance.collection('post').doc(val).update(
+                                             {"isDeleted": true});
+                                       }
+                                       setState(() {
+                                         _getPosts();
+                                       });
                                     },
+                                  )
+                                : Post(
+                                    samplePost: post,
+                                    isInView: false,
+                                    documentSnapshot: _posts[index],
+                              callback: (val) async {
+                                bool deletePost = await showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(20)
+                                        ),
+                                        title: Text("Delete this post?", style: GoogleFonts.readexPro(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 25), textAlign: TextAlign.center,),
+                                        content: Text("You can restore this post within 30 days. After that, it will be permanently deleted", style: GoogleFonts.readexPro(color: Colors.grey,), textAlign: TextAlign.center,),
+                                        actionsAlignment: MainAxisAlignment.center,
+                                        actions: [
+                                          ElevatedButton(onPressed: (){
+                                            Navigator.of(context).pop(false);
+                                          },
+                                            style: ElevatedButton.styleFrom(
+                                                elevation: 0,
+                                                padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
+                                                backgroundColor: Colors.white,
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(20)
+                                                )
+                                            ), child: Text("Cancel", style: GoogleFonts.readexPro(color: Colors.grey),),
+                                          ),
+                                          ElevatedButton(onPressed: (){
+                                            Navigator.of(context).pop(true);
+                                          },
+                                            style: ElevatedButton.styleFrom(
+                                                padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
+                                                backgroundColor: Colors.red,
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(20)
+                                                )
+                                            ), child: const Text("Delete"),
+                                          ),
+                                        ],
+                                      );
+                                    }
+                                );
+                                if(deletePost) {
+                                  FirebaseFirestore.instance.collection('post').doc(val).update(
+                                      {"isDeleted": true});
+                                }
+                                setState(() {
+                                  _getPosts();
+                                });
+                              },
                                   );
-                                },
-                              )),
-            ),
-          ),
+                          },
+                        );
+                      }),
+                ),
+              )
+            ],
+          )),
+          const SizedBox(
+            height: 70,
+          )
         ],
       ),
     );

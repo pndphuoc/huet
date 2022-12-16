@@ -1,91 +1,78 @@
 import 'dart:convert';
+import 'dart:core';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cached_video_player/cached_video_player.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/animation/heart_animation.dart';
 import 'package:hue_t/colors.dart' as colors;
+import 'package:hue_t/model/foodstore/restaurant.dart';
 import 'package:hue_t/model/social_network/postModel.dart';
 import 'package:hue_t/view/social_network_network/post_comments.dart';
 import 'package:hue_t/view/social_network_network/video_widget.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:intl/intl.dart';
-import 'package:video_player/video_player.dart';
-
-import '../../model/social_network/media_model.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
+import 'dart:io';
+import 'constants.dart' as constants;
 
 class Post extends StatefulWidget {
-  const Post({Key? key, required this.samplePost, required this.isInView}) : super(key: key);
+  const Post({Key? key, required this.samplePost, required this.isInView, required this.documentSnapshot, required this.callback}) : super(key: key);
   final PostModel samplePost;
   final bool isInView;
+  final DocumentSnapshot documentSnapshot;
+  final DeleteCallback callback;
   @override
   State<Post> createState() => _PostState();
 }
+
+typedef void DeleteCallback(String val);
+late String documentSnapshotID;
+late PostModel post;
 
 class _PostState extends State<Post> with TickerProviderStateMixin {
   late final AnimationController _heartController = AnimationController(
     duration: const Duration(milliseconds: 500),
     vsync: this,
   );
-  CachedVideoPlayerController? _controller;
+  //CachedVideoPlayerController? _controller;
   int currentPos = 0;
   bool isLiked = false;
   bool isHeartAnimating = false;
   bool isHeartButtonAnimating = false;
   bool isMark = false;
-
-/*  Future<void> loadVideo(String url) async {
-    controller = CachedVideoPlayerController.network(url);
-    controller.initialize().then((value) {
-      controller.play();
-      setState(() {});
-    });
-  }*/
+  String? selectedValue;
 
   @override
   void dispose() {
     _heartController.dispose();
-    _controller!.dispose();
     super.dispose();
   }
 
-  void loadVideo(Media media) {
-    if (media.isPhoto) {
-      return;
+  Future<String?> getVideoThumbnail(String url) async {
+    String? fileName;
+    if(!widget.samplePost.medias.first.isPhoto) {
+      fileName = await VideoThumbnail.thumbnailFile(
+        video: url,
+        thumbnailPath: (await getTemporaryDirectory()).path,
+        imageFormat: ImageFormat.JPEG,// specify the height of the thumbnail, let the width auto-scaled to keep the source aspect ratio
+        quality: 75,
+      );
     }
-    if(_controller != null) {
-      _controller!.dispose();
-    }
-    _controller = CachedVideoPlayerController.network(media.url)
-      ..initialize().then((_) {
-        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-        if(widget.isInView){
-          _controller!.play();
-        }
-        else {
-          _controller!.pause();
-        }
-        setState(() {});
-      });
-    setState(() {});
-  }
-
-  void initializeVideoController(String url) {
-    _controller = CachedVideoPlayerController.network(url)
-      ..initialize().then((_) {
-        // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-        _controller!.play();
-        setState(() {});
-      });
+    return fileName;
   }
 
   @override
   void initState() {
     super.initState();
-    loadVideo(widget.samplePost.medias.first);
+    documentSnapshotID = widget.documentSnapshot.id;
+    post = widget.samplePost;
   }
   Widget buildNameAndAttraction(BuildContext context) {
     return Container(
@@ -129,7 +116,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
           const SizedBox(
             width: 10,
           ),
-          IconButton(
+          /*IconButton(
             onPressed: () {},
             icon: const Icon(Icons.more_vert_outlined),
             highlightColor: Colors.transparent,
@@ -137,7 +124,35 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
             splashColor: Colors.transparent,
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
-          )
+          )*/
+          DropdownButtonHideUnderline(
+            child: DropdownButton2(
+              customButton:  const Icon(Icons.more_vert_outlined),
+
+              items: [
+              ...MenuItems.itemsList.map((e) => DropdownMenuItem(
+                  value: e,
+                  child: MenuItems.buildItem(e)))
+              ],
+              onChanged: (value) {
+                MenuItem selected = value as MenuItem;
+                if(selected.text == 'Delete') {
+                  widget.callback(widget.documentSnapshot.id.toString());
+                }
+                MenuItems.onChanged(context, value as MenuItem);
+              },
+              itemHeight: 40,
+              itemPadding: const EdgeInsets.only(left: 16, right: 16),
+              dropdownWidth: 100,
+              dropdownPadding: const EdgeInsets.symmetric(vertical: 6),
+              dropdownDecoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4),
+                color: colors.backgroundColor,
+              ),
+              dropdownElevation: 0,
+              offset: const Offset(-70, -10),
+            ),
+          ),
         ],
       ),
     );
@@ -167,7 +182,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                     enableInfiniteScroll: false,
                     viewportFraction: 1,
                     onPageChanged: (index, reason) async {
-                      loadVideo(widget.samplePost.medias[index]);
+                      //loadVideo(widget.samplePost.medias[index]);
                       setState(() {
                         currentPos = index;
                       });
@@ -190,15 +205,14 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                             const Icon(Icons.error),
                       );
                     } else {
-                      return _controller!.value.isInitialized
-                          ? /*AspectRatio(
-                              aspectRatio: _controller!.value.aspectRatio,
-                              child: CachedVideoPlayer(_controller!),
-                            )*/
-                      AspectRatio(aspectRatio: 1,
-                      child: VideoWidget(url: e.url, play: true),
-                      )
-                          : Center(
+                      if(widget.isInView!) {
+                        return VideoWidget(url: e.url, play: true);
+                      }
+                      else {
+                        return VideoWidget(url: e.url, play: false);
+                      }
+                      
+                           Center(
                               child: LoadingAnimationWidget.discreteCircle(
                                   color: colors.primaryColor, size: 30),
                             );
@@ -497,5 +511,55 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
         ],
       ),
     );
+  }
+}
+
+class MenuItem {
+  final String text;
+
+  const MenuItem({
+    required this.text,
+  });
+}
+
+class MenuItems {
+  static const List<MenuItem> itemsList = [delete, edit];
+  //static const List<MenuItem> secondItems = [logout];
+
+  static const delete = MenuItem(text: 'Delete');
+  static const edit = MenuItem(text: 'Edit');
+/*  static const share = MenuItem(text: 'Share', icon: Icons.share);
+  static const settings = MenuItem(text: 'Settings', icon: Icons.settings);
+  static const logout = MenuItem(text: 'Log Out', icon: Icons.logout);*/
+
+  static Widget buildItem(MenuItem item) {
+    return Row(
+      children: [
+        Text(
+          item.text,
+          style: const TextStyle(
+            color: Colors.black,
+          ),
+        ),
+      ],
+    );
+  }
+
+  static onChanged(BuildContext context, MenuItem item) {
+    switch (item) {
+      case MenuItems.delete:
+        break;
+      case MenuItems.edit:
+        break;
+/*      case MenuItems.settings:
+      //Do something
+        break;
+      case MenuItems.share:
+      //Do something
+        break;
+      case MenuItems.logout:*/
+      //Do something
+        break;
+    }
   }
 }
