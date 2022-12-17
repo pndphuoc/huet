@@ -6,13 +6,14 @@ import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hue_t/providers/foodstore_provider.dart';
 import 'package:hue_t/view/foodstore/foodstoredetail.dart';
 import 'package:hue_t/view/foodstore/search_foodstore.dart';
 import 'package:hue_t/view/navigationbar/navigationbar.dart' as NavigationBar;
 import 'package:hue_t/model/foodstore/restaurant.dart' as restaurant;
 import 'package:hue_t/colors.dart' as color;
-import 'package:hue_t/api/foodstore/food_store_api.dart' as data;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:provider/provider.dart';
 
 class Category {
   String? id;
@@ -72,10 +73,13 @@ class _FoodstoreState extends State<Foodstore> {
 
   @override
   Widget build(BuildContext context) {
+    var productProvider = Provider.of<FoodstoreProvider>(context);
+
     if (isloading) {
       (() async {
-        await data.gettop();
-        await data.sort();
+        await productProvider.gettop();
+
+        await productProvider.sort();
 
         setState(() {
           isloading = false;
@@ -88,157 +92,155 @@ class _FoodstoreState extends State<Foodstore> {
               child: LoadingAnimationWidget.staggeredDotsWave(
                   color: color.primaryColor, size: 50),
             )
-          : Container(
-              height: double.maxFinite,
-              color: color.backgroundColor,
-              child: Stack(
-                children: [
-                  SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: Column(
-                      children: [
-                        header(context),
-                        Padding(
-                          padding: const EdgeInsets.only(
-                              left: 20, right: 10, top: 15),
-                          child: Column(
-                            children: [
-                              category(context),
-                              nearby(context),
-                            ],
+          : GestureDetector(
+              onTap: () {
+                FocusScope.of(context).requestFocus(FocusNode());
+              },
+              child: Container(
+                height: double.maxFinite,
+                color: color.backgroundColor,
+                child: Stack(
+                  children: [
+                    SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: Column(
+                        children: [
+                          header(context),
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                left: 20, right: 10, top: 5),
+                            child: Column(
+                              children: [
+                                category(context),
+                                nearby(context),
+                              ],
+                            ),
                           ),
-                        ),
-                        popular(context),
-                      ],
+                          popular(context),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
     );
   }
 
   header(BuildContext context) {
-    return Container(
-      height: 230,
-      width: MediaQuery.of(context).size.width,
-      child: Stack(
-        children: [
-          Container(
-              height: 200,
-              width: MediaQuery.of(context).size.width,
-              child: Swiper(
-                itemBuilder: (context, index) {
-                  return Image.asset(
-                    imageslide[index],
-                    fit: BoxFit.cover,
-                  );
-                },
-                itemCount: imageslide.length,
-                autoplay: true,
-                autoplayDelay: 5000,
-              )),
-          Positioned(
-              bottom: 0,
-              child: Container(
-                  padding: EdgeInsets.only(left: 40, right: 40),
-                  width: MediaQuery.of(context).size.width,
-                  height: 60,
-                  child: TextField(
-                    onChanged: (value) {
-                      setState(() {});
-                    },
-                    decoration: InputDecoration(
-                        filled: true,
-                        fillColor: color.filterItemColor,
-                        hintText: "What are you cracing?",
-                        hintStyle: TextStyle(
-                            color: Color.fromARGB(255, 206, 205, 205)),
-                        prefixIcon: Icon(Icons.search),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(15.0)),
-                          borderSide: BorderSide(
-                              width: 0.2,
-                              color: Color.fromARGB(255, 255, 255, 255)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(15.0)),
-                            borderSide: BorderSide(
-                                width: 0.2,
-                                color: Color.fromARGB(255, 255, 255, 255)))),
-                  )))
-        ],
-      ),
-    );
-  }
-
-  category(BuildContext context) {
-    return Container(
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Category",
-                  style: GoogleFonts.readexPro(
-                      fontSize: 24, fontWeight: FontWeight.bold)),
-            ],
-          ),
           Container(
-            margin: EdgeInsets.only(top: 25),
             width: MediaQuery.of(context).size.width,
-            height: 80,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                ...categories.map((e) => GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SearchFoodStore(
-                                    searchValue: e.id.toString())));
-                      },
-                      child: Container(
-                        margin: EdgeInsets.only(right: 15),
-                        width: 170,
-                        decoration: BoxDecoration(
-                            color: e.color as Color,
-                            borderRadius: BorderRadius.circular(15)),
-                        child: Stack(
-                          children: [
-                            Positioned(
-                                top: 10,
-                                left: 10,
-                                child: Text(e.name.toString(),
-                                    style: GoogleFonts.readexPro(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600))),
-                            Positioned(
-                                right: 0,
-                                bottom: 0,
-                                child: Image.asset(
-                                  e.image.toString(),
-                                  width: 60,
-                                  height: 60,
-                                  fit: BoxFit.contain,
-                                ))
-                          ],
-                        ),
-                      ),
-                    ))
-              ],
-            ),
+            height: 60,
+            decoration: const BoxDecoration(),
+            child: Center(
+                child: Text(
+              "HUE FOOD",
+              style: GoogleFonts.readexPro(
+                  fontSize: 22, fontWeight: FontWeight.bold),
+            )),
+          ),
+          TextField(
+            onSubmitted: (value) {
+              setState(() {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            SearchFoodStore(value: "0", searchValue: value)));
+              });
+            },
+            decoration: const InputDecoration(
+                filled: true,
+                fillColor: Color.fromARGB(255, 240, 237, 237),
+                hintText: "Search foodstore ...",
+                hintStyle: TextStyle(color: Color.fromARGB(255, 206, 205, 205)),
+                prefixIcon: Icon(Icons.search),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                  borderSide: BorderSide(
+                      width: 0.2, color: Color.fromARGB(255, 255, 255, 255)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                    borderSide: BorderSide(
+                        width: 0.2,
+                        color: Color.fromARGB(255, 255, 255, 255)))),
           )
         ],
       ),
     );
   }
 
+  category(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text("Category",
+                style: GoogleFonts.readexPro(
+                    fontSize: 18, fontWeight: FontWeight.w600)),
+          ],
+        ),
+        Container(
+          margin: const EdgeInsets.only(top: 25),
+          width: MediaQuery.of(context).size.width,
+          height: 80,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              ...categories.map((e) => GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SearchFoodStore(
+                                    value: e.id.toString(),
+                                    searchValue: "",
+                                  )));
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 15),
+                      width: 160,
+                      decoration: BoxDecoration(
+                          color: e.color as Color,
+                          borderRadius: BorderRadius.circular(15)),
+                      child: Stack(
+                        children: [
+                          Positioned(
+                              top: 10,
+                              left: 10,
+                              child: Text(e.name.toString(),
+                                  style: GoogleFonts.readexPro(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500))),
+                          Positioned(
+                              right: 0,
+                              bottom: 0,
+                              child: Image.asset(
+                                e.image.toString(),
+                                width: 60,
+                                height: 60,
+                                fit: BoxFit.contain,
+                              ))
+                        ],
+                      ),
+                    ),
+                  ))
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
   nearby(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: 20),
+      margin: const EdgeInsets.only(top: 20),
       child: Column(
         children: [
           Row(
@@ -246,20 +248,20 @@ class _FoodstoreState extends State<Foodstore> {
             children: [
               Text("Nearby Store",
                   style: GoogleFonts.readexPro(
-                      fontSize: 24, fontWeight: FontWeight.bold)),
-              Text("See All",
+                      fontSize: 18, fontWeight: FontWeight.w600)),
+              Text("",
                   style: GoogleFonts.readexPro(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 104, 104, 172)))
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: const Color.fromARGB(255, 104, 104, 172)))
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 3,
           ),
           Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Icon(Icons.location_on_outlined,
-                size: 20, color: Color.fromARGB(255, 102, 102, 102)),
+            const Icon(Icons.location_on_outlined,
+                size: 18, color: Color.fromARGB(255, 102, 102, 102)),
             Text("Your Location: 102 Tuy Ly Vuong, TP Hue",
                 style: GoogleFonts.readexPro(
                     fontSize: 13,
@@ -267,176 +269,183 @@ class _FoodstoreState extends State<Foodstore> {
                     color: Color.fromARGB(255, 87, 86, 86)))
           ]),
           Container(
-            margin: EdgeInsets.only(top: 10),
-            padding: EdgeInsets.only(bottom: 15),
+            margin: const EdgeInsets.only(top: 10),
+            padding: const EdgeInsets.only(bottom: 15),
             width: MediaQuery.of(context).size.width,
-            height: 290,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                ...data.list.map((e) => GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    FoodstoreDetail(item: e)));
-                      },
-                      child: Container(
-                        margin: EdgeInsets.only(right: 20, bottom: 10),
-                        width: 180,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.2),
-                              spreadRadius: 1,
-                              blurRadius: 5,
-                              offset:
-                                  Offset(3, 3), // changes position of shadow
-                            ),
-                          ],
-                        ),
-                        child: Stack(
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                ClipRRect(
-                                    borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(15),
-                                        topRight: Radius.circular(15)),
-                                    child: Image.network(
-                                      e.image.toString(),
-                                      width: double.infinity,
-                                      height: 140,
-                                      fit: BoxFit.cover,
-                                    )),
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: Column(
+            height: 280,
+            child: Consumer<FoodstoreProvider>(
+              builder: (context, value, child) => ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  ...value.list.map((e) => GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      FoodstoreDetail(item: e)));
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(right: 20, bottom: 10),
+                          width: 180,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.2),
+                                spreadRadius: 1,
+                                blurRadius: 5,
+                                offset: const Offset(
+                                    3, 3), // changes position of shadow
+                              ),
+                            ],
+                          ),
+                          child: Stack(
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ClipRRect(
+                                      borderRadius: const BorderRadius.only(
+                                          topLeft: Radius.circular(15),
+                                          topRight: Radius.circular(15)),
+                                      child: Image.network(
+                                        e.image.toString(),
+                                        width: double.infinity,
+                                        height: 140,
+                                        fit: BoxFit.cover,
+                                      )),
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(e.title.toString(),
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 2,
+                                              style: GoogleFonts.readexPro(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w500)),
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text("Opening",
+                                                  style: GoogleFonts.readexPro(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color:
+                                                          Colors.lightGreen)),
+                                              const SizedBox(
+                                                height: 5,
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      const Icon(
+                                                        Icons
+                                                            .location_on_outlined,
+                                                        color: Color.fromARGB(
+                                                            255, 247, 95, 95),
+                                                        size: 14,
+                                                      ),
+                                                      Text("0.3km",
+                                                          style: GoogleFonts
+                                                              .readexPro(
+                                                            fontSize: 13,
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                          )),
+                                                    ],
+                                                  ),
+                                                  Text(
+                                                    "|",
+                                                    style: TextStyle(
+                                                        fontSize: 20,
+                                                        color: Colors.grey
+                                                            .withOpacity(0.6)),
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      const Icon(
+                                                        Icons
+                                                            .person_pin_outlined,
+                                                        size: 15,
+                                                      ),
+                                                      const SizedBox(
+                                                        width: 5,
+                                                      ),
+                                                      Text(e.checkin.toString(),
+                                                          style: GoogleFonts
+                                                              .readexPro(
+                                                            fontSize: 13,
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                          ))
+                                                    ],
+                                                  )
+                                                ],
+                                              )
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                              Positioned(
+                                  top: 10,
+                                  left: 10,
+                                  child: Container(
+                                    width: 50,
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.4),
+                                        borderRadius: BorderRadius.circular(5)),
+                                    child: Row(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                          CrossAxisAlignment.center,
                                       mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                          MainAxisAlignment.center,
                                       children: [
-                                        Text(e.title.toString(),
-                                            overflow: TextOverflow.ellipsis,
-                                            maxLines: 2,
-                                            style: GoogleFonts.readexPro(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w600)),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text("Opening",
-                                                style: GoogleFonts.readexPro(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Colors.lightGreen)),
-                                            SizedBox(
-                                              height: 5,
-                                            ),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons
-                                                          .location_on_outlined,
-                                                      color: Color.fromARGB(
-                                                          255, 247, 95, 95),
-                                                      size: 14,
-                                                    ),
-                                                    Text("0.3km",
-                                                        style: GoogleFonts
-                                                            .readexPro(
-                                                          fontSize: 13,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                        )),
-                                                  ],
-                                                ),
-                                                Text(
-                                                  "|",
-                                                  style: TextStyle(
-                                                      fontSize: 20,
-                                                      color: Colors.grey
-                                                          .withOpacity(0.6)),
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.person_pin_outlined,
-                                                      size: 15,
-                                                    ),
-                                                    SizedBox(
-                                                      width: 5,
-                                                    ),
-                                                    Text(e.checkin.toString(),
-                                                        style: GoogleFonts
-                                                            .readexPro(
-                                                          fontSize: 13,
-                                                          fontWeight:
-                                                              FontWeight.w500,
-                                                        ))
-                                                  ],
-                                                )
-                                              ],
-                                            )
-                                          ],
-                                        )
+                                        Icon(
+                                          Icons.star,
+                                          color: const Color.fromARGB(
+                                                  255, 255, 177, 59)
+                                              .withOpacity(0.8),
+                                          size: 15,
+                                        ),
+                                        const SizedBox(
+                                          width: 3,
+                                        ),
+                                        Text(
+                                          (e.rating! - 5).toStringAsFixed(1),
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                              color:
+                                                  Colors.white.withOpacity(0.9),
+                                              fontSize: 12),
+                                        ),
                                       ],
                                     ),
-                                  ),
-                                )
-                              ],
-                            ),
-                            Positioned(
-                                top: 10,
-                                left: 10,
-                                child: Container(
-                                  width: 50,
-                                  height: 30,
-                                  decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.4),
-                                      borderRadius: BorderRadius.circular(5)),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.star,
-                                        color: Color.fromARGB(255, 255, 177, 59)
-                                            .withOpacity(0.8),
-                                        size: 15,
-                                      ),
-                                      SizedBox(
-                                        width: 3,
-                                      ),
-                                      Text(
-                                        (e.rating! - 5).toStringAsFixed(1),
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            color:
-                                                Colors.white.withOpacity(0.9),
-                                            fontSize: 12),
-                                      ),
-                                    ],
-                                  ),
-                                ))
-                          ],
+                                  ))
+                            ],
+                          ),
                         ),
-                      ),
-                    ))
-              ],
+                      ))
+                ],
+              ),
             ),
           )
         ],
@@ -446,7 +455,7 @@ class _FoodstoreState extends State<Foodstore> {
 
   popular(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 60),
+      margin: const EdgeInsets.only(bottom: 60),
       child: Column(
         children: [
           Stack(
@@ -463,15 +472,15 @@ class _FoodstoreState extends State<Foodstore> {
                     child: Container(
                       width: MediaQuery.of(context).size.width / 2,
                       height: 40,
-                      decoration: BoxDecoration(),
+                      decoration: const BoxDecoration(),
                       child: Center(
                         child: Text("Hot",
                             style: GoogleFonts.readexPro(
-                                fontSize: 17,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w600,
                                 color: popular1
-                                    ? Color.fromARGB(255, 104, 104, 172)
-                                    : Color.fromARGB(255, 87, 86, 86))),
+                                    ? const Color.fromARGB(255, 104, 104, 172)
+                                    : const Color.fromARGB(255, 87, 86, 86))),
                       ),
                     ),
                   ),
@@ -488,11 +497,11 @@ class _FoodstoreState extends State<Foodstore> {
                       child: Center(
                         child: Text("Rating",
                             style: GoogleFonts.readexPro(
-                                fontSize: 17,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w600,
                                 color: !popular1
-                                    ? Color.fromARGB(255, 104, 104, 172)
-                                    : Color.fromARGB(255, 97, 97, 97))),
+                                    ? const Color.fromARGB(255, 104, 104, 172)
+                                    : const Color.fromARGB(255, 97, 97, 97))),
                       ),
                     ),
                   )
@@ -501,10 +510,10 @@ class _FoodstoreState extends State<Foodstore> {
               AnimatedPositioned(
                   bottom: 0,
                   left: popular1 ? 0 : MediaQuery.of(context).size.width / 2,
-                  duration: Duration(milliseconds: 300),
+                  duration: const Duration(milliseconds: 300),
                   child: Container(
                     width: MediaQuery.of(context).size.width / 2,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                         border: Border(
                             bottom: BorderSide(
                                 width: 2,
@@ -512,306 +521,326 @@ class _FoodstoreState extends State<Foodstore> {
                   ))
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 3,
           ),
           popular1
               ? SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      ...data.list.map((e) => GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          FoodstoreDetail(item: e)));
-                            },
-                            child: Container(
-                              margin: EdgeInsets.only(bottom: 10),
-                              width: MediaQuery.of(context).size.width,
-                              height: 120,
-                              color: Colors.white,
-                              child: Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Row(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(5),
-                                      child: Image.network(e.image.toString(),
-                                          height: double.infinity,
-                                          width: 90,
-                                          fit: BoxFit.cover),
-                                    ),
-                                    SizedBox(
-                                      width: 15,
-                                    ),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(e.title.toString(),
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 2,
-                                              style: GoogleFonts.readexPro(
-                                                fontSize: 17,
-                                                fontWeight: FontWeight.w600,
-                                              )),
-                                          SizedBox(
-                                            height: 4,
-                                          ),
-                                          Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Icon(
-                                                    Icons.star,
-                                                    size: 17,
-                                                    color: Colors.amber,
-                                                  ),
-                                                  SizedBox(
-                                                    width: 3,
-                                                  ),
-                                                  Text(
-                                                      (e.rating! - 5)
-                                                          .toStringAsFixed(1),
-                                                      style:
-                                                          GoogleFonts.readexPro(
-                                                              fontSize: 15,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                              color:
-                                                                  Colors.grey))
-                                                ],
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    left: 10.0, right: 10),
-                                                child: Text(
-                                                  "|",
-                                                  style: TextStyle(
-                                                      fontSize: 18,
-                                                      color: Colors.grey),
-                                                ),
-                                              ),
-                                              Row(
-                                                children: [
-                                                  Icon(
-                                                      Icons
-                                                          .location_on_outlined,
-                                                      size: 17),
-                                                  SizedBox(
-                                                    width: 3,
-                                                  ),
-                                                  Text("0.3km")
-                                                ],
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    left: 10.0, right: 10),
-                                                child: Text(
-                                                  "|",
-                                                  style: TextStyle(
-                                                      fontSize: 17,
-                                                      color: Colors.grey),
-                                                ),
-                                              ),
-                                              Text("Closing",
-                                                  style: GoogleFonts.readexPro(
-                                                      fontSize: 15,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      color: Color.fromARGB(
-                                                          255, 247, 69, 62)))
-                                            ],
-                                          ),
-                                          SizedBox(
-                                            height: 5,
-                                          ),
-                                          Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.end,
-                                            children: [
-                                              Icon(
-                                                Icons.person,
-                                                size: 25,
-                                                color: Colors.grey,
-                                              ),
-                                              SizedBox(
-                                                width: 5,
-                                              ),
-                                              Text(
-                                                  "Checkin: " +
-                                                      e.checkin.toString(),
-                                                  style: GoogleFonts.readexPro(
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      color: Color.fromARGB(
-                                                          255, 100, 99, 99)))
-                                            ],
-                                          )
-                                        ],
+                  child: Consumer<FoodstoreProvider>(
+                    builder: (context, value, child) => Column(
+                      children: [
+                        ...value.list.map((e) => GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            FoodstoreDetail(item: e)));
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.only(bottom: 10),
+                                width: MediaQuery.of(context).size.width,
+                                height: 120,
+                                color: Colors.white,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Row(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(5),
+                                        child: Image.network(e.image.toString(),
+                                            height: double.infinity,
+                                            width: 90,
+                                            fit: BoxFit.cover),
                                       ),
-                                    )
-                                  ],
+                                      const SizedBox(
+                                        width: 15,
+                                      ),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(e.title.toString(),
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 2,
+                                                style: GoogleFonts.readexPro(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w600,
+                                                )),
+                                            const SizedBox(
+                                              height: 4,
+                                            ),
+                                            Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    const Icon(
+                                                      Icons.star,
+                                                      size: 15,
+                                                      color: Colors.amber,
+                                                    ),
+                                                    const SizedBox(
+                                                      width: 3,
+                                                    ),
+                                                    Text(
+                                                        (e.rating! - 5)
+                                                            .toStringAsFixed(1),
+                                                        style: GoogleFonts
+                                                            .readexPro(
+                                                                fontSize: 15,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                color: Colors
+                                                                    .grey))
+                                                  ],
+                                                ),
+                                                const Padding(
+                                                  padding: EdgeInsets.only(
+                                                      left: 10.0, right: 10),
+                                                  child: Text(
+                                                    "|",
+                                                    style: TextStyle(
+                                                        fontSize: 18,
+                                                        color: Colors.grey),
+                                                  ),
+                                                ),
+                                                Row(
+                                                  children: const [
+                                                    Icon(
+                                                        Icons
+                                                            .location_on_outlined,
+                                                        size: 17),
+                                                    SizedBox(
+                                                      width: 3,
+                                                    ),
+                                                    Text("0.3km")
+                                                  ],
+                                                ),
+                                                const Padding(
+                                                  padding: EdgeInsets.only(
+                                                      left: 10.0, right: 10),
+                                                  child: Text(
+                                                    "|",
+                                                    style: TextStyle(
+                                                        fontSize: 17,
+                                                        color: Colors.grey),
+                                                  ),
+                                                ),
+                                                Text("Closing",
+                                                    style:
+                                                        GoogleFonts.readexPro(
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            color: const Color
+                                                                    .fromARGB(
+                                                                255,
+                                                                247,
+                                                                69,
+                                                                62)))
+                                              ],
+                                            ),
+                                            const SizedBox(
+                                              height: 5,
+                                            ),
+                                            Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.end,
+                                              children: [
+                                                const Icon(
+                                                  Icons.person,
+                                                  size: 25,
+                                                  color: Colors.grey,
+                                                ),
+                                                const SizedBox(
+                                                  width: 5,
+                                                ),
+                                                Text("Checkin: ${e.checkin}",
+                                                    style:
+                                                        GoogleFonts.readexPro(
+                                                            fontSize: 15,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            color: const Color
+                                                                    .fromARGB(
+                                                                255,
+                                                                100,
+                                                                99,
+                                                                99)))
+                                              ],
+                                            )
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ))
-                    ],
+                            ))
+                      ],
+                    ),
                   ),
                 )
               : SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      ...data.list2.map((e) => GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          FoodstoreDetail(item: e)));
-                            },
-                            child: Container(
-                              margin: EdgeInsets.only(bottom: 10),
-                              width: MediaQuery.of(context).size.width,
-                              height: 120,
-                              color: Colors.white,
-                              child: Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Row(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(5),
-                                      child: Image.network(e.image.toString(),
-                                          height: double.infinity,
-                                          width: 90,
-                                          fit: BoxFit.cover),
-                                    ),
-                                    SizedBox(
-                                      width: 15,
-                                    ),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(e.title.toString(),
-                                              style: GoogleFonts.readexPro(
-                                                fontSize: 17,
-                                                fontWeight: FontWeight.w600,
-                                              )),
-                                          SizedBox(
-                                            height: 4,
-                                          ),
-                                          Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Icon(
-                                                    Icons.star,
-                                                    size: 17,
-                                                    color: Colors.amber,
-                                                  ),
-                                                  SizedBox(
-                                                    width: 3,
-                                                  ),
-                                                  Text(
-                                                      (e.rating! - 5)
-                                                          .toStringAsFixed(1),
-                                                      style:
-                                                          GoogleFonts.readexPro(
-                                                              fontSize: 15,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w600,
-                                                              color:
-                                                                  Colors.grey))
-                                                ],
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    left: 10.0, right: 10),
-                                                child: Text(
-                                                  "|",
-                                                  style: TextStyle(
-                                                      fontSize: 17,
-                                                      color: Colors.grey),
-                                                ),
-                                              ),
-                                              Row(
-                                                children: [
-                                                  Icon(
-                                                      Icons
-                                                          .location_on_outlined,
-                                                      size: 17),
-                                                  SizedBox(
-                                                    width: 3,
-                                                  ),
-                                                  Text("0.3km")
-                                                ],
-                                              ),
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    left: 10.0, right: 10),
-                                                child: Text(
-                                                  "|",
-                                                  style: TextStyle(
-                                                      fontSize: 17,
-                                                      color: Colors.grey),
-                                                ),
-                                              ),
-                                              Text("Closing",
-                                                  style: GoogleFonts.readexPro(
-                                                      fontSize: 15,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      color: Color.fromARGB(
-                                                          255, 247, 69, 62)))
-                                            ],
-                                          ),
-                                          SizedBox(
-                                            height: 5,
-                                          ),
-                                          Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.end,
-                                            children: [
-                                              Icon(
-                                                Icons.person,
-                                                size: 25,
-                                                color: Colors.grey,
-                                              ),
-                                              SizedBox(
-                                                width: 5,
-                                              ),
-                                              Text(
-                                                  "Checkin: " +
-                                                      e.checkin.toString(),
-                                                  style: GoogleFonts.readexPro(
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      color: Color.fromARGB(
-                                                          255, 100, 99, 99)))
-                                            ],
-                                          )
-                                        ],
+                  child: Consumer<FoodstoreProvider>(
+                    builder: (context, value, child) => Column(
+                      children: [
+                        ...value.sort().map((e) => GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            FoodstoreDetail(item: e)));
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.only(bottom: 10),
+                                width: MediaQuery.of(context).size.width,
+                                height: 120,
+                                color: Colors.white,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Row(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(5),
+                                        child: Image.network(e.image.toString(),
+                                            height: double.infinity,
+                                            width: 90,
+                                            fit: BoxFit.cover),
                                       ),
-                                    )
-                                  ],
+                                      const SizedBox(
+                                        width: 15,
+                                      ),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(e.title.toString(),
+                                                style: GoogleFonts.readexPro(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.w600,
+                                                )),
+                                            const SizedBox(
+                                              height: 4,
+                                            ),
+                                            Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    const Icon(
+                                                      Icons.star,
+                                                      size: 17,
+                                                      color: Colors.amber,
+                                                    ),
+                                                    const SizedBox(
+                                                      width: 3,
+                                                    ),
+                                                    Text(
+                                                        (e.rating! - 5)
+                                                            .toStringAsFixed(1),
+                                                        style: GoogleFonts
+                                                            .readexPro(
+                                                                fontSize: 15,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
+                                                                color: Colors
+                                                                    .grey))
+                                                  ],
+                                                ),
+                                                const Padding(
+                                                  padding: EdgeInsets.only(
+                                                      left: 10.0, right: 10),
+                                                  child: Text(
+                                                    "|",
+                                                    style: TextStyle(
+                                                        fontSize: 17,
+                                                        color: Colors.grey),
+                                                  ),
+                                                ),
+                                                Row(
+                                                  children: const [
+                                                    Icon(
+                                                        Icons
+                                                            .location_on_outlined,
+                                                        size: 17),
+                                                    SizedBox(
+                                                      width: 3,
+                                                    ),
+                                                    Text("0.3km")
+                                                  ],
+                                                ),
+                                                const Padding(
+                                                  padding: EdgeInsets.only(
+                                                      left: 10.0, right: 10),
+                                                  child: Text(
+                                                    "|",
+                                                    style: TextStyle(
+                                                        fontSize: 17,
+                                                        color: Colors.grey),
+                                                  ),
+                                                ),
+                                                Text("Closing",
+                                                    style:
+                                                        GoogleFonts.readexPro(
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            color: const Color
+                                                                    .fromARGB(
+                                                                255,
+                                                                247,
+                                                                69,
+                                                                62)))
+                                              ],
+                                            ),
+                                            const SizedBox(
+                                              height: 5,
+                                            ),
+                                            Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.end,
+                                              children: [
+                                                const Icon(
+                                                  Icons.person,
+                                                  size: 25,
+                                                  color: Colors.grey,
+                                                ),
+                                                const SizedBox(
+                                                  width: 5,
+                                                ),
+                                                Text("Checkin: ${e.checkin}",
+                                                    style:
+                                                        GoogleFonts.readexPro(
+                                                            fontSize: 15,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            color: const Color
+                                                                    .fromARGB(
+                                                                255,
+                                                                100,
+                                                                99,
+                                                                99)))
+                                              ],
+                                            )
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ))
-                    ],
+                            ))
+                      ],
+                    ),
                   ),
                 )
         ],

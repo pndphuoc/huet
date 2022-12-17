@@ -8,7 +8,7 @@ import '../../model/foodstore/restaurant.dart';
 
 Future<bool> getapi() async {
   final response = await http.get(
-    Uri.parse('http://localhost:8888/api/foodstore'),
+    Uri.parse('http://172.20.10.5:8888/api/foodstore'),
   );
 
   if (response.statusCode == 200) {
@@ -23,7 +23,7 @@ Future<bool> getapi() async {
 List<Restaurant> list = [];
 
 Future gettop() async {
-  String apiURL = "http://localhost:8888/api/foodstore/gettop";
+  String apiURL = "http://172.20.10.5:8888/api/foodstore/gettop";
   var client = http.Client();
   var jsonString = await client.post(Uri.parse(apiURL));
   var jsonObject = jsonDecode(jsonString.body);
@@ -36,7 +36,7 @@ Future gettop() async {
 List<Restaurant> listSearch = [];
 
 Future search(id) async {
-  String apiURL = "http://localhost:8888/api/foodstore/search/${id}";
+  String apiURL = "http://172.20.10.5:8888/api/foodstore/search/3";
   var client = http.Client();
   var jsonString = await client.get(Uri.parse(apiURL));
   var jsonObject = jsonDecode(jsonString.body);
