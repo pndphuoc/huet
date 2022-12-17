@@ -1,3 +1,4 @@
+
 import 'dart:ui';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+
 import 'package:hue_t/accommodation_views/hotel_detail.dart';
 import 'package:hue_t/animation/show_up.dart';
 import 'package:hue_t/model/user/user.dart';
@@ -45,15 +47,14 @@ import 'colors.dart' as colors;
 import 'constants/user_info.dart' as userConstant;
 import 'model/user/user.dart' as userModel;
 
-void main() async {
+Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(MyApp());
+  runApp(
+    MyApp(), // Wrap your app
+  );
 }
-// void main()
-// {
-//   runApp(MyApp());
-// }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -173,9 +174,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
 class HueT extends StatefulWidget {
   const HueT({super.key, this.index});
-
   final int? index;
-
   @override
   State<HueT> createState() => _HueTState();
 }
@@ -221,12 +220,11 @@ class _HueTState extends State<HueT> {
 
   int _selectedItemPosition = 2;
   final List<Widget> _children = [
-    const HotelPage(),
-    const Foodstore(),
-    const HomePage(),
-    const ProfileUser(),
-    const TouristAttraction(),
-    const Events(),
+    HotelPage(),
+    Foodstore(),
+    HomePage(),
+    SocialNetWorkPage(),
+    ProfileUser()
   ];
 
   bottomNavigationBar(BuildContext context) {
@@ -291,29 +289,37 @@ class _HueTState extends State<HueT> {
       });
     }
   }
-
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).requestFocus(FocusNode());
-      },
-      child: Stack(children: [
-        _children[_selectedItemPosition],
-        MediaQuery.of(context).viewInsets.bottom != 0.0
-            ? Container()
-            : Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints constraints) {
-                    return ShowUp(
-                        child: bottomNavigationBar(context), delay: 0);
-                  },
-                ),
-              )
-      ]),
+    return MaterialApp(
+      title: 'Hue Travel',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: Scaffold(
+        body: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).requestFocus(new FocusNode());
+          },
+          child: Stack(children: [
+            _children[_selectedItemPosition],
+            MediaQuery.of(context).viewInsets.bottom != 0.0
+                ? Container()
+                : Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: LayoutBuilder(
+                      builder:
+                          (BuildContext context, BoxConstraints constraints) {
+                        return ShowUp(
+                            child: bottomNavigationBar(context), delay: 0);
+                      },
+                    ),
+                  )
+          ]),
+        ),
+      ),
     );
   }
 }

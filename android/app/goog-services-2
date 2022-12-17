@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "542914300169",
+    "project_id": "huet2-4f852",
+    "storage_bucket": "huet2-4f852.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:542914300169:android:639d231500d65bf7cb6bd8",
+        "android_client_info": {
+          "package_name": "com.example.hue_t"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "542914300169-47lj031aam1s69mcplbcfs3bfbttttoa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDPiubvE8qH8s4ovDA-_mQgDmAnmWZlxEA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "542914300169-47lj031aam1s69mcplbcfs3bfbttttoa.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
