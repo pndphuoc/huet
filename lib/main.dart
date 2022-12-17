@@ -14,6 +14,7 @@ import 'package:hue_t/provider/google_sign_in.dart';
 import 'package:hue_t/providers/event_provider.dart';
 import 'package:hue_t/providers/foodstore_provider.dart';
 import 'package:hue_t/providers/tourist_provider.dart';
+import 'package:hue_t/providers/user_provider.dart';
 import 'package:hue_t/providers/weather_provider.dart';
 import 'package:hue_t/view/Foodstore/foodstore.dart';
 import 'package:hue_t/view/events/events.dart';
@@ -67,6 +68,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
             create: (context) => TouristAttractionProvider()),
         ChangeNotifierProvider(create: (context) => WeatherProvider()),
+        ChangeNotifierProvider(create: (context) => UserProvider()),
       ],
       child: MaterialApp(
         useInheritedMediaQuery: true,

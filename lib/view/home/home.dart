@@ -397,12 +397,12 @@ class _HomePageState extends State<HomePage> {
             height: 80,
             decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
                       blurRadius: 3,
                       offset: const Offset(0, 2),
-                      color: Colors.grey.withOpacity(0.3))
+                      color: Colors.grey.withOpacity(0.1))
                 ]),
             child: Center(
               child: Image.network(image),
