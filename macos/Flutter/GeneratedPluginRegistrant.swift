@@ -4,7 +4,6 @@
 
 import FlutterMacOS
 import Foundation
-
 import cloud_firestore
 import firebase_core
 import firebase_storage
@@ -14,6 +13,8 @@ import photo_manager
 import shared_preferences_macos
 import sqflite
 import video_compress
+import firebase_auth
+import firebase_analytics
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   FLTFirebaseFirestorePlugin.register(with: registry.registrar(forPlugin: "FLTFirebaseFirestorePlugin"))

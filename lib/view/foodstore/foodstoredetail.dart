@@ -1,17 +1,13 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/model/foodstore/restaurant.dart';
 import 'package:hue_t/model/reviewModel.dart';
-import 'package:hue_t/view/foodstore/foodstore.dart';
 import 'package:hue_t/colors.dart' as color;
-import 'package:hue_t/api/foodstore/food_store_api.dart' as data;
 
 class FoodstoreDetail extends StatefulWidget {
   final Restaurant item;
-  FoodstoreDetail({Key? key, required this.item}) : super(key: key);
+  const FoodstoreDetail({Key? key, required this.item}) : super(key: key);
 
   @override
   State<FoodstoreDetail> createState() => _FoodstoreDetailState();
@@ -71,7 +67,7 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
   }
 
   header(BuildContext context) {
-    return Container(
+    return SizedBox(
       child: Stack(
         children: [
           Image.network(
@@ -96,10 +92,10 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 216, 215, 215)
+                            color: const Color.fromARGB(255, 216, 215, 215)
                                 .withOpacity(0.8),
                             borderRadius: BorderRadius.circular(40)),
-                        child: Center(
+                        child: const Center(
                             child: Icon(
                           Icons.arrow_back_ios_new_outlined,
                           size: 17,
@@ -112,10 +108,10 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 216, 215, 215)
+                            color: const Color.fromARGB(255, 216, 215, 215)
                                 .withOpacity(0.8),
                             borderRadius: BorderRadius.circular(40)),
-                        child: Center(
+                        child: const Center(
                             child: Icon(
                           Icons.favorite_border_outlined,
                           size: 20,
@@ -132,7 +128,7 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
 
   body(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(top: 200),
+      margin: const EdgeInsets.only(top: 200),
       width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(30),
@@ -148,8 +144,8 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
                     style: GoogleFonts.readexPro(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 104, 104, 172))),
-                SizedBox(
+                        color: const Color.fromARGB(255, 104, 104, 172))),
+                const SizedBox(
                   height: 8,
                 ),
                 Row(
@@ -158,18 +154,19 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.location_on_outlined),
-                        SizedBox(
+                        const Icon(Icons.location_on_outlined),
+                        const SizedBox(
                           width: 5,
                         ),
-                        Container(
+                        SizedBox(
                           width: MediaQuery.of(context).size.width / 1.5,
                           child: Text(widget.item.address.toString(),
                               maxLines: 2,
                               style: GoogleFonts.readexPro(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w400,
-                                  color: Color.fromARGB(255, 109, 109, 109))),
+                                  color: const Color.fromARGB(
+                                      255, 109, 109, 109))),
                         )
                       ],
                     ),
@@ -185,12 +182,12 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
                                 BoxShadow(
                                     blurRadius: 4,
                                     spreadRadius: 1,
-                                    offset: Offset(2, 3),
+                                    offset: const Offset(2, 3),
                                     color: Colors.grey.withOpacity(0.6))
                               ]),
                           child: Transform.rotate(
                             angle: 45,
-                            child: Icon(
+                            child: const Icon(
                               Icons.navigation_outlined,
                               color: Color.fromARGB(255, 104, 104, 172),
                             ),
@@ -198,88 +195,78 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
                     )
                   ],
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 5,
                 ),
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.star,
                       size: 18,
                       color: Colors.amber,
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 5,
                     ),
                     Text((widget.item.rating! - 5).toStringAsFixed(1),
                         style: GoogleFonts.readexPro(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
-                            color: Color.fromARGB(255, 109, 109, 109))),
-                    SizedBox(
+                            color: const Color.fromARGB(255, 109, 109, 109))),
+                    const SizedBox(
                       width: 7,
                     ),
-                    Text("-  " + widget.item.checkin.toString() + " Checkin",
+                    Text("-  ${widget.item.checkin} Checkin",
                         style: GoogleFonts.readexPro(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
-                            color: Color.fromARGB(255, 109, 109, 109))),
+                            color: const Color.fromARGB(255, 109, 109, 109))),
                   ],
                 ),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.timer_outlined,
                       size: 18,
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 5,
                     ),
-                    Text(
-                        widget.item.open.toString() +
-                            ":00" +
-                            " - " +
-                            widget.item.close.toString() +
-                            ":00",
+                    Text("${widget.item.open}:00 - ${widget.item.close}:00",
                         style: GoogleFonts.readexPro(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
-                            color: Color.fromARGB(255, 96, 97, 96))),
-                    SizedBox(
+                            color: const Color.fromARGB(255, 96, 97, 96))),
+                    const SizedBox(
                       width: 10,
                     ),
                   ],
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 5,
                 ),
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.attach_money_outlined,
                       size: 18,
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 5,
                     ),
                     Text(
-                        widget.item.mincost.toString() +
-                            ".000" +
-                            " - " +
-                            widget.item.maxcost.toString() +
-                            ".000" +
-                            " VND",
+                        "${widget.item.mincost}.000 - ${widget.item.maxcost}.000 VND",
                         style: GoogleFonts.readexPro(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
-                            color: Color.fromARGB(255, 96, 97, 96)))
+                            color: const Color.fromARGB(255, 96, 97, 96)))
                   ],
                 )
               ],
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
           Stack(
@@ -287,7 +274,7 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
               Container(
                 width: MediaQuery.of(context).size.width,
                 height: 40,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                     border: Border(
                         top: BorderSide(
                             width: 0.2,
@@ -303,15 +290,15 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
                       child: Container(
                         width: MediaQuery.of(context).size.width / 3,
                         height: 40,
-                        decoration: BoxDecoration(),
+                        decoration: const BoxDecoration(),
                         child: Center(
                           child: Text("Reviews",
                               style: GoogleFonts.readexPro(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                   color: link == 1
-                                      ? Color.fromARGB(255, 104, 104, 172)
-                                      : Color.fromARGB(255, 84, 84, 85))),
+                                      ? const Color.fromARGB(255, 104, 104, 172)
+                                      : const Color.fromARGB(255, 84, 84, 85))),
                         ),
                       ),
                     ),
@@ -324,15 +311,15 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
                       child: Container(
                         width: MediaQuery.of(context).size.width / 3,
                         height: 40,
-                        decoration: BoxDecoration(),
+                        decoration: const BoxDecoration(),
                         child: Center(
                           child: Text("Images",
                               style: GoogleFonts.readexPro(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                   color: link == 2
-                                      ? Color.fromARGB(255, 104, 104, 172)
-                                      : Color.fromARGB(255, 84, 84, 85))),
+                                      ? const Color.fromARGB(255, 104, 104, 172)
+                                      : const Color.fromARGB(255, 84, 84, 85))),
                         ),
                       ),
                     ),
@@ -345,15 +332,15 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
                       child: Container(
                         width: MediaQuery.of(context).size.width / 3,
                         height: 40,
-                        decoration: BoxDecoration(),
+                        decoration: const BoxDecoration(),
                         child: Center(
                           child: Text("Map",
                               style: GoogleFonts.readexPro(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
                                   color: link == 3
-                                      ? Color.fromARGB(255, 104, 104, 172)
-                                      : Color.fromARGB(255, 84, 84, 85))),
+                                      ? const Color.fromARGB(255, 104, 104, 172)
+                                      : const Color.fromARGB(255, 84, 84, 85))),
                         ),
                       ),
                     )
@@ -367,15 +354,15 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
                       : link == 2
                           ? MediaQuery.of(context).size.width / 3
                           : MediaQuery.of(context).size.width * 2 / 3,
+                  duration: const Duration(milliseconds: 300),
                   child: Container(
                     width: MediaQuery.of(context).size.width / 3,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                         border: Border(
                             bottom: BorderSide(
                                 width: 2,
                                 color: Color.fromARGB(255, 104, 104, 172)))),
-                  ),
-                  duration: Duration(milliseconds: 300))
+                  ))
             ],
           ),
           link == 1
@@ -389,49 +376,53 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
   }
 
   introduce(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          // Padding(
-          //   padding: const EdgeInsets.all(20.0),
-          //   child: Text(
-          //     widget.item.description.toString(),
-          //     style: GoogleFonts.readexPro(
-          //         fontSize: 15,
-          //         fontWeight: FontWeight.w400,
-          //         color: Color.fromARGB(255, 109, 109, 109)),
-          //     textAlign: TextAlign.justify,
-          //   ),
-          // ),
-          SizedBox(
-            height: 20,
-          ),
-          review(context),
-        ],
-      ),
+    return Column(
+      children: [
+        // Padding(
+        //   padding: const EdgeInsets.all(20.0),
+        //   child: Text(
+        //     widget.item.description.toString(),
+        //     style: GoogleFonts.readexPro(
+        //         fontSize: 15,
+        //         fontWeight: FontWeight.w400,
+        //         color: Color.fromARGB(255, 109, 109, 109)),
+        //     textAlign: TextAlign.justify,
+        //   ),
+        // ),
+        const SizedBox(
+          height: 20,
+        ),
+        review(context),
+      ],
     );
   }
 
   menu(BuildContext context) {
-    return widget.item.menu!.length < 2
-        ? Text(
-            "No Image !",
-            style: GoogleFonts.readexPro(fontSize: 15),
-          )
-        : GridView.builder(
+    if (widget.item.menu!.length < 2) {
+      return Text(
+        "No Image !",
+        style: GoogleFonts.readexPro(fontSize: 15),
+      );
+    } else {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 20.0),
+        child: GridView.builder(
+            physics: const ScrollPhysics(),
             shrinkWrap: true,
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 150,
                 mainAxisExtent: 100,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10),
+                crossAxisSpacing: 2,
+                mainAxisSpacing: 2),
             itemCount: widget.item.menu!.length,
             itemBuilder: (BuildContext ctx, index) {
               return Image.network(
                 widget.item.menu![index]['ImageUrl'],
                 fit: BoxFit.cover,
               );
-            });
+            }),
+      );
+    }
   }
 
   map(BuildContext context) {
@@ -439,179 +430,168 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
   }
 
   review(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          // Container(
-          //   width: double.infinity,
-          //   height: 35,
-          //   decoration: BoxDecoration(),
-          //   child: Padding(
-          //     padding: const EdgeInsets.only(left: 20.0, right: 20),
-          //     child: Row(
-          //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //       children: [
-          //         Text("",
-          //             style: GoogleFonts.readexPro(
-          //                 fontSize: 19,
-          //                 fontWeight: FontWeight.w600,
-          //                 color: Color.fromARGB(255, 63, 63, 63))),
-          //         Text("See All",
-          //             style: GoogleFonts.readexPro(
-          //                 fontSize: 16,
-          //                 fontWeight: FontWeight.w600,
-          //                 color: Color.fromARGB(255, 104, 104, 172)))
-          //       ],
-          //     ),
-          //   ),
-          // ),
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                ...widget.item.description!.map((e) => Container(
-                      padding: EdgeInsets.all(20),
-                      width: MediaQuery.of(context).size.width,
-                      color: Colors.white,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(50),
-                                    child: Image.network(
-                                      widget.item.category![0] == '3'
-                                          ? e['OwnerAvatar']
-                                          : widget.item.category![0] == '4'
-                                              ? e['OwnerAvatar']
-                                              : e['reviewUserAvatar'],
-                                      width: 50,
-                                      height: 50,
-                                      fit: BoxFit.cover,
-                                    ),
+    return Column(
+      children: [
+        // Container(
+        //   width: double.infinity,
+        //   height: 35,
+        //   decoration: BoxDecoration(),
+        //   child: Padding(
+        //     padding: const EdgeInsets.only(left: 20.0, right: 20),
+        //     child: Row(
+        //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //       children: [
+        //         Text("",
+        //             style: GoogleFonts.readexPro(
+        //                 fontSize: 19,
+        //                 fontWeight: FontWeight.w600,
+        //                 color: Color.fromARGB(255, 63, 63, 63))),
+        //         Text("See All",
+        //             style: GoogleFonts.readexPro(
+        //                 fontSize: 16,
+        //                 fontWeight: FontWeight.w600,
+        //                 color: Color.fromARGB(255, 104, 104, 172)))
+        //       ],
+        //     ),
+        //   ),
+        // ),
+        SingleChildScrollView(
+          child: Column(
+            children: [
+              ...widget.item.description!.map((e) => Container(
+                    padding: const EdgeInsets.all(20),
+                    width: MediaQuery.of(context).size.width,
+                    color: Colors.white,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(50),
+                                  child: Image.network(
+                                    widget.item.category![0] == '2'
+                                        ? e['OwnerAvatar']
+                                        : widget.item.category![0] == '4'
+                                            ? e['OwnerAvatar']
+                                            : widget.item.category![0] == '3'
+                                                ? e['OwnerAvatar']
+                                                : e['reviewUserAvatar'],
+                                    width: 50,
+                                    height: 50,
+                                    fit: BoxFit.cover,
                                   ),
-                                  SizedBox(
-                                    width: 15,
-                                  ),
-                                  Container(
-                                    width:
-                                        MediaQuery.of(context).size.width - 105,
-                                    height: 42,
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                            widget.item.category![0] == '3'
-                                                ? e['OwnerUserName']
-                                                : widget.item.category![0] ==
-                                                        '4'
-                                                    ? e['OwnerUserName']
-                                                    : e[
-                                                        'reviewUserDisplayName'],
+                                ),
+                                const SizedBox(
+                                  width: 15,
+                                ),
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width - 105,
+                                  height: 42,
+                                  child: Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                          widget.item.category![0] == '2'
+                                              ? e['OwnerUserName']
+                                              : widget.item.category![0] == '4'
+                                                  ? e['OwnerUserName']
+                                                  : widget.item.category![0] ==
+                                                          '3'
+                                                      ? e['OwnerUserName']
+                                                      : e[
+                                                          'reviewUserDisplayName'],
+                                          style: GoogleFonts.readexPro(
+                                              color: const Color.fromARGB(
+                                                  255, 71, 71, 71),
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16)),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          RatingBar(
+                                            ratingWidget: RatingWidget(
+                                                full: Icon(
+                                                  Icons.star,
+                                                  color: color.starsReviewColor,
+                                                ),
+                                                half: Icon(
+                                                  Icons.star_half,
+                                                  color: color.starsReviewColor,
+                                                ),
+                                                empty: Icon(
+                                                  Icons.star_border,
+                                                  color: color.starsReviewColor,
+                                                )),
+                                            onRatingUpdate: (rating) {},
+                                            itemSize: 15,
+                                            allowHalfRating: true,
+                                            initialRating: (e['AvgRating']! - 5)
+                                                .toDouble(),
+                                          ),
+                                          Text(
+                                            "${now.difference(DateTime(2022, 11, 15, 12, 56)).inDays} ngày trước",
                                             style: GoogleFonts.readexPro(
-                                                color: Color.fromARGB(
-                                                    255, 71, 71, 71),
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16)),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            RatingBar(
-                                              ratingWidget: RatingWidget(
-                                                  full: Icon(
-                                                    Icons.star,
-                                                    color:
-                                                        color.starsReviewColor,
-                                                  ),
-                                                  half: Icon(
-                                                    Icons.star_half,
-                                                    color:
-                                                        color.starsReviewColor,
-                                                  ),
-                                                  empty: Icon(
-                                                    Icons.star_border,
-                                                    color:
-                                                        color.starsReviewColor,
-                                                  )),
-                                              onRatingUpdate: (rating) {},
-                                              itemSize: 15,
-                                              allowHalfRating: true,
-                                              initialRating:
-                                                  (e['AvgRating']! - 5)
-                                                      .toDouble(),
-                                            ),
-                                            Text(
-                                              (now
-                                                          .difference(DateTime(
-                                                              2022,
-                                                              11,
-                                                              15,
-                                                              12,
-                                                              56))
-                                                          .inDays)
-                                                      .toString() +
-                                                  " ngày trước",
-                                              style: GoogleFonts.readexPro(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Color.fromARGB(
-                                                      255, 131, 130, 130)),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                                color: const Color.fromARGB(
+                                                    255, 131, 130, 130)),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Text(e['Comment'],
-                              style: GoogleFonts.readexPro(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color.fromARGB(255, 102, 102, 102))),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              ...reviewsList1[0].images!.map((e) => Container(
-                                    margin: EdgeInsets.only(right: 5),
-                                    width: 60,
-                                    height: 60,
-                                    child: AspectRatio(
-                                      aspectRatio: 1 / 1,
-                                      child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                          child: Image.asset(
-                                            e,
-                                            fit: BoxFit.cover,
-                                          )),
-                                    ),
-                                  ))
-                            ],
-                          )
-                        ],
-                      ),
-                    ))
-              ],
-            ),
-          )
-        ],
-      ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Text(e['Comment'],
+                            style: GoogleFonts.readexPro(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                                color:
+                                    const Color.fromARGB(255, 102, 102, 102))),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          children: [
+                            ...reviewsList1[0].images!.map((e) => Container(
+                                  margin: const EdgeInsets.only(right: 5),
+                                  width: 60,
+                                  height: 60,
+                                  child: AspectRatio(
+                                    aspectRatio: 1 / 1,
+                                    child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: Image.asset(
+                                          e,
+                                          fit: BoxFit.cover,
+                                        )),
+                                  ),
+                                ))
+                          ],
+                        )
+                      ],
+                    ),
+                  ))
+            ],
+          ),
+        )
+      ],
     );
   }
 }

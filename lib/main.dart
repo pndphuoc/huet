@@ -1,17 +1,51 @@
+
+import 'dart:ui';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+
+import 'package:hue_t/accommodation_views/hotel_detail.dart';
+import 'package:hue_t/animation/show_up.dart';
+import 'package:hue_t/model/user/user.dart';
+import 'package:hue_t/provider/google_sign_in.dart';
+import 'package:hue_t/providers/event_provider.dart';
+import 'package:hue_t/providers/foodstore_provider.dart';
+import 'package:hue_t/providers/tourist_provider.dart';
+import 'package:hue_t/providers/weather_provider.dart';
+import 'package:hue_t/view/Foodstore/foodstore.dart';
+import 'package:hue_t/view/events/events.dart';
+import 'package:hue_t/view/foodstore/foodstoredetail.dart';
 import 'package:hue_t/animation/show_up.dart';
 import 'package:hue_t/view/Foodstore/foodstore.dart';
 import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
-import 'package:hue_t/home.dart';
+import 'package:hue_t/view/home/home.dart';
 import 'package:hue_t/accommodation_views/hotel.dart';
-import 'package:hue_t/view/social_network_network/socialNetwork.dart';
+import 'package:hue_t/view/profileuser/auth_service.dart';
+import 'package:hue_t/view/profileuser/loginin_page.dart';
 import 'package:hue_t/view/profileuser/profile_user.dart';
+import 'package:hue_t/view/foodstore/search_foodstore.dart';
+import 'package:provider/provider.dart';
+import 'package:rive/rive.dart' as rive;
+import 'package:hue_t/view/tourist_attraction/tourist_attraction.dart';
+import 'accommodation_views/homestays_list.dart';
+import 'accommodation_views/hotels_list.dart';
+import 'accommodation_views/resorts_list.dart';
 import 'colors.dart' as colors;
+import 'fake_data.dart' as faker;
+import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
+import 'package:hue_t/view/home/home.dart';
+import 'package:hue_t/accommodation_views/hotel.dart';
+import 'accommodation_views/homestays_list.dart';
+import 'accommodation_views/hotels_list.dart';
+import 'accommodation_views/resorts_list.dart';
+import 'colors.dart' as colors;
+import 'constants/user_info.dart' as userConstant;
+import 'model/user/user.dart' as userModel;
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,17 +55,28 @@ Future main() async {
   );
 }
 
+
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      useInheritedMediaQuery: true,
-      locale: DevicePreview.locale(context),
-      builder: DevicePreview.appBuilder,
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
-      debugShowCheckedModeBanner: false,
-      home: SplashScreen(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => FoodstoreProvider()),
+        ChangeNotifierProvider(create: (context) => EventProvider()),
+        ChangeNotifierProvider(
+            create: (context) => TouristAttractionProvider()),
+        ChangeNotifierProvider(create: (context) => WeatherProvider()),
+      ],
+      child: MaterialApp(
+        useInheritedMediaQuery: true,
+        locale: DevicePreview.locale(context),
+        builder: DevicePreview.appBuilder,
+        theme: ThemeData.light(),
+        darkTheme: ThemeData.dark(),
+        home: const SplashScreen(),
+      ),
     );
   }
 }
@@ -47,53 +92,83 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    if (FirebaseAuth.instance.currentUser != null) {
+      userConstant.user = userModel.User(
+          name: FirebaseAuth.instance.currentUser!.displayName!,
+          mail: FirebaseAuth.instance.currentUser!.email!,
+          photoURL: FirebaseAuth.instance.currentUser!.photoURL!,
+          uid: FirebaseAuth.instance.currentUser!.uid,
+          phoneNumber: FirebaseAuth.instance.currentUser!.phoneNumber);
+    }
     Future.delayed(Duration(seconds: 4)).then((value) => Navigator.of(context)
         .pushReplacement(CupertinoPageRoute(builder: (ctx) => HueT())));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        child: Stack(
-      children: [
-        Image.asset(
-          'assets/images/splashscreen/3.png',
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          fit: BoxFit.cover,
+    return Stack(children: [
+      Image.asset(
+        'assets/images/splashscreen/3.png',
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        fit: BoxFit.cover,
+      ),
+      Positioned(
+        width: MediaQuery.of(context).size.width * 1.7,
+        left: 100,
+        bottom: 100,
+        child: Image.asset(
+          "assets/Backgrounds/Spline.png",
         ),
-        Positioned(
-            top: 330,
+      ),
+      Positioned.fill(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: const SizedBox(),
+        ),
+      ),
+      const rive.RiveAnimation.asset(
+        fit: BoxFit.fitWidth,
+        "assets/RiveAssets/shapesscreen.riv",
+      ),
+      Positioned.fill(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+          child: const SizedBox(),
+        ),
+      ),
+      Positioned(
+          top: 330,
+          child: Image.asset(
+            'assets/images/splashscreen/5.png',
+            width: MediaQuery.of(context).size.width,
+          )),
+      Positioned(
+          top: 100,
+          child: ElasticInUp(
+            duration: Duration(milliseconds: 3000),
             child: Image.asset(
-              'assets/images/splashscreen/5.png',
+              'assets/images/splashscreen/2.png',
               width: MediaQuery.of(context).size.width,
-            )),
-        Positioned(
-            top: 100,
-            child: ElasticInUp(
-              duration: Duration(milliseconds: 3000),
-              child: Image.asset(
-                'assets/images/splashscreen/2.png',
-                width: MediaQuery.of(context).size.width,
-              ),
-            )),
-        Positioned(
-            top: 700,
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  SpinKitThreeBounce(
-                    color: Colors.white,
-                    duration: Duration(milliseconds: 1000),
-                    size: 40,
-                  ),
-                ],
-              ),
-            ))
-      ],
-    ));
+            ),
+          )),
+      Positioned(
+          top: 700,
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SpinKitThreeBounce(
+                  color: Colors.white,
+                  duration: Duration(milliseconds: 1000),
+                  size: 40,
+                ),
+              ],
+            ),
+          ))
+    ]);
+    //Add animation
   }
 }
 
@@ -116,7 +191,7 @@ class _HueTState extends State<HueT> {
 
   SnakeBarBehaviour snakeBarStyle = SnakeBarBehaviour.floating;
 
-  EdgeInsets padding = const EdgeInsets.only(left: 12, right: 12, bottom: 12);
+  EdgeInsets padding = const EdgeInsets.only(left: 12, right: 12, bottom: 5);
 
   SnakeShape snakeShape = SnakeShape.circle;
 
@@ -175,7 +250,11 @@ class _HueTState extends State<HueT> {
       showSelectedLabels: showSelectedLabels,
 
       currentIndex: _selectedItemPosition,
-      onTap: (index) => setState(() => _selectedItemPosition = index),
+      onTap: (index) {
+        setState(() {
+          _selectedItemPosition = index;
+        });
+      },
       items: [
         BottomNavigationBarItem(
             icon: Icon(Icons.hotel_outlined),
