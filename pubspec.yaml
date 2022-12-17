@@ -74,6 +74,9 @@ dependencies:
   card_swiper: ^2.0.4
   animate_do: ^3.0.2
   flutter_spinkit: ^5.1.0
+  flutter_html:
+  html_unescape: ^2.0.0
+  tiengviet: ^0.5.0
 
 dev_dependencies:
   flutter_test:
@@ -96,6 +99,7 @@ flutter:
     - assets/images/
     - assets/images/profileuser/
     - assets/images/hotel/
+    - assets/images/home/
     - assets/images/foodstore/
     - assets/images/splashscreen/
     - assets/images/foodstore/category/
