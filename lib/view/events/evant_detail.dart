@@ -192,7 +192,7 @@ class _EventDetailState extends State<EventDetail> {
               data: formatHtmlString(widget.item.description.toString()),
               style: {
                 "body": Style(
-                    fontSize: const FontSize(15.0),
+                    fontSize: FontSize(15.0),
                     fontWeight: FontWeight.w500,
                     fontFamily: 'readexPro')
               },

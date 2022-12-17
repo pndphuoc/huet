@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "899570795134",
+    "project_id": "login-c0445",
+    "storage_bucket": "login-c0445.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:899570795134:android:b6662bf5bd40487e2ece2f",
+        "android_client_info": {
+          "package_name": "com.example.hue_t"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "899570795134-657pnvdfj0vuhj8fe1s5h415asbarau5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0O5szblMCyWtCqXfsUK2FTtBl6h2tKkw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "899570795134-657pnvdfj0vuhj8fe1s5h415asbarau5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
