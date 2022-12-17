@@ -11,8 +11,8 @@ class PostModel {
   int userID;
   String attractionID;
   List<Media> medias;
-  int likeCount;
-  int commentCount;
+  List<String> likedUser;
+  List<>
   DateTime createDate;
   bool isDeleted;
 
