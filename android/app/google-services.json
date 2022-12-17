@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "720888531339",
+    "project_id": "huetravel-62f0b",
+    "storage_bucket": "huetravel-62f0b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:720888531339:android:5d3782923ab2406d0c078e",
+        "android_client_info": {
+          "package_name": "com.example.hue_t"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "720888531339-7mekbepfcodue7ds2f8msfh3d8j752sh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.hue_t",
+            "certificate_hash": "20ae4eddb07fc1ab0733116d9de8c800e3e88b63"
+          }
+        },
+        {
+          "client_id": "720888531339-o2vpimvp3lng5ds4qs5c15gi76hbav57.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2PComVGxX4VPwGnmdwu4eLiOZ8ROb2M4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "720888531339-o2vpimvp3lng5ds4qs5c15gi76hbav57.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

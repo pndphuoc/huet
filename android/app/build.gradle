@@ -8,7 +8,7 @@ if (localPropertiesFile.exists()) {
 
 def flutterRoot = localProperties.getProperty('flutter.sdk')
 if (flutterRoot == null) {
-    throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
+    throw new FileNotFoundException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
 }
 
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
@@ -21,17 +21,25 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
+def compileVersion = localProperties.getProperty('android.version')
+if (compileVersion == null) {
+    compileVersion = "33"
+}
+
+apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
-
 android {
-    compileSdkVersion 33
-    ndkVersion flutter.ndkVersion
+    compileSdkVersion compileVersion.toInteger()
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+    signingConfigs {
+        release {
+            storeFile file("${rootDir.absolutePath}/photo-manager-keystore")
+            storePassword '123456'
+            keyAlias 'key0'
+            keyPassword '123456'
+        }
     }
 
     kotlinOptions {
@@ -42,24 +50,36 @@ android {
         main.java.srcDirs += 'src/main/kotlin'
     }
 
+    lintOptions {
+        disable 'InvalidPackage'
+    }
+
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.example.hue_t"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration.
-        minSdkVersion 20
-        targetSdkVersion flutter.targetSdkVersion
+        minSdkVersion 21
+        targetSdkVersion compileVersion.toInteger()
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        multiDexEnabled true
     }
 
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
+        }
+        debug {
+            signingConfig signingConfigs.release
+        }
+        profile {
+            signingConfig signingConfigs.release
         }
     }
+    namespace 'com.example.hue_t'
 }
 
 flutter {
@@ -68,4 +88,19 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.github.bumptech.glide:glide:4.14.2'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.14.2'
+    implementation platform('com.google.firebase:firebase-bom:31.1.1')
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    implementation 'com.google.firebase:firebase-inappmessaging-display:17.2.0'
+    implementation 'com.google.guava:guava:27.0.1-android'
+    implementation 'com.android.support:multidex:1.0.3'
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.android.gms:play-services-auth:20.4.0'
 }
+/*plugins {
+    id 'com.android.application'
+    // Add the Google services Gradle plugin
+    id 'com.google.gms.google-services'
+}*/
+
