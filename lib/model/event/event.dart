@@ -34,7 +34,7 @@ class Event {
         description: obj['description'],
         begin: obj['begin'],
         end: obj['end'],
-        price: obj['price'],
+        price: double.parse(obj['price'].toString()),
         organizationName: obj['organizationName'],
         note: obj['note']);
   }
