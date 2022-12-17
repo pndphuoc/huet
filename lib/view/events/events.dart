@@ -110,7 +110,7 @@ class _EventsState extends State<Events> {
                     Text(
                       "Upcoming Event",
                       style: GoogleFonts.readexPro(
-                          fontSize: 18, fontWeight: FontWeight.w600),
+                          fontSize: 17, fontWeight: FontWeight.w500),
                     ),
                     Text(
                       "View All",
@@ -141,8 +141,8 @@ class _EventsState extends State<Events> {
                             decoration: const BoxDecoration(),
                             child: Text("Today",
                                 style: GoogleFonts.readexPro(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
                                     color: popular1
                                         ? const Color.fromARGB(
                                             255, 104, 104, 172)
@@ -163,8 +163,8 @@ class _EventsState extends State<Events> {
                             decoration: const BoxDecoration(),
                             child: Text("Tomorrow",
                                 style: GoogleFonts.readexPro(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
                                     color: !popular1
                                         ? const Color.fromARGB(
                                             255, 104, 104, 172)
@@ -343,7 +343,7 @@ class _EventsState extends State<Events> {
                     Text(
                       "Next Month Event",
                       style: GoogleFonts.readexPro(
-                          fontSize: 18, fontWeight: FontWeight.w600),
+                          fontSize: 17, fontWeight: FontWeight.w500),
                     ),
                     Text(
                       "View All",
@@ -381,7 +381,7 @@ class _EventsState extends State<Events> {
                                   width: 70, height: 70, fit: BoxFit.cover),
                             ),
                             Padding(
-                              padding: const EdgeInsets.only(left: 8.0, top: 8),
+                              padding: const EdgeInsets.only(left: 8.0, top: 3),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [

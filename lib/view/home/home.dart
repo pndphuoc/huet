@@ -21,6 +21,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool isloading = true;
+  bool users = true;
   int _currentIndex = 0;
   final bool _visible = true;
   List listSlider = [
@@ -84,13 +85,13 @@ class _HomePageState extends State<HomePage> {
                   bottomRight: Radius.circular(20)),
               child: Stack(children: [
                 Image.asset(
-                  'assets/images/home/1.jpg',
+                  'assets/images/home/2.jpg',
                   height: 210,
                   width: MediaQuery.of(context).size.width,
                   fit: BoxFit.cover,
                 ),
                 Positioned(
-                  bottom: -10,
+                  bottom: -15,
                   right: 10,
                   child: Visibility(
                     maintainSize: true,
@@ -129,43 +130,75 @@ class _HomePageState extends State<HomePage> {
                 alignment: Alignment.centerLeft,
                 padding: const EdgeInsets.only(left: 40),
                 width: MediaQuery.of(context).size.width,
-                height: 70,
-                child: Container(
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.only(left: 35),
-                  width: 150,
-                  height: 40,
-                  decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 144, 144, 240),
-                      borderRadius: BorderRadius.circular(50)),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.lock_open_outlined,
-                        color: Colors.white,
-                        size: 18,
+                height: 80,
+                child: users
+                    ? Container(
+                        padding: const EdgeInsets.only(left: 40),
+                        height: 45,
+                        alignment: Alignment.centerLeft,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("NGUYỄN ĐĂNG QUANG",
+                                style: GoogleFonts.readexPro(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white)),
+                            const SizedBox(
+                              height: 3,
+                            ),
+                            Text("Chào mừng bạn đến với Huế Travel",
+                                style: GoogleFonts.readexPro(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.white.withOpacity(0.7))),
+                          ],
+                        ),
+                      )
+                    : Container(
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.only(left: 35),
+                        width: 150,
+                        height: 45,
+                        decoration: BoxDecoration(
+                            color: const Color.fromARGB(255, 165, 165, 250),
+                            borderRadius: BorderRadius.circular(50)),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.lock_open_outlined,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                            const SizedBox(
+                              width: 5,
+                            ),
+                            Text("Đăng nhập",
+                                style: GoogleFonts.readexPro(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white)),
+                          ],
+                        ),
                       ),
-                      const SizedBox(
-                        width: 5,
-                      ),
-                      Text("Đăng nhập",
-                          style: GoogleFonts.readexPro(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white)),
-                    ],
-                  ),
-                ),
               ),
               Positioned(
                 left: 0,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(70),
-                  child: Image.network(
-                    "https://i.kym-cdn.com/photos/images/facebook/001/124/155/20e.jpg",
-                    width: 70,
-                    height: 70,
-                    fit: BoxFit.cover,
+                child: Container(
+                  alignment: Alignment.center,
+                  width: 74,
+                  height: 74,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(75),
+                      color: Color.fromARGB(255, 255, 255, 255)),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(70),
+                    child: Image.network(
+                      "https://i.kym-cdn.com/photos/images/facebook/001/124/155/20e.jpg",
+                      width: 70,
+                      height: 70,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               )
@@ -442,8 +475,13 @@ class _HomePageState extends State<HomePage> {
                       fontWeight: FontWeight.w500,
                       color: Colors.black87)),
               GestureDetector(
-                onTap: () => Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const Events())),
+                onTap: () => Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const HueT(
+                              index: 6,
+                            )),
+                    (route) => false),
                 child: Text("Xem tất cả",
                     style: GoogleFonts.readexPro(
                         fontSize: 13,
