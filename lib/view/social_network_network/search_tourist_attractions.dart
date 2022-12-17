@@ -6,7 +6,7 @@ import 'package:hue_t/model/attraction/tourist_attraction.dart';
 
 import 'complete_upload.dart';
 
-typedef void AttractionCallback(TouristAttaction val);
+typedef void AttractionCallback(TouristAttraction val);
 
 class SearchTouristAttractionPage extends StatefulWidget {
   final AttractionCallback callback;
@@ -49,7 +49,7 @@ class _SearchTouristAttractionPageState extends State<SearchTouristAttractionPag
     );
   }
 
-  touristAttractionBlock(BuildContext context, TouristAttaction att) {
+  touristAttractionBlock(BuildContext context, TouristAttraction att) {
     return Container(
       margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
       child: GestureDetector(

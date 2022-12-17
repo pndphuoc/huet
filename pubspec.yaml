@@ -52,11 +52,8 @@ dependencies:
   carousel_slider: ^4.1.1
   flutter:
     sdk: flutter
-
-  firebase_core: ^2.4.0
   firebase_analytics: ^10.0.4
-  firebase_auth: ^4.2.0
-  google_sign_in: ^4.5.1
+  google_sign_in:
   provider:
 
   rxdart: ^0.27.7
@@ -105,6 +102,8 @@ dependencies:
   quickalert: ^1.0.1
   html_unescape: ^2.0.0
   tiengviet: ^0.5.0
+  firebase_auth: ^4.2.1
+  flutter_html: ^3.0.0-alpha.6
 
 dev_dependencies:
   flutter_test:

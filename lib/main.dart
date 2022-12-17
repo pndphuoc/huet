@@ -1,6 +1,5 @@
 
 import 'dart:ui';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
@@ -29,6 +28,7 @@ import 'package:hue_t/view/profileuser/auth_service.dart';
 import 'package:hue_t/view/profileuser/loginin_page.dart';
 import 'package:hue_t/view/profileuser/profile_user.dart';
 import 'package:hue_t/view/foodstore/search_foodstore.dart';
+import 'package:hue_t/view/social_network_network/socialNetwork.dart';
 import 'package:provider/provider.dart';
 import 'package:rive/rive.dart' as rive;
 import 'package:hue_t/view/tourist_attraction/tourist_attraction.dart';
