@@ -255,21 +255,13 @@ class _HueTState extends State<HueT> {
       },
       items: const [
         BottomNavigationBarItem(
-            icon: Icon(Icons.hotel_outlined),
-            label: 'Accommodations',
-            activeIcon: Icon(Icons.hotel)),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.fastfood_outlined),
-            label: 'Food stores',
-            activeIcon: Icon(Icons.fastfood)),
+            icon: Icon(Icons.camera_alt_outlined),
+            label: 'Social network',
+            activeIcon: Icon(Icons.camera_alt)),
         BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
             label: 'Home',
             activeIcon: Icon(Icons.home)),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.camera_alt_outlined),
-            label: 'Social network',
-            activeIcon: Icon(Icons.camera_alt)),
         BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             label: 'Personal Infomation',

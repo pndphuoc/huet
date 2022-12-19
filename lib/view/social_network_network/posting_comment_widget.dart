@@ -2,20 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/animation/heart_animation.dart';
 import 'package:hue_t/model/social_network/comment_model.dart';
-import 'package:hue_t/colors.dart' as colors;
 import '../../firebase_function/common_function.dart';
 
-
-class CommentWidget extends StatefulWidget {
-  const CommentWidget({Key? key, required this.cmt, required this.isSelecting}) : super(key: key);
-  final Comment cmt;
-  final bool isSelecting;
-
+class PostingCommentWidget extends StatefulWidget {
+  const PostingCommentWidget({Key? key, required this.content}) : super(key: key);
+  final String content;
   @override
-  State<CommentWidget> createState() => _CommentWidgetState();
+  State<PostingCommentWidget> createState() => _PostingCommentWidgetState();
 }
 
-class _CommentWidgetState extends State<CommentWidget> with TickerProviderStateMixin{
+class _PostingCommentWidgetState extends State<PostingCommentWidget> with TickerProviderStateMixin{
   bool isLiked = false;
 
   late final AnimationController _heartController = AnimationController(
@@ -34,10 +30,9 @@ class _CommentWidgetState extends State<CommentWidget> with TickerProviderStateM
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: widget.isSelecting ? Colors.black12 : colors.backgroundColor
+      decoration: const BoxDecoration(
       ),
-      padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
+      margin: const EdgeInsets.only(left: 20, right: 20, top: 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -78,12 +73,13 @@ class _CommentWidgetState extends State<CommentWidget> with TickerProviderStateM
                   height: 5,
                 ),
                 Text(
-                  widget.cmt.content,
+                  widget.content,
                   style:
                   GoogleFonts.montserrat(color: Colors.black, fontSize: 15),
                 ),
                 const SizedBox(height: 10,),
-                buildDateFormat(widget.cmt.createDate, Colors.grey, 10),
+                //buildDateFormat(widget.cmt.createDate, Colors.grey, 10),
+                Text("Posting...", style: GoogleFonts.readexPro(color: Colors.grey, fontSize: 10),),
                 const SizedBox(
                   height: 5,
                 ),
@@ -121,7 +117,7 @@ class _CommentWidgetState extends State<CommentWidget> with TickerProviderStateM
                 ),
               ),
               Text(
-                widget.cmt.likedUsers.length.toString(),
+                "0",
                 style: GoogleFonts.readexPro(color: Colors.grey),
               )
             ],

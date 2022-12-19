@@ -1,9 +1,4 @@
-import 'dart:convert';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:hue_t/model/social_network/comment_model.dart';
-import 'dart:convert' as convert;
 import 'media_model.dart';
 
 class PostModel {
