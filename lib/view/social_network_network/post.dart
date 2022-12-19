@@ -22,10 +22,9 @@ import 'dart:io';
 import 'constants.dart' as constants;
 
 class Post extends StatefulWidget {
-  const Post({Key? key, required this.post, required this.isInView, required this.documentSnapshot, required this.callback}) : super(key: key);
+  const Post({Key? key, required this.post, required this.isInView, required this.callback}) : super(key: key);
   final PostModel post;
   final bool isInView;
-  final DocumentSnapshot documentSnapshot;
   final DeleteCallback callback;
   @override
   State<Post> createState() => _PostState();
@@ -80,7 +79,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    documentSnapshotID = widget.documentSnapshot.id;
+    //documentSnapshotID = widget.documentSnapshot.id;
     post = widget.post;
     _likeStatus();
     likeCount = post.likedUsers.length;
@@ -149,7 +148,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
               onChanged: (value) {
                 MenuItem selected = value as MenuItem;
                 if(selected.text == 'Delete') {
-                  widget.callback(widget.documentSnapshot.id.toString());
+                  widget.callback(widget.post.postID.toString());
                 }
                 MenuItems.onChanged(context, value as MenuItem);
               },

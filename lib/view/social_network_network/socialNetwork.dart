@@ -36,6 +36,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
   static const int postsLimit = 2;
 
   void _onRefresh() async {
+    postList.clear();
     _posts.clear();
     setState(() {
       _morePostsAvailable = true;
@@ -61,6 +62,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
   List<DocumentSnapshot> _posts = [];
   DocumentSnapshot? _lastDocument;
   bool _morePostsAvailable = true;
+  List<PostModel> postList = [];
 
   _getPosts() async {
     Query q = _firestore
@@ -71,6 +73,10 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
     _posts = querySnapshot.docs;
     if(querySnapshot.docs.isNotEmpty) {
       _lastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
+    }
+
+    for(var e in _posts) {
+      postList.add(await PostModel.fromJson(e.data() as Map<String, dynamic>));
     }
     setState(() {});
   }
@@ -108,7 +114,9 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
     _refreshController.dispose();
   }
 
+  _getPost() async {
 
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -158,21 +166,16 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                           _refreshController.loadComplete();
                         },
                   child: ListView.builder(
-                      itemCount: _posts.length,
+                      itemCount: postList.length,
                       itemBuilder: (context, index) {
                         return InViewNotifierWidget(
                           id: '$index',
                           builder: (BuildContext context, bool isInView,
                               Widget? child) {
-                            PostModel post = PostModel.fromJson(
-                              _posts[index].data()
-                              as Map<String, dynamic>,
-                            );
                             return isInView
                                 ? Post(
-                                    post: post,
+                                    post: postList[index],
                                     isInView: true,
-                                    documentSnapshot: _posts[index],
                                     callback: (val) async {
                                        bool deletePost = await showDialog(
                                            context: context,
@@ -222,9 +225,8 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                                     },
                                   )
                                 : Post(
-                                    post: post,
+                                    post: postList[index],
                                     isInView: false,
-                                    documentSnapshot: _posts[index],
                               callback: (val) async {
                                 bool deletePost = await showDialog(
                                     context: context,

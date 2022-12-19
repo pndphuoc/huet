@@ -1,5 +1,6 @@
 import 'package:hue_t/model/social_network/comment_model.dart';
 import 'media_model.dart';
+import '../../firebase_function/comment_function.dart';
 
 class PostModel {
   String postID;
@@ -31,15 +32,18 @@ class PostModel {
       'isDeleted': false
     };
   }
-  static PostModel fromJson(Map<String, dynamic> json) {
+  
+  
+  static Future<PostModel> fromJson(Map<String, dynamic> json) async{
     List<Media> medias = [];
     for(var e in List.from(json['medias'])) {
       medias.add(Media.fromJson(e));
     }
     List<Comment> comments = [];
-    for(var e in json['comments']){
+   comments = await  getAllComment(json['postID']);
+/*    for(var e in json['comments']){
       comments.add(Comment.fromJson(e));
-    }
+    }*/
     return PostModel(
         postID: json['postID'],
         userID: json['userID'],

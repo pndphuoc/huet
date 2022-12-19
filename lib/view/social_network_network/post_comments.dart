@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
 import 'package:hue_t/model/social_network/comment_model.dart';
@@ -6,8 +7,10 @@ import 'package:hue_t/model/social_network/post_model.dart';
 import 'package:hue_t/view/social_network_network/comment.dart';
 import 'package:hue_t/view/social_network_network/posting_comment_widget.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:oktoast/oktoast.dart';
 import '../../firebase_function/comment_function.dart';
 import '../../constants/user_info.dart' as user_info;
+import '../../firebase_function/comment_function.dart';
 import '../../firebase_function/comment_function.dart';
 
 class PostCommentsPage extends StatefulWidget {
@@ -27,25 +30,28 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
   bool isLoading = true;
   bool isPostingComment = false;
   bool isSelectingItem = false;
+  Comment? selectedItem;
+  late List<Comment> commentList;
+
   _getPostContent() async {
     //post = await displayUsersCommentFirst(widget.postID);
     post = await getPostContent(widget.postID);
+    commentList = await getAllComment(widget.postID);
 
-    //display user's comment first
     List<Comment> myComments = [];
-    post.comments.toList().forEach((element) {
+    commentList.toList().forEach((element) {
       if(element.userID == user_info.user!.uid) {
         myComments.add(element);
-        post.comments.remove(element);
+        commentList.remove(element);
       }
     });
     myComments.sort((a, b) => b.createDate.compareTo(a.createDate),);
-    post.comments = myComments + post.comments;
-
+    commentList = myComments + commentList;
     setState(() {
       isLoading = false;
     });
   }
+
 
   void _scrollUp() {
     _controller.animateTo(
@@ -65,7 +71,7 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
-        appBar: !isSelectingItem ? appBar(context) : appBarDeleteComment(context),
+        appBar: !isSelectingItem ? appBar(context) : selectedItemAppBar(context),
         backgroundColor: colors.backgroundColor,
         body: isLoading ? Center(child: LoadingAnimationWidget.discreteCircle(color: colors.primaryColor, size: 30),) : SafeArea(
           child: Stack(children: [
@@ -77,13 +83,14 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
                   children: [
                     contentBlock(context),
                     isPostingComment ? postingCommentBlock(context, commentContent) : Container(),
-                    ...post.comments.map((e) => GestureDetector(
+                    ...commentList.map((e) => GestureDetector(
                         onLongPress: (){
                           setState(() {
                             isSelectingItem = true;
+                            selectedItem = e;
                           });
                         },
-                        child: CommentWidget(cmt: e, isSelecting: isSelectingItem ? true : false,))),
+                        child: CommentWidget(cmt: e, isSelecting: isSelectingItem ? selectedItem!.id : "", postID: widget.postID,))),
                     const SizedBox(height: 80,)
                   ],
                 ),
@@ -252,10 +259,10 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
     );
   }
 
-  AppBar appBarDeleteComment(BuildContext context) {
+  AppBar selectedItemAppBar(BuildContext context) {
     return AppBar(
       leading: IconButton(
-        icon: Icon(Icons.close),
+        icon: const Icon(Icons.close),
         onPressed: (){
           setState(() {
             isSelectingItem = false;
@@ -267,7 +274,27 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
         "1 item selected",
         style: GoogleFonts.readexPro(color: Colors.black),
       ),
-      backgroundColor: colors.backgroundColor,
+      actions: [
+        selectedItem!.userID == user_info.user!.uid ? IconButton(onPressed: () async{
+          await deleteComment(selectedItem!, widget.postID);
+          Fluttertoast.showToast(
+              msg: "Deleted 1 comment",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.CENTER,
+              timeInSecForIosWeb: 1,
+              textColor: Colors.white,
+              fontSize: 16.0);
+          setState(() {
+            post.comments.remove(selectedItem!);
+            selectedItem = null;
+            isSelectingItem = false;
+          });
+        }, icon: const Icon(Icons.delete)) :
+        IconButton(onPressed: (){
+
+        }, icon: const Icon(Icons.error)),
+      ],
+      backgroundColor: colors.primaryColor,
       elevation: 0,
     );
   }
