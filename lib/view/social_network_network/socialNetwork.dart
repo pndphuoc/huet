@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
-import 'package:hue_t/model/social_network/postModel.dart';
+import 'package:hue_t/model/social_network/post_model.dart';
 import 'package:hue_t/view/social_network_network/post.dart';
 import 'package:hue_t/view/social_network_network/uploading_widget.dart';
 import 'package:inview_notifier_list/inview_notifier_list.dart';
@@ -42,7 +42,6 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
     });
     // monitor network fetch
     await _getPosts();
-    // if failed,use refreshFailed()
     _refreshController.refreshCompleted();
   }
 
@@ -70,7 +69,9 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
         .limit(postsLimit);
     QuerySnapshot querySnapshot = await q.get();
     _posts = querySnapshot.docs;
-    _lastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
+    if(querySnapshot.docs.isNotEmpty) {
+      _lastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
+    }
     setState(() {});
   }
 
@@ -87,7 +88,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
         .limit(postsLimit);
 
     QuerySnapshot querySnapshot = await q.get();
-    if (querySnapshot.docs.length == 0) {
+    if (querySnapshot.docs.isEmpty) {
       _morePostsAvailable = false;
       _refreshController.loadComplete();
     }
@@ -95,7 +96,6 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
       _morePostsAvailable = false;
     }
 
-    _lastDocument = querySnapshot.docs.last;
     _posts.addAll(querySnapshot.docs);
 
     setState(() {});
@@ -108,34 +108,6 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
     _refreshController.dispose();
   }
 
-  Card buildButton({
-    required onTap,
-    required title,
-    required text,
-    required leadingImage,
-  }) {
-    return Card(
-      shape: const StadiumBorder(),
-      margin: const EdgeInsets.symmetric(
-        horizontal: 20,
-      ),
-      clipBehavior: Clip.antiAlias,
-      elevation: 1,
-      child: ListTile(
-        onTap: onTap,
-        leading: CircleAvatar(
-          backgroundImage: AssetImage(
-            leadingImage,
-          ),
-        ),
-        title: Text(title ?? ""),
-        subtitle: Text(text ?? ""),
-        trailing: const Icon(
-          Icons.keyboard_arrow_right_rounded,
-        ),
-      ),
-    );
-  }
 
 
   @override
@@ -198,7 +170,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                             );
                             return isInView
                                 ? Post(
-                                    samplePost: post,
+                                    post: post,
                                     isInView: true,
                                     documentSnapshot: _posts[index],
                                     callback: (val) async {
@@ -250,7 +222,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                                     },
                                   )
                                 : Post(
-                                    samplePost: post,
+                                    post: post,
                                     isInView: false,
                                     documentSnapshot: _posts[index],
                               callback: (val) async {

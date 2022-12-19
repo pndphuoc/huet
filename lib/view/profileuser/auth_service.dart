@@ -17,6 +17,8 @@ class AuthService {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (BuildContext context, snapshot) {
           if (snapshot.hasData) {
+            print(FirebaseAuth.instance.currentUser!.displayName!);
+            //print(FirebaseAuth.instance.currentUser!.email!);
             userConstant.user = userModel.User(
                 name: FirebaseAuth.instance.currentUser!.displayName!,
                 mail: FirebaseAuth.instance.currentUser!.email!,
@@ -64,13 +66,16 @@ class AuthService {
 
   //Sign out
   Future<void> signOut(BuildContext context)async {
+    GoogleSignIn _googleSignIn = GoogleSignIn();
+    await _googleSignIn.disconnect();
     await FirebaseAuth.instance.signOut();
     userConstant.user = null;
-    Navigator.pushReplacement(
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
         builder: (BuildContext context) => const HueT(),
       ),
+          (Route<dynamic> route) => false,
     );
   }
 }

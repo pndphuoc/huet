@@ -1,9 +1,21 @@
-class CommentModel {
+class Comment {
   String id;
-  String userId;
-  String postId;
+  String userID;
   String content;
-  int likeCount;
+  List<String> likedUsers;
 
-  CommentModel({required this.id, required this.userId, required this.postId, required this.content, required this.likeCount});
+  Comment({required this.id, required this.userID, required this.content, required this.likedUsers});
+
+  static Comment fromJson(Map<String, dynamic> json) {
+    return Comment(id: json['id'], userID: json['userID'], content: json['content'], likedUsers: json['likedUsers'].cast<String>());
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'userID': id,
+      'content': content,
+      'likedUsers': likedUsers
+    };
+  }
 }

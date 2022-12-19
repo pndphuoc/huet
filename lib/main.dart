@@ -100,8 +100,8 @@ class _SplashScreenState extends State<SplashScreen> {
           uid: FirebaseAuth.instance.currentUser!.uid,
           phoneNumber: FirebaseAuth.instance.currentUser!.phoneNumber);
     }
-    Future.delayed(Duration(seconds: 4)).then((value) => Navigator.of(context)
-        .pushReplacement(CupertinoPageRoute(builder: (ctx) => HueT())));
+    Future.delayed(const Duration(seconds: 4)).then((value) => Navigator.of(context)
+        .pushReplacement(CupertinoPageRoute(builder: (ctx) => const HueT())));
   }
 
   @override
@@ -146,7 +146,7 @@ class _SplashScreenState extends State<SplashScreen> {
       Positioned(
           top: 100,
           child: ElasticInUp(
-            duration: Duration(milliseconds: 3000),
+            duration: const Duration(milliseconds: 3000),
             child: Image.asset(
               'assets/images/splashscreen/2.png',
               width: MediaQuery.of(context).size.width,
@@ -154,11 +154,11 @@ class _SplashScreenState extends State<SplashScreen> {
           )),
       Positioned(
           top: 700,
-          child: Container(
+          child: SizedBox(
             width: MediaQuery.of(context).size.width,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+              children: const [
                 SpinKitThreeBounce(
                   color: Colors.white,
                   duration: Duration(milliseconds: 1000),
@@ -220,11 +220,9 @@ class _HueTState extends State<HueT> {
 
   int _selectedItemPosition = 2;
   final List<Widget> _children = [
-    HotelPage(),
-    Foodstore(),
-    HomePage(),
-    SocialNetWorkPage(),
-    ProfileUser()
+    const SocialNetWorkPage(),
+    const HomePage(),
+    const ProfileUser()
   ];
 
   bottomNavigationBar(BuildContext context) {
@@ -255,7 +253,7 @@ class _HueTState extends State<HueT> {
           _selectedItemPosition = index;
         });
       },
-      items: [
+      items: const [
         BottomNavigationBarItem(
             icon: Icon(Icons.hotel_outlined),
             label: 'Accommodations',
@@ -299,7 +297,7 @@ class _HueTState extends State<HueT> {
       home: Scaffold(
         body: GestureDetector(
           onTap: () {
-            FocusScope.of(context).requestFocus(new FocusNode());
+            FocusScope.of(context).requestFocus(FocusNode());
           },
           child: Stack(children: [
             _children[_selectedItemPosition],

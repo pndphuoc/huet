@@ -2,95 +2,39 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
 import 'package:hue_t/model/social_network/comment_model.dart';
-import 'package:hue_t/model/social_network/postModel.dart';
+import 'package:hue_t/model/social_network/post_model.dart';
 import 'package:hue_t/view/social_network_network/comment.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import '../../firebase_function/comment_function.dart';
+import '../../constants/user_info.dart' as user_info;
+import '../../firebase_function/comment_function.dart';
 
 class PostCommentsPage extends StatefulWidget {
-  const PostCommentsPage({Key? key, required this.post}) : super(key: key);
-  final PostModel post;
+  const PostCommentsPage({Key? key, required this.postID}) : super(key: key);
+  final String postID;
 
   @override
   State<PostCommentsPage> createState() => _PostCommentsPageState();
 }
 
-List<CommentModel> commentList = [
-  CommentModel(
-      id: "1", userId: "1", postId: "1", content: "abcsdf", likeCount: 6999),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431)
-];
-
 class _PostCommentsPageState extends State<PostCommentsPage> {
+
+  final commentController = TextEditingController();
+  late PostModel post;
+  bool isLoading = true;
+  bool isPostingComment = false;
+  _getPostContent() async {
+    post = await getPostContent(widget.postID);
+    setState(() {
+      isLoading = false;
+    });
+  }
+  
+  @override
+  void initState() {
+    super.initState();
+    _getPostContent();
+  }
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -106,15 +50,18 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
           elevation: 0,
         ),
         backgroundColor: colors.backgroundColor,
-        body: SafeArea(
+        body: isLoading ? Center(child: LoadingAnimationWidget.discreteCircle(color: colors.primaryColor, size: 30),) : SafeArea(
           child: Stack(children: [
             SingleChildScrollView(
-              child: Column(
-                children: [
-                  contentBlock(context),
-                  ...commentList.map((e) => Comment(cmt: e)),
-                  const SizedBox(height: 80, )
-                ],
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height,
+                child: Column(
+                  children: [
+                    contentBlock(context),
+                    ...post.comments.map((e) => CommentWidget(cmt: e)),
+                    const SizedBox(height: 80, )
+                  ],
+                ),
               ),
             ),
             commentBlock(context)
@@ -166,7 +113,7 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
                     width: 10,
                   ),
                   Text(
-                    "${daysBetween(widget.post.createDate, DateTime.now())} days before",
+                    "${daysBetween(post.createDate, DateTime.now())} days before",
                     style: GoogleFonts.readexPro(color: Colors.grey),
                   )
                 ],
@@ -175,7 +122,7 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
                 height: 5,
               ),
               Text(
-                widget.post.caption!,
+                post.caption!,
                 style:
                     GoogleFonts.montserrat(color: Colors.black, fontSize: 15),
               )
@@ -202,10 +149,10 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                SizedBox(
+                const SizedBox(
                   height: 45,
                   width: 45,
-                  child: const CircleAvatar(
+                  child: CircleAvatar(
                     backgroundImage: AssetImage(
                       "assets/images/socialNetwork/avatar.png",
                     ),
@@ -214,12 +161,13 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
                 const SizedBox(
                   width: 10,
                 ),
-                const Expanded(child: TextField(
+                Expanded(child: TextField(
+                  controller: commentController,
                   autofocus: true,
                   textInputAction: TextInputAction.send,
                   keyboardType: TextInputType.multiline,
                   maxLines: null,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                       contentPadding: EdgeInsets.fromLTRB(10, 15, 10, 10),
                       border: InputBorder.none,
                     hintText: "Write a comment"
@@ -229,7 +177,18 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
                   width: 10,
                 ),
                 IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    setState(() {
+                      isPostingComment = true;
+                    });
+                    postComment(commentController.value.text, user_info.user!.uid, post.postID);
+                    setState(() {
+                      isPostingComment = false;
+                    });
+                    setState(() {
+                      _getPostContent();
+                    });
+                  },
                   icon: Icon(
                     Icons.send_rounded,
                     color: colors.primaryColor,
@@ -245,5 +204,11 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
             ),
           ),
         ));
+  }
+
+  Widget postingCommentBlock(BuildContext context, Comment cmt) {
+    return AnimatedContainer(duration: const Duration(milliseconds: 500),
+      child: CommentWidget(cmt: cmt),
+    );
   }
 }

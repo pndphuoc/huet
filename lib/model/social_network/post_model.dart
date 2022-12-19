@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hue_t/model/social_network/comment_model.dart';
 import 'dart:convert' as convert;
 import 'media_model.dart';
 
@@ -11,12 +12,12 @@ class PostModel {
   int userID;
   String attractionID;
   List<Media> medias;
-  List<String> likedUser;
-  List<>
+  List<String> likedUsers;
+  List<Comment> comments;
   DateTime createDate;
   bool isDeleted;
 
-  PostModel({required this.postID,this.caption, required this.userID, required this.attractionID, required this.medias, required this.likeCount, required this.commentCount, required this.createDate, required this.isDeleted});
+  PostModel({required this.postID,this.caption, required this.userID, required this.attractionID, required this.medias, required this.likedUsers, required this.comments, required this.createDate, required this.isDeleted});
 
   Map<String, dynamic> toJson() {
     var mediaJson = [];
@@ -29,21 +30,41 @@ class PostModel {
       'userID': userID,
       'attractionID': attractionID,
       'medias': mediaJson,
-      'likeCount': likeCount,
-      'commentCount': commentCount,
+      'likedUsers': likedUsers,
+      'comments': comments,
       'createDate': createDate,
       'isDeleted': false
     };
   }
-
   static PostModel fromJson(Map<String, dynamic> json) {
+    List<Media> medias = [];
+    for(var e in List.from(json['medias'])) {
+      medias.add(Media.fromJson(e));
+    }
+    List<Comment> comments = [];
+    for(var e in json['comments']){
+      comments.add(Comment.fromJson(e));
+    }
+    return PostModel(
+        postID: json['postID'],
+        userID: json['userID'],
+        caption: json['caption'],
+        attractionID: json['attractionID'],
+        medias: medias,
+        likedUsers: List<String>.from(json['likedUsers']),
+        comments: comments,
+        createDate: json['createDate'].toDate(),
+        isDeleted: json['isDeleted']);
+  }
+
+/*  static PostModel fromJson(Map<String, dynamic> json) {
     List<Media> medias = [];
     for(var e in List.from(json['medias'])) {
       medias.add(Media.fromJson(e));
     }
     return PostModel(
         postID: json['postID'], caption: json['caption'], userID: json['userID'], attractionID: json['attractionID'],
-        medias:  medias, likeCount: json['likeCount'], commentCount: json['commentCount'],
-        createDate: (json['createDate'] as Timestamp).toDate(), isDeleted: false);
-  }
+        medias:  medias,
+        createDate: (json['createDate'] as Timestamp).toDate(), isDeleted: false, likedUsers: []);
+  }*/
 }

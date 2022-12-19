@@ -3,14 +3,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/animation/heart_animation.dart';
 import 'package:hue_t/model/social_network/comment_model.dart';
 
-class Comment extends StatefulWidget {
-  const Comment({Key? key, required this.cmt}) : super(key: key);
-  final CommentModel cmt;
+class CommentWidget extends StatefulWidget {
+  const CommentWidget({Key? key, required this.cmt}) : super(key: key);
+  final Comment cmt;
   @override
-  State<Comment> createState() => _CommentState();
+  State<CommentWidget> createState() => _CommentWidgetState();
 }
 
-class _CommentState extends State<Comment> with TickerProviderStateMixin{
+class _CommentWidgetState extends State<CommentWidget> with TickerProviderStateMixin{
   bool isLiked = false;
 
   late final AnimationController _heartController = AnimationController(
@@ -110,7 +110,7 @@ class _CommentState extends State<Comment> with TickerProviderStateMixin{
                 ),
               ),
               Text(
-                widget.cmt.likeCount.toString(),
+                widget.cmt.likedUsers.length.toString(),
                 style: GoogleFonts.readexPro(color: Colors.grey),
               )
             ],

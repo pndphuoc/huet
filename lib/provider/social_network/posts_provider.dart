@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
-import '../../model/social_network/postModel.dart';
+import '../../model/social_network/post_model.dart';
 
 class PostsProvider extends ChangeNotifier {
   List<PostModel> list = [];

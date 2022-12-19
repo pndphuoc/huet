@@ -3,7 +3,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hue_t/model/social_network/postModel.dart';
+import 'package:hue_t/model/social_network/post_model.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'dart:io';
 import 'package:path/path.dart' as p;
@@ -102,8 +102,8 @@ class _UploadingWidgetState extends State<UploadingWidget> {
       userID: 1,
       caption: widget.caption!,
       isDeleted: false,
-      likeCount: 0,
-      commentCount: 0,
+      likedUsers: [],
+      comments: [],
       medias: mediaList,
       postID: docPost.id,
       createDate: DateTime.now()
