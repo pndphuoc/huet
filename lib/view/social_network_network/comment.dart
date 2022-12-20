@@ -8,17 +8,18 @@ import 'package:hue_t/model/social_network/post_model.dart';
 import 'package:hue_t/view/social_network_network/post.dart';
 import '../../firebase_function/common_function.dart';
 import '../../constants/user_info.dart' as user_info;
-
+typedef void StringCallback();
 class CommentWidget extends StatefulWidget {
   const CommentWidget(
       {Key? key,
       required this.cmt,
       required this.isSelecting,
-      required this.postID})
+      required this.postID, required this.callback})
       : super(key: key);
   final Comment cmt;
   final String isSelecting;
   final String postID;
+  final StringCallback callback;
 
   @override
   State<CommentWidget> createState() => _CommentWidgetState();
@@ -27,7 +28,6 @@ class CommentWidget extends StatefulWidget {
 class _CommentWidgetState extends State<CommentWidget>
     with TickerProviderStateMixin {
   bool isLiked = false;
-
   late final AnimationController _heartController = AnimationController(
     duration: const Duration(milliseconds: 500),
     vsync: this,
@@ -38,19 +38,11 @@ class _CommentWidgetState extends State<CommentWidget>
 
   @override
   void dispose() {
-    _heartController.dispose();
+    //_heartController.dispose();
     super.dispose();
   }
 
   _likeStatus() async {
-    /* await FirebaseFirestore.instance.collection('post').doc(widget.postID).get().then((doc) {
-      final comment = Comment.fromJson(List.from(doc.data()!["comments"]).where((element) => element["id"] == widget.cmt.id).toList()[0]);
-      if(comment.likedUsers.contains(user_info.user!.uid)) {
-        setState(() {
-          isLiked = true;
-        });
-      }
-    });*/
     if (widget.cmt.likedUsers.contains(user_info.user!.uid)) {
       setState(() {
         isLiked = true;
@@ -132,9 +124,10 @@ class _CommentWidgetState extends State<CommentWidget>
                       GoogleFonts.montserrat(color: Colors.black, fontSize: 15),
                 ),
                 const SizedBox(
-                  height: 10,
+                  height: 5,
                 ),
                 buildDateFormat(widget.cmt.createDate, Colors.grey, 10),
+                buildReplyButton(context),
                 const SizedBox(
                   height: 5,
                 ),
@@ -183,6 +176,23 @@ class _CommentWidgetState extends State<CommentWidget>
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget buildReplyButton(BuildContext context) {
+    return SizedBox(
+      width: 60,
+      child: TextButton(onPressed: (){
+        widget.callback();
+      },
+          style: TextButton.styleFrom(
+            minimumSize: const Size(50, 30),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            splashFactory: NoSplash.splashFactory,
+            alignment: Alignment.center
+          ),
+          child: Text("Reply", style: GoogleFonts.readexPro(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w600),)
       ),
     );
   }

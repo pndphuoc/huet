@@ -90,7 +90,7 @@ class _UploadingWidgetState extends State<UploadingWidget> {
     return mediaList;
   }
 
-  Future uploadPostContent(List<Media> mediaList) async {
+  Future<void> uploadPostContent(List<Media> mediaList) async {
 /*    List<Object> mediaJson = [];
     for (int i=0 ; i<mediaList.length; i++) {
       mediaJson.add(mediaList[i].toJson());
@@ -110,7 +110,8 @@ class _UploadingWidgetState extends State<UploadingWidget> {
     );
 
     final json = post.toJson();
-    return docPost.set(json);
+    docPost.set(json);
+    FirebaseFirestore.instance.collection('post').doc(docPost.id).collection('comments').doc().set({});
   }
 
   Future<void> createPost() async {

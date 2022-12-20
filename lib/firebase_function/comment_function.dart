@@ -17,6 +17,7 @@ Future<void> postComment(String content, String userID, String postID) async {
       .doc();
   Comment cmt = Comment(id: doc.id, userID: userID, content: content, likedUsers: [], createDate: DateTime.now());
   doc.set(cmt.toJson());
+  FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').doc(doc.id).collection('replyComments').doc().set({});
 }
 
 Future<List<Comment>> getAllComment(String postID) async {
@@ -53,7 +54,12 @@ Future<PostModel> displayUsersCommentFirst(String postID) async {
 }
 
 Future<void> deleteComment(Comment cmt, String postID) async {
-  final docPost = FirebaseFirestore.instance.collection('post').doc(postID);
-  await docPost.update({'comments': FieldValue.arrayRemove([cmt.toJson()])});
+  final docPost = FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').doc(cmt.id);
+  await docPost.delete();
 }
 
+Future<void> postReplyComment(String content, String userID, String postID, String cmtID) async {
+  final doc = FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').doc(cmtID).collection('replyComments').doc();
+  Comment cmt = Comment(id: doc.id, userID: userID, content: content, likedUsers: [], createDate: DateTime.now());
+  doc.set(cmt.toJson());
+}
