@@ -30,8 +30,9 @@ Future<List<Comment>> getAllComment(String postID) async {
   List<Comment> commentList = [];
   for(var e in listDocComment) {
     commentList.add(Comment.fromJson(e.data()));
-    commentList.last.replyComments = await getReplyComments(postID, e.id);
-    print("reply count ${commentList.last.replyComments!.length}");
+    final docsLen = await FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').doc(e.id).collection('replyComments').get();
+    commentList.last.replyCount = docsLen.docs.length;
+    print("reply count ${commentList.last.replyCount}");
   }
   return commentList;
 }
@@ -63,6 +64,11 @@ Future<void> deleteComment(Comment cmt, String postID) async {
   await docPost.delete();
 }
 
+Future<void> deleteReplyComment(Comment cmt, String postID,String cmtID) async {
+  final docPost = FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').doc(cmtID).collection('replyComments').doc(cmt.id);
+  await docPost.delete();
+}
+
 Future<void> postReplyComment(String content, String userID, String postID, String cmtID) async {
   final doc = FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').doc(cmtID).collection('replyComments').doc();
   Comment cmt = Comment(id: doc.id, userID: userID, content: content, likedUsers: [], createDate: DateTime.now());
@@ -73,11 +79,23 @@ Future<List<Comment>> getReplyComments(String postID, String cmtID) async {
   final doc = await FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').doc(cmtID).collection('replyComments').get();
   final listDocComment = doc.docs;
   //print(listDocComment.first.data());
+
   List<Comment> replyCommentList = [];
   if(listDocComment.isNotEmpty) {
     for(var e in listDocComment) {
       replyCommentList.add(Comment.fromJson(e.data()));
     }
   }
+  replyCommentList.sort((a, b) => a.createDate.compareTo(b.createDate),);
   return replyCommentList;
+}
+
+Future<List<Comment>> getAllReplyCommentOfUser(String userID, String postID, String cmtID) async {
+  QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').doc(cmtID).collection('replyComments').get();
+  final docs = snapshot.docs.where((element) => (element.data() as Map<String, dynamic>)["userID"] == userID);
+  List<Comment> replyCommentOfUser = [];
+  for(var e in docs) {
+    replyCommentOfUser.add(Comment.fromJson(e.data() as Map<String, dynamic>));
+  }
+  return replyCommentOfUser;
 }

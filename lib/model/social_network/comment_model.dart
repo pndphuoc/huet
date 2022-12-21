@@ -7,11 +7,10 @@ class Comment {
   List<String> likedUsers;
   DateTime createDate;
   List<Comment>? replyComments;
-  int? replyCount;
-  Comment({required this.id, required this.userID, required this.content, required this.likedUsers, required this.createDate});
-
+  int? replyCount = 0;
+  Comment({required this.id, required this.userID, required this.content, required this.likedUsers, required this.createDate, this.replyCount});
   static Comment fromJson(Map<String, dynamic> json) {
-    return Comment(id: json['id'], userID: json['userID'], content: json['content'], likedUsers: json['likedUsers'].cast<String>(), createDate: json['createDate'].toDate());
+    return Comment(id: json['id'], userID: json['userID'], content: json['content'], likedUsers: json['likedUsers'].cast<String>(), createDate: json['createDate'].toDate(), );
   }
 
   Map<String, dynamic> toJson() {

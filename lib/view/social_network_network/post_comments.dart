@@ -33,17 +33,22 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
   bool isPostingComment = false;
   bool isPostingReplyComment = false;
   bool isSelectingItem = false;
+  bool isSelectingItemIsReplyComment = false;
+  late String parentCommentID;
   Comment? selectedItem;
   late List<Comment> commentList;
   bool isReplying = false;
   Comment? commentAreBeingReplied;
+  List replyCommentsOfUser = [];
+
   _getPostContent() async {
     //post = await displayUsersCommentFirst(widget.postID);
     post = await getPostContent(widget.postID);
-    commentList = await getAllComment(widget.postID);
+    commentList = post.comments;
 
     List<Comment> myComments = [];
-    commentList.toList().forEach((element) {
+    commentList.toList().forEach((element) async {
+      //replyCommentsOfUser.addAll( await getAllReplyCommentOfUser(user_info.user!.uid, widget.postID, element.id));
       if (element.userID == user_info.user!.uid) {
         myComments.add(element);
         commentList.remove(element);
@@ -78,7 +83,6 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
     _getPostContent();
   }
 
-
   @override
   void dispose() {
     super.dispose();
@@ -87,49 +91,52 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: !isSelectingItem ? appBar(context) : selectedItemAppBar(context),
-      backgroundColor: colors.backgroundColor,
-      body: isLoading
-          ? Center(
-              child: LoadingAnimationWidget.discreteCircle(
-                  color: colors.primaryColor, size: 30),
-            )
-          : SafeArea(
-              child: Stack(children: [
-                SizedBox(
-                  height: MediaQuery.of(context).size.height -
-                      AppBar().preferredSize.height,
-                  child: SingleChildScrollView(
-                    keyboardDismissBehavior:
-                        ScrollViewKeyboardDismissBehavior.onDrag,
-                    controller: _commentScrollController,
-                    child: Column(
-                      children: [
-                        contentBlock(context),
-                        isPostingComment
-                            ? postingCommentBlock(context, commentContent)
-                            : Container(),
-                        ...commentList.map((e) {
-                          ++index;
-                          return AutoScrollTag(
-                            key: ValueKey(index),
-                            controller: _commentScrollController,
-                            index: index,
-                            child: Column(
-                              children: [
-                                GestureDetector(
-                                  onLongPress: () {
-                                    setState(() {
-                                      isSelectingItem = true;
-                                      selectedItem = e;
-                                    });
-                                  },
-                                  child: CommentWidget(
+    return GestureDetector(
+      onTap: (){
+        //FocusScope.of(context).requestFocus(new FocusNode());
+      },
+      child: Scaffold(
+        appBar: !isSelectingItem ? appBar(context) : selectedItemAppBar(context),
+        backgroundColor: colors.backgroundColor,
+        body: isLoading
+            ? Center(
+                child: LoadingAnimationWidget.discreteCircle(
+                    color: colors.primaryColor, size: 30),
+              )
+            : SafeArea(
+                child: Stack(children: [
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height -
+                        AppBar().preferredSize.height,
+                    child: SingleChildScrollView(
+                      controller: _commentScrollController,
+                      child: Column(
+                        children: [
+                          contentBlock(context),
+                          isPostingComment
+                              ? postingCommentBlock(context, commentContent)
+                              : Container(),
+                          ...commentList.map((e) {
+                            ++index;
+                            return AutoScrollTag(
+                              key: ValueKey(index),
+                              controller: _commentScrollController,
+                              index: index,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  CommentWidget(
                                     cmt: e,
                                     isSelecting:
                                         isSelectingItem ? selectedItem!.id : "",
                                     postID: widget.postID,
+                                    selectCallback: (value, flag, parentID) =>
+                                        setState(() {
+                                      selectedItem = value;
+                                      isSelectingItem = true;
+                                      isSelectingItemIsReplyComment = flag;
+                                      parentCommentID = parentID;
+                                    }),
                                     callback: () => setState(() {
                                       commentController.clear();
                                       commentController.text = "@${e.userID} ";
@@ -142,28 +149,34 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
                                       });
                                       FocusScope.of(context)
                                           .requestFocus(focusNode);
-                                      Future.delayed(const Duration(milliseconds: 200), () => setState((){
-                                        isReplying = true;
-                                      }));
+                                      Future.delayed(
+                                          const Duration(milliseconds: 200),
+                                          () => setState(() {
+                                                isReplying = true;
+                                              }));
                                     }),
                                   ),
-                                ),
-                                isPostingReplyComment ?
-                                postingReplyCommentBlock(context, commentContent) : Container()
-                              ],
-                            ),
-                          );
-                        }),
-                        const SizedBox(
-                          height: 80,
-                        )
-                      ],
+                                  isPostingReplyComment
+                                      ? commentAreBeingReplied == e
+                                          ? postingReplyCommentBlock(
+                                              context, commentContent)
+                                          : Container()
+                                      : Container()
+                                ],
+                              ),
+                            );
+                          }),
+                          const SizedBox(
+                            height: 80,
+                          )
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                commentBlock(context)
-              ]),
-            ),
+                  commentBlock(context)
+                ]),
+              ),
+      ),
     );
   }
 
@@ -239,38 +252,53 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
         child: IntrinsicHeight(
           child: Column(
             children: [
-             commentAreBeingReplied != null ?  AnimatedContainer(
-               duration: const Duration(milliseconds: 200),
-               color: Colors.grey,
-               height: isReplying ? 50 : 0,
-               child: Row(
-                 children: [
-                   Expanded(
-                     child: Container(
-                         padding: const EdgeInsets.only(left: 20),
-                         child: Text("Replying to ${commentAreBeingReplied!.id}", style: GoogleFonts.readexPro(color: Colors.white), overflow: TextOverflow.ellipsis, maxLines: 1,)),
-                   ),
-                   const SizedBox(
-                     width: 10,
-                   ),
-                   Padding(padding: const EdgeInsets.only(right: 20), child: IconButton(onPressed: (){
-                     commentController.clear();
-                     setState(() {
-                       isReplying = false;
-                     });
-                     Future.delayed(const Duration(milliseconds: 200), () => setState(() {
-                       commentAreBeingReplied = null;
-                     }),);
-                   },
-                       constraints: const BoxConstraints(),
-                       padding: EdgeInsets.zero,
-                       icon: const Icon(Icons.close)),)
-                 ],
-               ),
-             ) : Container(),
+              commentAreBeingReplied != null
+                  ? AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      color: Colors.grey,
+                      height: isReplying ? 50 : 0,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                                padding: const EdgeInsets.only(left: 20),
+                                child: Text(
+                                  "Replying to ${commentAreBeingReplied!.id}",
+                                  style: GoogleFonts.readexPro(
+                                      color: Colors.white),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                )),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 20),
+                            child: IconButton(
+                                onPressed: () {
+                                  commentController.clear();
+                                  setState(() {
+                                    isReplying = false;
+                                  });
+                                  Future.delayed(
+                                    const Duration(milliseconds: 200),
+                                    () => setState(() {
+                                      commentAreBeingReplied = null;
+                                    }),
+                                  );
+                                },
+                                constraints: const BoxConstraints(),
+                                padding: EdgeInsets.zero,
+                                icon: const Icon(Icons.close)),
+                          )
+                        ],
+                      ),
+                    )
+                  : Container(),
               Container(
-                padding:
-                    const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
+                padding: const EdgeInsets.only(
+                    left: 20, right: 20, top: 10, bottom: 10),
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
                     color: colors.SN_postBackgroundColor,
@@ -311,20 +339,26 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
                     IconButton(
                       onPressed: () async {
                         if (commentController.value.text.isNotEmpty) {
-                          if(commentAreBeingReplied != null) {
+                          if (commentAreBeingReplied != null) {
                             FocusScope.of(context).requestFocus(FocusNode());
                             commentContent = commentController.text;
-                            isPostingReplyComment = true;
                             isReplying = false;
-                            setState(() {});
+                            setState(() {
+                              isPostingReplyComment = true;
+                            });
                             commentController.clear();
-                            await postReplyComment(commentContent, user_info.user!.uid, widget.postID, commentAreBeingReplied!.id);
+                            await Future.delayed(
+                                const Duration(milliseconds: 500));
+                            await postReplyComment(
+                                commentContent,
+                                user_info.user!.uid,
+                                widget.postID,
+                                commentAreBeingReplied!.id);
                             setState(() {
                               isPostingReplyComment = false;
                               commentAreBeingReplied = null;
                             });
-                          }
-                          else {
+                          } else {
                             _scrollUp();
                             FocusScope.of(context).requestFocus(FocusNode());
                             commentContent = commentController.text;
@@ -367,13 +401,13 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
   }
 
   Widget postingReplyCommentBlock(BuildContext context, String content) {
-    print("phuocdtvd");
     return AnimatedContainer(
       duration: const Duration(milliseconds: 5000),
       color: isPostingComment ? Colors.black12 : colors.backgroundColor,
       child: PostingReplyCommentWidget(content: content),
     );
   }
+
   AppBar appBar(BuildContext context) {
     return AppBar(
       iconTheme: const IconThemeData(color: Colors.black),
@@ -405,19 +439,36 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
         selectedItem!.userID == user_info.user!.uid
             ? IconButton(
                 onPressed: () async {
-                  await deleteComment(selectedItem!, widget.postID);
-                  Fluttertoast.showToast(
-                      msg: "Deleted 1 comment",
-                      toastLength: Toast.LENGTH_SHORT,
-                      gravity: ToastGravity.CENTER,
-                      timeInSecForIosWeb: 1,
-                      textColor: Colors.white,
-                      fontSize: 16.0);
-                  setState(() {
-                    post.comments.remove(selectedItem!);
-                    selectedItem = null;
-                    isSelectingItem = false;
-                  });
+                  if (isSelectingItemIsReplyComment) {
+                    await deleteReplyComment(
+                        selectedItem!, widget.postID, parentCommentID);
+                    Fluttertoast.showToast(
+                        msg: "Deleted 1 reply comment",
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.CENTER,
+                        timeInSecForIosWeb: 1,
+                        textColor: Colors.white,
+                        fontSize: 16.0);
+                    setState(() {
+                      selectedItem = null;
+                      isSelectingItem = false;
+                    });
+                  } else {
+                    await deleteComment(selectedItem!, widget.postID);
+                    Fluttertoast.showToast(
+                        msg: "Deleted 1 comment",
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.CENTER,
+                        timeInSecForIosWeb: 1,
+                        textColor: Colors.white,
+                        fontSize: 16.0);
+                    commentList.remove(selectedItem!);
+                    setState(() {
+                      post.comments.remove(selectedItem!);
+                      selectedItem = null;
+                      isSelectingItem = false;
+                    });
+                  }
                 },
                 icon: const Icon(Icons.delete))
             : IconButton(onPressed: () {}, icon: const Icon(Icons.error)),
