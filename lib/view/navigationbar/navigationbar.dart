@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hue_t/accommodation_views/hotel.dart';
+import 'package:hue_t/view/accommodation_views/hotel.dart';
 
 class BottomNavBarV2 extends StatefulWidget {
   @override

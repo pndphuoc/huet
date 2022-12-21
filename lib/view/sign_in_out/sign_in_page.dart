@@ -1,9 +1,12 @@
 import 'dart:ui';
 
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart';
+import 'package:hue_t/providers/user_provider.dart';
 import 'package:hue_t/view/sign_in_out/register_user.dart';
+import 'package:provider/provider.dart';
 import 'package:rive/rive.dart';
 import '../../conponents/AnimatedBtn.dart';
 import '../../main.dart';
@@ -17,10 +20,12 @@ class SignInPage extends StatefulWidget {
   State<SignInPage> createState() => _SignInPageState();
 }
 
-
 class _SignInPageState extends State<SignInPage> {
   late RiveAnimationController _btnAnimationController;
   bool isShowSignInDialog = false;
+  final _formkey = GlobalKey<FormState>();
+  String? email;
+  String? password;
 
   @override
   void initState() {
@@ -36,48 +41,55 @@ class _SignInPageState extends State<SignInPage> {
     return Scaffold(
       backgroundColor: primaryColor,
       resizeToAvoidBottomInset: true,
-      body: SingleChildScrollView(
-        child: Stack(children: [
-          Positioned(
-            width: MediaQuery.of(context).size.width * 1.7,
-            left: 100,
-            bottom: 100,
-            child: Image.asset(
-              "assets/Backgrounds/Spline.png",
+      body: Form(
+        key: _formkey,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Stack(children: [
+            Positioned(
+              width: MediaQuery.of(context).size.width * 1.7,
+              left: 100,
+              bottom: 100,
+              child: Image.asset(
+                "assets/Backgrounds/Spline.png",
+              ),
             ),
-          ),
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-              child: const SizedBox(),
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                child: const SizedBox(),
+              ),
             ),
-          ),
-          const RiveAnimation.asset(
-            "assets/RiveAssets/shapes.riv",
-          ),
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-              child: const SizedBox(),
+            const RiveAnimation.asset(
+              "assets/RiveAssets/shapes.riv",
             ),
-          ),
-          SizedBox(
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                child: const SizedBox(),
+              ),
+            ),
+            SizedBox(
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
-              child: contentBlock(context),),
-          backButton(context),
-        ]),
+              child: contentBlock(context),
+            ),
+            backButton(context),
+          ]),
+        ),
       ),
     );
   }
 
   contentBlock(BuildContext context) {
-    return Column(
-      children: [
-        headerLogin(context),
-        labelInput(context),
-        buttonLogin(context)
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          headerLogin(context),
+          labelInput(context),
+          buttonLogin(context)
+        ],
+      ),
     );
   }
 
@@ -87,17 +99,20 @@ class _SignInPageState extends State<SignInPage> {
           color: Colors.black.withOpacity(0.3),
           borderRadius: BorderRadius.circular(15)),
       margin: const EdgeInsets.only(top: 40, left: 20),
-      child: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(
-            Icons.arrow_back_outlined,
-            color: Colors.white,
-          ),
-          style: ButtonStyle(
-              shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15))))),
+      child: Consumer<UserProvider>(
+        builder: (context, value, child) => IconButton(
+            onPressed: () {
+              value.isLogin = true;
+              Navigator.pop(context);
+            },
+            icon: const Icon(
+              Icons.arrow_back_outlined,
+              color: Colors.white,
+            ),
+            style: ButtonStyle(
+                shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15))))),
+      ),
     );
   }
 
@@ -134,14 +149,17 @@ class _SignInPageState extends State<SignInPage> {
           children: [
             TextFormField(
               decoration: InputDecoration(
-                focusedBorder:
-                    UnderlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                errorStyle: const TextStyle(color: Colors.red),
+                focusedBorder: UnderlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none),
                 filled: true,
                 enabledBorder: const OutlineInputBorder(
                   borderSide: BorderSide.none,
                   borderRadius: BorderRadius.all(Radius.circular(10)),
                 ),
-                fillColor: const Color.fromARGB(255, 235, 235, 235).withOpacity(0.6),
+                fillColor:
+                    const Color.fromARGB(255, 235, 235, 235).withOpacity(0.6),
                 hintText: 'Enter your mail',
                 labelStyle: const TextStyle(color: Colors.black54),
                 labelText: 'Email',
@@ -151,9 +169,14 @@ class _SignInPageState extends State<SignInPage> {
                 ),
               ),
               validator: (value) {
-                if (value == null) {
-                  return 'Your email';
+                if (value!.isEmpty) {
+                  return "Không được để trống";
                 }
+                if (!EmailValidator.validate(value)) {
+                  return "Email nhập không hợp lệ !";
+                }
+
+                email = value;
                 return null;
               },
             ),
@@ -162,15 +185,16 @@ class _SignInPageState extends State<SignInPage> {
             ),
             TextFormField(
               decoration: InputDecoration(
-                focusedBorder:
-                UnderlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-
+                focusedBorder: UnderlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none),
                 filled: true,
                 enabledBorder: const OutlineInputBorder(
                   borderSide: BorderSide.none,
                   borderRadius: BorderRadius.all(Radius.circular(10)),
                 ),
-                fillColor: const Color.fromARGB(255, 235, 235, 235).withOpacity(0.6),
+                fillColor:
+                    const Color.fromARGB(255, 235, 235, 235).withOpacity(0.6),
                 hintText: 'Enter your password',
                 labelStyle: const TextStyle(color: Colors.black54),
                 labelText: 'Password',
@@ -180,12 +204,27 @@ class _SignInPageState extends State<SignInPage> {
                 ),
               ),
               validator: (value) {
-                if (value == null) {
-                  return 'Your email';
+                if (value!.isEmpty) {
+                  return "Không được để trống";
                 }
+
+                password = value;
                 return null;
               },
             ),
+            const SizedBox(
+              height: 15,
+            ),
+            Consumer<UserProvider>(
+                builder: (context, value, child) => value.isLogin
+                    ? const SizedBox(
+                        height: 0,
+                      )
+                    : Text(
+                        'Tài khoản hoặc mật khẩu không đúng!',
+                        style: GoogleFonts.readexPro(
+                            fontWeight: FontWeight.w400, color: Colors.red),
+                      )),
             const SizedBox(
               height: 20,
             )
@@ -201,20 +240,40 @@ class _SignInPageState extends State<SignInPage> {
         const SizedBox(
           height: 10,
         ),
-        AnimatedBtn(
-            text: "LOGIN",
-            btnAnimationController: _btnAnimationController,
-            press: (){
-              _btnAnimationController.isActive = true;
-              Future.doWhile(() async {
-                const RiveAnimation.asset(
-                  "assets/RiveAssets/success.riv",
-                );
-                await Future.delayed(const Duration(milliseconds: 1500), () => Navigator.push(context,MaterialPageRoute(builder: (context) => const HueT())),);
-                return true;
-              }
-              );
-            }
+        Consumer<UserProvider>(
+          builder: (context, value, child) => AnimatedBtn(
+              text: "LOGIN",
+              btnAnimationController: _btnAnimationController,
+              press: () {
+                _btnAnimationController.isActive = true;
+                if (_formkey.currentState!.validate()) {
+                  Future.doWhile(() async {
+                    const RiveAnimation.asset(
+                      "assets/RiveAssets/success.riv",
+                    );
+
+                    setState(() async {
+                      value.isLogin = false;
+
+                      await value.login(email!, password!);
+                      if (value.isLogin) {
+                        await Future.delayed(Duration(milliseconds: 2000));
+                        Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: ((context) => HueT(
+                                      index: 2,
+                                    ))),
+                            (route) => false);
+                      } else {
+                        setState(() {});
+                      }
+                    });
+
+                    return true;
+                  });
+                } else {}
+              }),
         ),
         const SizedBox(
           height: 10,
@@ -262,16 +321,27 @@ class _SignInPageState extends State<SignInPage> {
             ),
           ),
         ),
-        const SizedBox(height: 15,),
+        const SizedBox(
+          height: 15,
+        ),
         GestureDetector(
           onTap: () {
-            Navigator.push(context,MaterialPageRoute(builder: (context) => const RegisterUser()));
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const RegisterUser()));
           },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("Don't have an account? ", style: GoogleFonts.readexPro(fontWeight: FontWeight.w300, color: Colors.white),),
-              Text("Register Now", style: GoogleFonts.readexPro(fontWeight: FontWeight.w500, color: Colors.black87),)
+              Text(
+                "Don't have an account? ",
+                style: GoogleFonts.readexPro(
+                    fontWeight: FontWeight.w300, color: Colors.white),
+              ),
+              Text(
+                "Register Now",
+                style: GoogleFonts.readexPro(
+                    fontWeight: FontWeight.w500, color: Colors.black87),
+              )
             ],
           ),
         ),

@@ -19,5 +19,13 @@ var primaryColor = const Color.fromARGB(255, 104, 104, 172);
 var backgroundColorDarkMode = const Color.fromARGB(255, 18, 18, 18);
 var accomodationItemColorDarkMode = const Color.fromARGB(255, 50, 50, 50);
 
-var categoryBlockColorDarkMode = const Color.fromARGB(255, 50, 50, 50);
-var categoryBlockColor = const Color.fromARGB(255, 246, 246, 246);
+var categoryBlockColorDarkMode = Color.fromARGB(255, 50, 50, 50);
+var categoryBlockColor = Color.fromARGB(255, 246, 246, 246);
+
+//social network
+var SN_circleButton = Colors.white;
+var SN_postBackgroundColor = Colors.white;
+var SN_postTextColor = Color.fromARGB(255, 200, 200, 200);
+var SN_commentBackgroudColor = Color.fromARGB(255, 200, 200, 200);
+var SN_panelBackgroundColor = Color.fromARGB(255, 200, 200, 200);
+

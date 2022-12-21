@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:hue_t/accommodation_views/hotel_detail.dart';
+import 'package:hue_t/providers/accommodation_provider.dart';
+
+import 'package:hue_t/view/accommodation_views/hotel_detail.dart';
 import 'package:hue_t/animation/show_up.dart';
 import 'package:hue_t/model/user/user.dart';
 import 'package:hue_t/provider/google_sign_in.dart';
@@ -23,38 +25,35 @@ import 'package:hue_t/animation/show_up.dart';
 import 'package:hue_t/view/Foodstore/foodstore.dart';
 import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
 import 'package:hue_t/view/home/home.dart';
-import 'package:hue_t/accommodation_views/hotel.dart';
+import 'package:hue_t/view/accommodation_views/hotel.dart';
 import 'package:hue_t/view/profileuser/auth_service.dart';
 import 'package:hue_t/view/profileuser/loginin_page.dart';
 import 'package:hue_t/view/profileuser/profile_user.dart';
 import 'package:hue_t/view/foodstore/search_foodstore.dart';
+import 'package:hue_t/view/social_network_network/socialNetwork.dart';
 import 'package:provider/provider.dart';
 import 'package:rive/rive.dart' as rive;
 import 'package:hue_t/view/tourist_attraction/tourist_attraction.dart';
-import 'accommodation_views/homestays_list.dart';
-import 'accommodation_views/hotels_list.dart';
-import 'accommodation_views/resorts_list.dart';
+import 'view/accommodation_views/homestays_list.dart';
+import 'view/accommodation_views/hotels_list.dart';
+import 'view/accommodation_views/resorts_list.dart';
 import 'colors.dart' as colors;
 import 'fake_data.dart' as faker;
 import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
 import 'package:hue_t/view/home/home.dart';
-import 'package:hue_t/accommodation_views/hotel.dart';
-import 'accommodation_views/homestays_list.dart';
-import 'accommodation_views/hotels_list.dart';
-import 'accommodation_views/resorts_list.dart';
+import 'package:hue_t/view/accommodation_views/hotel.dart';
+import 'view/accommodation_views/homestays_list.dart';
+import 'view/accommodation_views/hotels_list.dart';
+import 'view/accommodation_views/resorts_list.dart';
 import 'colors.dart' as colors;
 import 'constants/user_info.dart' as userConstant;
 import 'model/user/user.dart' as userModel;
 
-void main() async {
+Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(const MyApp());
 }
-// void main()
-// {
-//   runApp(MyApp());
-// }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -69,6 +68,7 @@ class MyApp extends StatelessWidget {
             create: (context) => TouristAttractionProvider()),
         ChangeNotifierProvider(create: (context) => WeatherProvider()),
         ChangeNotifierProvider(create: (context) => UserProvider()),
+        ChangeNotifierProvider(create: (context) => AccomodationProvider()),
       ],
       child: MaterialApp(
         useInheritedMediaQuery: true,
@@ -176,9 +176,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
 class HueT extends StatefulWidget {
   const HueT({super.key, this.index});
-
   final int? index;
-
   @override
   State<HueT> createState() => _HueTState();
 }
@@ -227,7 +225,7 @@ class _HueTState extends State<HueT> {
     const HotelPage(),
     const Foodstore(),
     const HomePage(),
-    const HomePage(),
+    const SocialNetWorkPage(),
     const ProfileUser(),
     const TouristAttraction(),
     const Events(),
@@ -298,26 +296,35 @@ class _HueTState extends State<HueT> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).requestFocus(FocusNode());
-      },
-      child: Stack(children: [
-        _children[_selectedItemPosition],
-        MediaQuery.of(context).viewInsets.bottom != 0.0
-            ? Container()
-            : Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints constraints) {
-                    return ShowUp(
-                        child: bottomNavigationBar(context), delay: 0);
-                  },
-                ),
-              )
-      ]),
+    return MaterialApp(
+      title: 'Hue Travel',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: Scaffold(
+        body: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).requestFocus(new FocusNode());
+          },
+          child: Stack(children: [
+            _children[_selectedItemPosition],
+            MediaQuery.of(context).viewInsets.bottom != 0.0
+                ? Container()
+                : Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: LayoutBuilder(
+                      builder:
+                          (BuildContext context, BoxConstraints constraints) {
+                        return ShowUp(
+                            child: bottomNavigationBar(context), delay: 0);
+                      },
+                    ),
+                  )
+          ]),
+        ),
+      ),
     );
   }
 }

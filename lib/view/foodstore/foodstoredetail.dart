@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/model/foodstore/restaurant.dart';
-import 'package:hue_t/model/reviewModel.dart';
+import 'package:hue_t/model/accommodation/reviewModel.dart';
 import 'package:hue_t/colors.dart' as color;
 
 class FoodstoreDetail extends StatefulWidget {

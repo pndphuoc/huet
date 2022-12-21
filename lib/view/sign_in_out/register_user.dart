@@ -169,6 +169,8 @@ class _RegisterUserState extends State<RegisterUser> {
             onPressed: () {
               if (_formkey.currentState!.validate()) {
                 setState(() async {
+                  value.isRegister = true;
+
                   await value.createUser(name!, email!, password!);
                   if (value.isRegister) {
                     Navigator.push(
@@ -176,6 +178,7 @@ class _RegisterUserState extends State<RegisterUser> {
                         MaterialPageRoute(
                             builder: ((context) => SignInPage())));
                   } else {
+                    _formkey.currentState!.validate();
                     setState(() {});
                   }
                 });
