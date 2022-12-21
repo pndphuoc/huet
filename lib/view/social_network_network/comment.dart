@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/animation/heart_animation.dart';
 import 'package:hue_t/model/social_network/comment_model.dart';
@@ -13,7 +14,7 @@ import '../../firebase_function/common_function.dart';
 import '../../constants/user_info.dart' as user_info;
 
 typedef void StringCallback();
-typedef void CommentCallback(Comment value, bool isReplyComment, String cmtID);
+typedef void deleteCallback(Comment value);
 
 class CommentWidget extends StatefulWidget {
   const CommentWidget(
@@ -21,13 +22,13 @@ class CommentWidget extends StatefulWidget {
       required this.cmt,
       required this.isSelecting,
       required this.postID,
-      required this.callback,})
+      required this.callback, required this.delCallback,})
       : super(key: key);
   final Comment cmt;
   final String isSelecting;
   final String postID;
   final StringCallback callback;
-
+  final deleteCallback delCallback;
   @override
   State<CommentWidget> createState() => _CommentWidgetState();
 }
@@ -100,8 +101,19 @@ class _CommentWidgetState extends State<CommentWidget>
     await showMenu(
       context: context,
       position: RelativeRect.fromLTRB(left, top, 0, 0),
-      items: const [
+      items: [
         PopupMenuItem<String>(
+          onTap: () async{
+            await deleteComment(widget.cmt, widget.postID);
+            Fluttertoast.showToast(
+                msg: "Deleted 1 comment",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.CENTER,
+                timeInSecForIosWeb: 1,
+                textColor: Colors.white,
+                fontSize: 16.0);
+            widget.delCallback(widget.cmt);
+          },
             value: 'del',
             child: Text('Delete')),
         PopupMenuItem<String>(
@@ -120,11 +132,11 @@ class _CommentWidgetState extends State<CommentWidget>
           behavior: HitTestBehavior.opaque,
           onLongPressStart: (details) {
             _showPopupMenu(details.globalPosition);
-            setState(() {
+           /* setState(() {
               isSelectingItem = true;
-            });
-
+            });*/
           },
+
 /*            onLongPress: () {
             //widget.selectCallback(widget.cmt, false, widget.cmt.id);
 

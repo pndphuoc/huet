@@ -127,6 +127,9 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   CommentWidget(
+                                    delCallback: (value) => setState(() {
+                                      commentList.remove(value);
+                                    }),
                                     cmt: e,
                                     isSelecting:
                                         isSelectingItem ? selectedItem!.id : "",
