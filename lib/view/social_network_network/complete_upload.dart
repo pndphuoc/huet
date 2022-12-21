@@ -25,11 +25,11 @@ class CompleteUploadPage extends StatefulWidget {
 
 class _CompleteUploadPageState extends State<CompleteUploadPage> {
   int currentPos = 0;
-  TouristAttaction? selectedAttraction;
+  TouristAttraction? selectedAttraction;
   VideoPlayerController? videoController;
   UploadTask? uploadTask;
 
-  set selected(TouristAttaction value) =>
+  set selected(TouristAttraction value) =>
       setState(() => selectedAttraction = value);
   bool isUploading = false;
 
@@ -302,7 +302,7 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
     );
   }
 
-  placeBlock(BuildContext context, TouristAttaction att) {
+  placeBlock(BuildContext context, TouristAttraction att) {
     return Container(
       margin: const EdgeInsets.only(right: 10),
       decoration: BoxDecoration(
@@ -378,7 +378,7 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
     );
   }
 
-  selectedAttractionBlock(BuildContext context, TouristAttaction att) {
+  selectedAttractionBlock(BuildContext context, TouristAttraction att) {
     return Container(
         margin: const EdgeInsets.only(left: 20, right: 20, top: 20),
         padding: const EdgeInsets.only(left: 10, right: 10),

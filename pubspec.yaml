@@ -87,7 +87,7 @@ dependencies:
   photo_gallery: ^1.1.1
   transparent_image: ^2.0.0
   sliding_up_panel: ^2.0.0+1
-  firebase_core: ^2.4.0
+
   firebase_storage: ^11.0.7
   cloud_firestore: ^4.2.0
   cached_network_image: ^3.2.3
@@ -105,6 +105,8 @@ dependencies:
   quickalert: ^1.0.1
   html_unescape: ^2.0.0
   tiengviet: ^0.5.0
+  email_validator: ^2.1.17
+  flutter_html: ^3.0.0-alpha.6
 
 dev_dependencies:
   flutter_test:

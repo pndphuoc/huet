@@ -5,15 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:hue_t/accommodation_views/all_reviews.dart';
-import 'package:hue_t/model/accommodationModel.dart';
+import 'package:hue_t/view/accommodation_views/all_reviews.dart';
+import 'package:hue_t/model/accommodation/accommodationModel.dart';
 import 'package:hue_t/animation/show_up.dart';
 import 'package:geolocator/geolocator.dart';
-import '../animation/show_right.dart';
-import '../colors.dart' as colors;
-import '../model/reviewModel.dart';
+import '../../animation/show_right.dart';
+import '../../colors.dart' as colors;
+import '../../model/accommodation/reviewModel.dart';
 import 'package:map_launcher/map_launcher.dart' as map;
-import '../permission/get_user_location.dart' as userLocation;
+import '../../permission/get_user_location.dart' as userLocation;
 
 class HotelDetail extends StatefulWidget {
   const HotelDetail({Key? key, required this.model}) : super(key: key);
@@ -169,8 +169,8 @@ class _HotelDetailState extends State<HotelDetail> {
                                 child: ClipRRect(
                               child: Image.network(
                                 e ?? "",
-                                height: MediaQuery.of(context).size.height /
-                                    2.8,
+                                height:
+                                    MediaQuery.of(context).size.height / 2.8,
                                 fit: BoxFit.fitHeight,
                               ),
                             )),
@@ -218,7 +218,8 @@ class _HotelDetailState extends State<HotelDetail> {
                     child: Text(
                       widget.model.name,
                       style: GoogleFonts.quicksand(
-                          color: colors.isDarkMode?Colors.white:Colors.black,
+                          color:
+                              colors.isDarkMode ? Colors.white : Colors.black,
                           fontWeight: FontWeight.bold,
                           fontSize: 30),
                     ),
@@ -237,13 +238,16 @@ class _HotelDetailState extends State<HotelDetail> {
                             child: Icon(
                           Icons.pin_drop_outlined,
                           size: 20,
-                              color: colors.isDarkMode?Colors.white:Colors.black,
+                          color:
+                              colors.isDarkMode ? Colors.white : Colors.black,
                         )),
                         TextSpan(
                             text: " ${widget.model.address}",
                             style: GoogleFonts.nunitoSans(
                                 fontWeight: FontWeight.w600,
-                                color: colors.isDarkMode?Colors.white:Colors.black,
+                                color: colors.isDarkMode
+                                    ? Colors.white
+                                    : Colors.black,
                                 fontSize: 20))
                       ]),
                     ),
@@ -266,13 +270,17 @@ class _HotelDetailState extends State<HotelDetail> {
                             height: 40,
                             width: MediaQuery.of(context).size.width / 4,
                             decoration: BoxDecoration(
-                                color: colors.isDarkMode?colors.categoryBlockColorDarkMode:colors.categoryBlockColor,
+                                color: colors.isDarkMode
+                                    ? colors.categoryBlockColorDarkMode
+                                    : colors.categoryBlockColor,
                                 borderRadius: BorderRadius.circular(15)),
                             child: Center(
                                 child: Text(
                               e.name,
-                              style:
-                                  GoogleFonts.quicksand(color: colors.isDarkMode?Colors.white:Colors.black),
+                              style: GoogleFonts.quicksand(
+                                  color: colors.isDarkMode
+                                      ? Colors.white
+                                      : Colors.black),
                             )),
                           ))
                     ],
@@ -288,7 +296,10 @@ class _HotelDetailState extends State<HotelDetail> {
                     delay: 600,
                     child: Text(
                       "Map",
-                      style: GoogleFonts.montserrat(fontSize: 25, color: colors.isDarkMode?Colors.white:Colors.black),
+                      style: GoogleFonts.montserrat(
+                          fontSize: 25,
+                          color:
+                              colors.isDarkMode ? Colors.white : Colors.black),
                     )),
               ),
               Container(
@@ -324,7 +335,6 @@ class _HotelDetailState extends State<HotelDetail> {
                           child: Stack(
                             children: [
                               GoogleMap(
-
                                 zoomControlsEnabled: false,
                                 // on below line setting camera position
                                 initialCameraPosition: _kGoogle,
@@ -337,8 +347,7 @@ class _HotelDetailState extends State<HotelDetail> {
                                 // on below line setting compass enabled.
                                 //compassEnabled: true,
                                 // on below line specifying controller on map complete.
-                                onMapCreated:
-                                    (GoogleMapController controller) {
+                                onMapCreated: (GoogleMapController controller) {
                                   _controller.complete(controller);
                                 },
                               ),
@@ -353,7 +362,9 @@ class _HotelDetailState extends State<HotelDetail> {
                                     "Click to open direction in Google Map",
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.montserrat(
-                                        color: colors.isDarkMode?Colors.white:Colors.black),
+                                        color: colors.isDarkMode
+                                            ? Colors.white
+                                            : Colors.black),
                                   ),
                                 ),
                               )
@@ -382,7 +393,10 @@ class _HotelDetailState extends State<HotelDetail> {
                           Text(
                             "Reviews",
                             style: GoogleFonts.montserrat(
-                                color: colors.isDarkMode?Colors.white:Colors.black, fontSize: 25),
+                                color: colors.isDarkMode
+                                    ? Colors.white
+                                    : Colors.black,
+                                fontSize: 25),
                           ),
                           Row(
                             children: [
@@ -406,7 +420,11 @@ class _HotelDetailState extends State<HotelDetail> {
                                 initialRating: widget.model.rating!,
                               ),
                               Text(
-                                " ${widget.model.rating!}/5", style: GoogleFonts.poppins(color: colors.isDarkMode?Colors.white:Colors.black),
+                                " ${widget.model.rating!}/5",
+                                style: GoogleFonts.poppins(
+                                    color: colors.isDarkMode
+                                        ? Colors.white
+                                        : Colors.black),
                               )
                             ],
                           )
@@ -420,8 +438,8 @@ class _HotelDetailState extends State<HotelDetail> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => AllReviews(
-                                          hotelId: widget.model.id)));
+                                      builder: (context) =>
+                                          AllReviews(hotelId: 1)));
                             },
                             style: ButtonStyle(
                                 overlayColor: MaterialStateColor.resolveWith(
@@ -586,7 +604,10 @@ class _HotelDetailState extends State<HotelDetail> {
                   const SizedBox(
                     height: 10,
                   ),
-                  Text(e.review!, style: const TextStyle(color: Colors.black),),
+                  Text(
+                    e.review!,
+                    style: const TextStyle(color: Colors.black),
+                  ),
                   const SizedBox(
                     height: 10,
                   ),
