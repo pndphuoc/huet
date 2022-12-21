@@ -1,10 +1,13 @@
+import 'package:hue_t/firebase_function/comment_function.dart';
+
 class Comment {
   String id;
   String userID;
   String content;
   List<String> likedUsers;
   DateTime createDate;
-
+  List<Comment>? replyComments;
+  int? replyCount;
   Comment({required this.id, required this.userID, required this.content, required this.likedUsers, required this.createDate});
 
   static Comment fromJson(Map<String, dynamic> json) {

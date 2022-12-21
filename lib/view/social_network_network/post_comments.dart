@@ -6,6 +6,7 @@ import 'package:hue_t/model/social_network/comment_model.dart';
 import 'package:hue_t/model/social_network/post_model.dart';
 import 'package:hue_t/view/social_network_network/comment.dart';
 import 'package:hue_t/view/social_network_network/posting_comment_widget.dart';
+import 'package:hue_t/view/social_network_network/posting_reply_comment_widget.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:oktoast/oktoast.dart';
 import '../../firebase_function/comment_function.dart';
@@ -30,10 +31,10 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
   late PostModel post;
   bool isLoading = true;
   bool isPostingComment = false;
+  bool isPostingReplyComment = false;
   bool isSelectingItem = false;
   Comment? selectedItem;
   late List<Comment> commentList;
-  final itemKey = GlobalKey();
   bool isReplying = false;
   Comment? commentAreBeingReplied;
   _getPostContent() async {
@@ -111,40 +112,47 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
                             : Container(),
                         ...commentList.map((e) {
                           ++index;
-                          return GestureDetector(
-                              onLongPress: () {
-                                setState(() {
-                                  isSelectingItem = true;
-                                  selectedItem = e;
-                                });
-                              },
-                              child: AutoScrollTag(
-                                key: ValueKey(index),
-                                controller: _commentScrollController,
-                                index: index,
-                                child: CommentWidget(
-                                  cmt: e,
-                                  isSelecting:
-                                      isSelectingItem ? selectedItem!.id : "",
-                                  postID: widget.postID,
-                                  callback: () => setState(() {
-                                    commentController.clear();
-                                    commentController.text = "@${e.userID} ";
-                                    commentController.selection =
-                                        TextSelection.fromPosition(TextPosition(
-                                            offset:
-                                                commentController.text.length));
+                          return AutoScrollTag(
+                            key: ValueKey(index),
+                            controller: _commentScrollController,
+                            index: index,
+                            child: Column(
+                              children: [
+                                GestureDetector(
+                                  onLongPress: () {
                                     setState(() {
-                                      commentAreBeingReplied = e;
+                                      isSelectingItem = true;
+                                      selectedItem = e;
                                     });
-                                    FocusScope.of(context)
-                                        .requestFocus(focusNode);
-                                    Future.delayed(const Duration(milliseconds: 200), () => setState((){
-                                      isReplying = true;
-                                    }));
-                                  }),
+                                  },
+                                  child: CommentWidget(
+                                    cmt: e,
+                                    isSelecting:
+                                        isSelectingItem ? selectedItem!.id : "",
+                                    postID: widget.postID,
+                                    callback: () => setState(() {
+                                      commentController.clear();
+                                      commentController.text = "@${e.userID} ";
+                                      commentController.selection =
+                                          TextSelection.fromPosition(TextPosition(
+                                              offset:
+                                                  commentController.text.length));
+                                      setState(() {
+                                        commentAreBeingReplied = e;
+                                      });
+                                      FocusScope.of(context)
+                                          .requestFocus(focusNode);
+                                      Future.delayed(const Duration(milliseconds: 200), () => setState((){
+                                        isReplying = true;
+                                      }));
+                                    }),
+                                  ),
                                 ),
-                              ));
+                                isPostingReplyComment ?
+                                postingReplyCommentBlock(context, commentContent) : Container()
+                              ],
+                            ),
+                          );
                         }),
                         const SizedBox(
                           height: 80,
@@ -304,7 +312,17 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
                       onPressed: () async {
                         if (commentController.value.text.isNotEmpty) {
                           if(commentAreBeingReplied != null) {
-                            await postReplyComment(commentController.text, user_info.user!.uid, widget.postID, commentAreBeingReplied!.id);
+                            FocusScope.of(context).requestFocus(FocusNode());
+                            commentContent = commentController.text;
+                            isPostingReplyComment = true;
+                            isReplying = false;
+                            setState(() {});
+                            commentController.clear();
+                            await postReplyComment(commentContent, user_info.user!.uid, widget.postID, commentAreBeingReplied!.id);
+                            setState(() {
+                              isPostingReplyComment = false;
+                              commentAreBeingReplied = null;
+                            });
                           }
                           else {
                             _scrollUp();
@@ -348,6 +366,14 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
     );
   }
 
+  Widget postingReplyCommentBlock(BuildContext context, String content) {
+    print("phuocdtvd");
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 5000),
+      color: isPostingComment ? Colors.black12 : colors.backgroundColor,
+      child: PostingReplyCommentWidget(content: content),
+    );
+  }
   AppBar appBar(BuildContext context) {
     return AppBar(
       iconTheme: const IconThemeData(color: Colors.black),

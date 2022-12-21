@@ -128,9 +128,7 @@ class _CommentWidgetState extends State<CommentWidget>
                 ),
                 buildDateFormat(widget.cmt.createDate, Colors.grey, 10),
                 buildReplyButton(context),
-                const SizedBox(
-                  height: 5,
-                ),
+                widget.cmt.replyComments!.isNotEmpty ? buildReadReplyComment(context, widget.postID, widget.cmt.id, widget.cmt.replyComments!.length) : Container()
               ],
             ),
           ),
@@ -195,5 +193,15 @@ class _CommentWidgetState extends State<CommentWidget>
           child: Text("Reply", style: GoogleFonts.readexPro(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w600),)
       ),
     );
+  }
+
+  Widget buildReadReplyComment(BuildContext context, String postID, String cmtID, int replyCommentsCount) {
+    return TextButton(
+        onPressed: (){},
+        style: TextButton.styleFrom(
+          padding: EdgeInsets.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+        child: Text("----- Read $replyCommentsCount reply comments", style: GoogleFonts.readexPro(color: Colors.grey),));
   }
 }

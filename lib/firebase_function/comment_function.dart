@@ -17,8 +17,11 @@ Future<void> postComment(String content, String userID, String postID) async {
       .doc();
   Comment cmt = Comment(id: doc.id, userID: userID, content: content, likedUsers: [], createDate: DateTime.now());
   doc.set(cmt.toJson());
-  FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').doc(doc.id).collection('replyComments').doc().set({});
-}
+ /* FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').doc(doc.id).collection('replyComments').doc().set({});
+  final defaultDoc = await FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').doc(doc.id).collection('replyComments').get();
+  //delete default when create replyComments collection
+  FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').doc(doc.id).collection('replyComments').doc(defaultDoc.docs.first.id).delete();
+*/}
 
 Future<List<Comment>> getAllComment(String postID) async {
   final doc = await FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').get();
@@ -27,6 +30,8 @@ Future<List<Comment>> getAllComment(String postID) async {
   List<Comment> commentList = [];
   for(var e in listDocComment) {
     commentList.add(Comment.fromJson(e.data()));
+    commentList.last.replyComments = await getReplyComments(postID, e.id);
+    print("reply count ${commentList.last.replyComments!.length}");
   }
   return commentList;
 }
@@ -62,4 +67,17 @@ Future<void> postReplyComment(String content, String userID, String postID, Stri
   final doc = FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').doc(cmtID).collection('replyComments').doc();
   Comment cmt = Comment(id: doc.id, userID: userID, content: content, likedUsers: [], createDate: DateTime.now());
   doc.set(cmt.toJson());
+}
+
+Future<List<Comment>> getReplyComments(String postID, String cmtID) async {
+  final doc = await FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').doc(cmtID).collection('replyComments').get();
+  final listDocComment = doc.docs;
+  //print(listDocComment.first.data());
+  List<Comment> replyCommentList = [];
+  if(listDocComment.isNotEmpty) {
+    for(var e in listDocComment) {
+      replyCommentList.add(Comment.fromJson(e.data()));
+    }
+  }
+  return replyCommentList;
 }
