@@ -21,14 +21,12 @@ class CommentWidget extends StatefulWidget {
       required this.cmt,
       required this.isSelecting,
       required this.postID,
-      required this.callback,
-      required this.selectCallback})
+      required this.callback,})
       : super(key: key);
   final Comment cmt;
   final String isSelecting;
   final String postID;
   final StringCallback callback;
-  final CommentCallback selectCallback;
 
   @override
   State<CommentWidget> createState() => _CommentWidgetState();
@@ -122,6 +120,10 @@ class _CommentWidgetState extends State<CommentWidget>
           behavior: HitTestBehavior.opaque,
           onLongPressStart: (details) {
             _showPopupMenu(details.globalPosition);
+            setState(() {
+              isSelectingItem = true;
+            });
+
           },
 /*            onLongPress: () {
             //widget.selectCallback(widget.cmt, false, widget.cmt.id);
@@ -131,7 +133,7 @@ class _CommentWidgetState extends State<CommentWidget>
           child: Container(
             padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
             decoration: BoxDecoration(
-                color: widget.isSelecting == widget.cmt.id
+                color: isSelectingItem
                     ? Colors.black12
                     : colors.backgroundColor),
             child: Column(
@@ -246,8 +248,9 @@ class _CommentWidgetState extends State<CommentWidget>
                 : buildReadReplyComment(context, widget.postID, widget.cmt.id,
                     widget.cmt.replyCount!)
             : Container(),
+        if(isReadAllReplyComments)
         ...replyComments.map((e) => ReplyCommentWidget(
-          selectCallback: (value) => widget.selectCallback(value, true, widget.cmt.id),
+          selectCallback: (value){},
               cmt: e,
               postID: widget.postID,
               callback: () {},

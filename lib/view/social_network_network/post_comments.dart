@@ -91,9 +91,10 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
 
   @override
   Widget build(BuildContext context) {
+    print("phuoccccccccccccccc");
     return GestureDetector(
-      onTap: (){
-        //FocusScope.of(context).requestFocus(new FocusNode());
+      onTap: () {
+        FocusManager.instance.primaryFocus?.unfocus();
       },
       child: Scaffold(
         appBar: !isSelectingItem ? appBar(context) : selectedItemAppBar(context),
@@ -130,13 +131,6 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
                                     isSelecting:
                                         isSelectingItem ? selectedItem!.id : "",
                                     postID: widget.postID,
-                                    selectCallback: (value, flag, parentID) =>
-                                        setState(() {
-                                      selectedItem = value;
-                                      isSelectingItem = true;
-                                      isSelectingItemIsReplyComment = flag;
-                                      parentCommentID = parentID;
-                                    }),
                                     callback: () => setState(() {
                                       commentController.clear();
                                       commentController.text = "@${e.userID} ";
