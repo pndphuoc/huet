@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
@@ -42,12 +43,16 @@ class _PostCommentsPageState extends State<PostCommentsPage>
   bool isPostingReplyComment = false;
   bool isSelectingItem = false;
   bool isSelectingItemIsReplyComment = false;
+  bool isLoadingReplyComments = false;
   late String parentCommentID;
   Comment? selectedItem;
   late List<Comment> commentList;
   bool isReplying = false;
   Comment? commentAreBeingReplied;
   List replyCommentsOfUser = [];
+  List<Comment> showReplyCommentList = [];
+  Comment? commentIsLoadingReply;
+  bool isHeartAnimating = false;
 
   _getPostContent() async {
     //post = await displayUsersCommentFirst(widget.postID);
@@ -63,7 +68,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
       }
     });
     myComments.sort(
-          (a, b) => b.createDate.compareTo(a.createDate),
+      (a, b) => b.createDate.compareTo(a.createDate),
     );
     commentList = myComments + commentList;
     setState(() {
@@ -86,10 +91,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
     super.initState();
     _commentScrollController = AutoScrollController(
         viewportBoundaryGetter: () =>
-            Rect.fromLTRB(0, 0, 0, MediaQuery
-                .of(context)
-                .padding
-                .bottom),
+            Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
         axis: Axis.vertical);
     _getPostContent();
   }
@@ -107,23 +109,15 @@ class _PostCommentsPageState extends State<PostCommentsPage>
         FocusManager.instance.primaryFocus?.unfocus();
       },
       child: Scaffold(
-        appBar: !isSelectingItem ? appBar(context) : selectedItemAppBar(
-            context),
+        appBar:
+            !isSelectingItem ? appBar(context) : selectedItemAppBar(context),
         backgroundColor: colors.backgroundColor,
         body: isLoading
             ? Center(
-          child: LoadingAnimationWidget.discreteCircle(
-              color: colors.primaryColor, size: 30),
-        )
-            : SafeArea(
-          child: Stack(children: [
-            SizedBox(
-              height: MediaQuery
-                  .of(context)
-                  .size
-                  .height -
-                  AppBar().preferredSize.height,
-              child: SingleChildScrollView(
+                child: LoadingAnimationWidget.discreteCircle(
+                    color: colors.primaryColor, size: 30),
+              )
+            : SingleChildScrollView(
                 controller: _commentScrollController,
                 child: Column(
                   children: [
@@ -140,13 +134,22 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            buildCommentBlock(context, e)
+                            buildCommentBlock(context, e),
+                            if (e.replyCount! > 0)
+                              if (isLoadingReplyComments && commentIsLoadingReply != null && commentIsLoadingReply == e)
+                               Center(child:  LoadingAnimationWidget.fallingDot(
+                                   color: colors.primaryColor, size: 15),)
+                            else
+                                buildReadReplyCommentButton(
+                                    context, widget.postID, e),
+                            if(showReplyCommentList.contains(e) && e.replyComments != null)
+                              ...e.replyComments!.map((reply) => buildReplyCommentBlock(context, reply, e.id))
                             /*isPostingReplyComment
-                                ? commentAreBeingReplied == e
-                                ? postingReplyCommentBlock(
-                                context, commentContent)
-                                : Container()
-                                : Container()*/
+                        ? commentAreBeingReplied == e
+                        ? postingReplyCommentBlock(
+                        context, commentContent)
+                        : Container()
+                        : Container()*/
                           ],
                         ),
                       );
@@ -157,10 +160,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                   ],
                 ),
               ),
-            ),
-            commentBlock(context)
-          ]),
-        ),
+        bottomNavigationBar: buildWritingCommentBlock(context),
       ),
     );
   }
@@ -168,9 +168,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
   int daysBetween(DateTime from, DateTime to) {
     from = DateTime(from.year, from.month, from.day);
     to = DateTime(to.year, to.month, to.day);
-    return (to
-        .difference(from)
-        .inHours / 24).round();
+    return (to.difference(from).inHours / 24).round();
   }
 
   contentBlock(BuildContext context) {
@@ -209,8 +207,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                     width: 10,
                   ),
                   Text(
-                    "${daysBetween(
-                        post.createDate, DateTime.now())} days before",
+                    "${daysBetween(post.createDate, DateTime.now())} days before",
                     style: GoogleFonts.readexPro(color: Colors.grey),
                   )
                 ],
@@ -221,7 +218,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
               Text(
                 post.caption!,
                 style:
-                GoogleFonts.montserrat(color: Colors.black, fontSize: 15),
+                    GoogleFonts.montserrat(color: Colors.black, fontSize: 15),
               )
             ],
           )
@@ -232,157 +229,151 @@ class _PostCommentsPageState extends State<PostCommentsPage>
 
   var focusNode = FocusNode();
 
-  commentBlock(BuildContext context) {
-    return Positioned(
-        bottom: 0,
-        left: 0,
-        right: 0,
-        child: IntrinsicHeight(
-          child: Column(
-            children: [
-              commentAreBeingReplied != null
-                  ? AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                color: Colors.grey,
-                height: isReplying ? 50 : 0,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                          padding: const EdgeInsets.only(left: 20),
-                          child: Text(
-                            "Replying to ${commentAreBeingReplied!.id}",
-                            style: GoogleFonts.readexPro(
-                                color: Colors.white),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          )),
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 20),
-                      child: IconButton(
-                          onPressed: () {
-                            commentController.clear();
-                            setState(() {
-                              isReplying = false;
-                            });
-                            Future.delayed(
-                              const Duration(milliseconds: 200),
-                                  () =>
-                                  setState(() {
+  buildWritingCommentBlock(BuildContext context) {
+    return Padding(
+      padding: MediaQuery.of(context).viewInsets,
+      child: IntrinsicHeight(
+        child: Column(
+          children: [
+            commentAreBeingReplied != null
+                ? AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    color: Colors.grey,
+                    height: isReplying ? 50 : 0,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                              padding: const EdgeInsets.only(left: 20),
+                              child: Text(
+                                "Replying to ${commentAreBeingReplied!.id}",
+                                style:
+                                    GoogleFonts.readexPro(color: Colors.white),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              )),
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 20),
+                          child: IconButton(
+                              onPressed: () {
+                                commentController.clear();
+                                setState(() {
+                                  isReplying = false;
+                                });
+                                Future.delayed(
+                                  const Duration(milliseconds: 200),
+                                  () => setState(() {
                                     commentAreBeingReplied = null;
                                   }),
-                            );
-                          },
-                          constraints: const BoxConstraints(),
-                          padding: EdgeInsets.zero,
-                          icon: const Icon(Icons.close)),
-                    )
-                  ],
-                ),
-              )
-                  : Container(),
-              Container(
-                padding: const EdgeInsets.only(
-                    left: 20, right: 20, top: 10, bottom: 10),
-                width: MediaQuery
-                    .of(context)
-                    .size
-                    .width,
-                decoration: BoxDecoration(
-                    color: colors.SN_postBackgroundColor,
-                    borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        topRight: Radius.circular(20))),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    const SizedBox(
-                      height: 45,
-                      width: 45,
-                      child: CircleAvatar(
-                        backgroundImage: AssetImage(
-                          "assets/images/socialNetwork/avatar.png",
-                        ),
+                                );
+                              },
+                              constraints: const BoxConstraints(),
+                              padding: EdgeInsets.zero,
+                              icon: const Icon(Icons.close)),
+                        )
+                      ],
+                    ),
+                  )
+                : Container(),
+            Container(
+              padding: const EdgeInsets.only(
+                  left: 20, right: 20, top: 10, bottom: 10),
+              width: MediaQuery.of(context).size.width,
+              decoration: BoxDecoration(
+                  color: colors.SN_postBackgroundColor,
+                  borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20))),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  const SizedBox(
+                    height: 45,
+                    width: 45,
+                    child: CircleAvatar(
+                      backgroundImage: AssetImage(
+                        "assets/images/socialNetwork/avatar.png",
                       ),
                     ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Expanded(
-                        child: TextField(
-                          focusNode: focusNode,
-                          controller: commentController,
-                          autofocus: true,
-                          textInputAction: TextInputAction.send,
-                          keyboardType: TextInputType.multiline,
-                          maxLines: null,
-                          decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.fromLTRB(
-                                  10, 15, 10, 10),
-                              border: InputBorder.none,
-                              hintText: "Write a comment"),
-                        )),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    IconButton(
-                      onPressed: () async {
-                        if (commentController.value.text.isNotEmpty) {
-                          if (commentAreBeingReplied != null) {
-                            FocusScope.of(context).requestFocus(FocusNode());
-                            commentContent = commentController.text;
-                            isReplying = false;
-                            setState(() {
-                              isPostingReplyComment = true;
-                            });
-                            commentController.clear();
-                            await Future.delayed(
-                                const Duration(milliseconds: 500));
-                            await postReplyComment(
-                                commentContent,
-                                user_info.user!.uid,
-                                widget.postID,
-                                commentAreBeingReplied!.id);
-                            setState(() {
-                              isPostingReplyComment = false;
-                              commentAreBeingReplied = null;
-                            });
-                          } else {
-                            _scrollUp();
-                            FocusScope.of(context).requestFocus(FocusNode());
-                            commentContent = commentController.text;
-                            isPostingComment = true;
-                            setState(() {});
-                            commentController.clear();
-                            await postComment(commentContent,
-                                user_info.user!.uid, post.postID);
-                            await _getPostContent();
-                            isPostingComment = false;
-                            setState(() {});
-                          }
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Expanded(
+                      child: TextField(
+                    focusNode: focusNode,
+                    controller: commentController,
+                    autofocus: true,
+                    textInputAction: TextInputAction.send,
+                    keyboardType: TextInputType.multiline,
+                    maxLines: null,
+                    decoration: const InputDecoration(
+                        contentPadding: EdgeInsets.fromLTRB(10, 15, 10, 10),
+                        border: InputBorder.none,
+                        hintText: "Write a comment"),
+                  )),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      if (commentController.value.text.isNotEmpty) {
+                        if (commentAreBeingReplied != null) {
+                          FocusScope.of(context).requestFocus(FocusNode());
+                          commentContent = commentController.text;
+                          isReplying = false;
+                          setState(() {
+                            isPostingReplyComment = true;
+                          });
+                          commentController.clear();
+                          await Future.delayed(
+                              const Duration(milliseconds: 500));
+                          await postReplyComment(
+                              commentContent,
+                              user_info.user!.uid,
+                              widget.postID,
+                              commentAreBeingReplied!.id);
+                          setState(() {
+                            isPostingReplyComment = false;
+                            commentAreBeingReplied = null;
+                          });
+                        } else {
+                          _scrollUp();
+                          FocusScope.of(context).requestFocus(FocusNode());
+                          commentContent = commentController.text;
+                          isPostingComment = true;
+                          setState(() {});
+                          commentController.clear();
+                          await postComment(
+                              commentContent, user_info.user!.uid, post.postID);
+                          await _getPostContent();
+                          isPostingComment = false;
+                          setState(() {});
                         }
-                      },
-                      icon: Icon(
-                        Icons.send_rounded,
-                        color: colors.primaryColor,
-                        size: 30,
-                      ),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      splashColor: Colors.transparent,
-                      hoverColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                    )
-                  ],
-                ),
+                      }
+                    },
+                    icon: Icon(
+                      Icons.send_rounded,
+                      color: colors.primaryColor,
+                      size: 30,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    splashColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                  )
+                ],
               ),
-            ],
-          ),
-        ));
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget postingCommentBlock(BuildContext context, String content) {
@@ -431,39 +422,39 @@ class _PostCommentsPageState extends State<PostCommentsPage>
       actions: [
         selectedItem!.userID == user_info.user!.uid
             ? IconButton(
-            onPressed: () async {
-              if (isSelectingItemIsReplyComment) {
-                await deleteReplyComment(
-                    selectedItem!, widget.postID, parentCommentID);
-                Fluttertoast.showToast(
-                    msg: "Deleted 1 reply comment",
-                    toastLength: Toast.LENGTH_SHORT,
-                    gravity: ToastGravity.CENTER,
-                    timeInSecForIosWeb: 1,
-                    textColor: Colors.white,
-                    fontSize: 16.0);
-                setState(() {
-                  selectedItem = null;
-                  isSelectingItem = false;
-                });
-              } else {
-                await deleteComment(selectedItem!, widget.postID);
-                Fluttertoast.showToast(
-                    msg: "Deleted 1 comment",
-                    toastLength: Toast.LENGTH_SHORT,
-                    gravity: ToastGravity.CENTER,
-                    timeInSecForIosWeb: 1,
-                    textColor: Colors.white,
-                    fontSize: 16.0);
-                commentList.remove(selectedItem!);
-                setState(() {
-                  post.comments.remove(selectedItem!);
-                  selectedItem = null;
-                  isSelectingItem = false;
-                });
-              }
-            },
-            icon: const Icon(Icons.delete))
+                onPressed: () async {
+                  if (isSelectingItemIsReplyComment) {
+                    await deleteReplyComment(
+                        selectedItem!, widget.postID, parentCommentID);
+                    Fluttertoast.showToast(
+                        msg: "Deleted 1 reply comment",
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.CENTER,
+                        timeInSecForIosWeb: 1,
+                        textColor: Colors.white,
+                        fontSize: 16.0);
+                    setState(() {
+                      selectedItem = null;
+                      isSelectingItem = false;
+                    });
+                  } else {
+                    await deleteComment(selectedItem!, widget.postID);
+                    Fluttertoast.showToast(
+                        msg: "Deleted 1 comment",
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.CENTER,
+                        timeInSecForIosWeb: 1,
+                        textColor: Colors.white,
+                        fontSize: 16.0);
+                    commentList.remove(selectedItem!);
+                    setState(() {
+                      post.comments.remove(selectedItem!);
+                      selectedItem = null;
+                      isSelectingItem = false;
+                    });
+                  }
+                },
+                icon: const Icon(Icons.delete))
             : IconButton(onPressed: () {}, icon: const Icon(Icons.error)),
       ],
       backgroundColor: colors.primaryColor,
@@ -490,32 +481,48 @@ class _PostCommentsPageState extends State<PostCommentsPage>
     );
   }
 
+  Widget buildModalBottom(BuildContext context) {
+    return Container(
+      height: 200,
+      color: colors.backgroundColor,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          TextButton(onPressed: (){}, child: Text("Report", style: GoogleFonts.readexPro(fontSize: 20, color: Colors.black),)),
+          TextButton(onPressed: (){}, child: Text("Reply", style: GoogleFonts.readexPro(fontSize: 20, color: Colors.black),)),
+          TextButton(onPressed: (){}, child: Text("Copy comment", style: GoogleFonts.readexPro(fontSize: 20, color: Colors.black),)),
+          TextButton(onPressed: (){}, child: Text("Delete", style: GoogleFonts.readexPro(fontSize: 20, color: Colors.black),)),
+        ],
+      ),
+    );
+  }
+  
   Widget buildCommentBlock(BuildContext context, Comment cmt) {
-    bool isLiked = false;
-    bool isHeartAnimating = false;
     bool isSelectingItem = false;
-    bool isLoadingReplyComments = false;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onLongPressStart: (details) {
-            //_showPopupMenu(details.globalPosition);
+          onLongPressStart: (details) async {
+            selectedItem = cmt;
+            setState(() {});
+            //_showPopupMenuForComment(details.globalPosition, cmt);
+            await showModalBottomSheet<void>(
+                context: context,
+                builder: (BuildContext context) {
+                  return buildModalBottom(context);
+                },
+            );
+            selectedItem = null;
+            setState(() {});
           },
-
-/*            onLongPress: () {
-            //widget.selectCallback(widget.cmt, false, widget.cmt.id);
-
-            //setState(() {});
-          },*/
           child: Container(
             padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
             decoration: BoxDecoration(
-                color: isSelectingItem
-                    ? Colors.black12
-                    : colors.backgroundColor),
+                color:
+                    selectedItem == cmt ? Colors.black12 : colors.backgroundColor),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -566,8 +573,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                           const SizedBox(
                             height: 5,
                           ),
-                          buildDateFormat(
-                              cmt.createDate, Colors.grey, 10),
+                          buildDateFormat(cmt.createDate, Colors.grey, 10),
                         ],
                       ),
                     ),
@@ -580,24 +586,29 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                           HeartAnimation(
                             isAnimating: isHeartAnimating, ////
                             child: IconButton(
-                              onPressed: () async {
+                              onPressed: () {
+                                likeAndUnlikeComment(cmt, widget.postID);
+                                cmt.isLiked = !cmt.isLiked!;
+                                if(cmt.isLiked!) {
+                                  cmt.likeCount = cmt.likeCount! + 1;
+                                } else {
+                                  cmt.likeCount = cmt.likeCount! - 1;
+                                }
                                 setState(() {
-                                  likeAndUnlikeComment(cmt, widget.postID);
-                                  cmt.isLiked = !cmt.isLiked!;
                                   isHeartAnimating = !isHeartAnimating;
                                   _heartController.forward();
                                 });
                               },
-                              icon: isLiked
+                              icon: cmt.isLiked!
                                   ? const Icon(
-                                Icons.favorite_rounded,
-                                color: Colors.red,
-                                size: 15,
-                              )
+                                      Icons.favorite_rounded,
+                                      color: Colors.red,
+                                      size: 15,
+                                    )
                                   : const Icon(
-                                Icons.favorite_outline_rounded,
-                                size: 15,
-                              ),
+                                      Icons.favorite_outline_rounded,
+                                      size: 15,
+                                    ),
                               splashColor: Colors.transparent,
                               highlightColor: Colors.transparent,
                               hoverColor: Colors.transparent,
@@ -606,7 +617,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                             ),
                           ),
                           Text(
-                            cmt.likedUsers.length.toString(),
+                            cmt.likeCount.toString(),
                             style: GoogleFonts.readexPro(color: Colors.grey),
                           )
                         ],
@@ -619,41 +630,195 @@ class _PostCommentsPageState extends State<PostCommentsPage>
             ),
           ),
         ),
-        cmt.replyCount! > 0
-            ? isLoadingReplyComments
-            ? Center(
-          child: LoadingAnimationWidget.staggeredDotsWave(
-              color: colors.primaryColor, size: 15),
-        )
-            : buildReadReplyComment(context, widget.postID, cmt.id,
-            cmt.replyCount!)
-            : Container(),
-        /*if(isReadAllReplyComments)
-        ...replyComments.map((e) => ReplyCommentWidget(
-            selectCallback: (value){},
-            cmt: e,
-            postID: widget.postID,
-            callback: () {},
-            cmtID: widget.cmt.id,
-          ))*/
       ],
     );
   }
 
-  Widget buildReadReplyComment(BuildContext context, String postID,
-      String cmtID, int replyCommentsCount) {
+  Widget buildReadReplyCommentButton(
+      BuildContext context, String postID, Comment cmt) {
     return Container(
         margin: const EdgeInsets.only(left: 55),
         child: TextButton(
-            onPressed: () async {},
+            onPressed: () async {
+              /*   replyList = await getReplyComments(postID, cmtID);
+              print(replyList.length);*/
+              if (!showReplyCommentList.contains(cmt)) {
+                showReplyCommentList.add(cmt);
+                isLoadingReplyComments = true;
+                commentIsLoadingReply = cmt;
+                setState(() {});
+                cmt.replyComments ??= await getReplyComments(postID, cmt.id);
+                setState(() {
+                  isLoadingReplyComments = false;
+                });
+              }
+              else {
+                showReplyCommentList.remove(cmt);
+              }
+              setState(() {});
+            },
             style: TextButton.styleFrom(
               padding: EdgeInsets.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            child: Text(
-              "----- Read $replyCommentsCount reply comments",
+            child: !showReplyCommentList.contains(cmt)  ? Text(
+              "----- Read ${cmt.replyCount} reply comments",
+              style: GoogleFonts.readexPro(color: Colors.grey),
+            ) :
+            Text(
+              "----- Hide ${cmt.replyCount} reply comments",
               style: GoogleFonts.readexPro(color: Colors.grey),
             )
         ));
+  }
+
+  Widget buildReplyCommentBlock(BuildContext context, Comment cmt, String parentCmtID) {
+    return Container(
+      decoration: BoxDecoration(
+          color: colors.backgroundColor),
+      padding: const EdgeInsets.only(left: 55, top: 10, right: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(
+                height: 35,
+                width: 35,
+                child: CircleAvatar(
+                  backgroundImage: AssetImage(
+                    "assets/images/socialNetwork/lisaAvatar.png",
+                  ),
+                ),
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Expanded(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onLongPressStart: (details) {
+                    //_showPopupMenu(details.globalPosition);
+                  },
+                  /*  onLongPress: () {
+                    dynamic state = _menuKey.currentState;
+                    state.showButtonMenu();
+                    //widget.selectCallback(widget.cmt);
+                    setState(() {});
+                  },*/
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        "lalalalisa_m",
+                        style: GoogleFonts.readexPro(
+                            color: Colors.black, fontSize: 15),
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Text(
+                        cmt.content,
+                        style:
+                        GoogleFonts.montserrat(color: Colors.black, fontSize: 15),
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      buildDateFormat(cmt.createDate, Colors.grey, 10),
+
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              IntrinsicWidth(
+                child: Column(
+                  children: [
+                    HeartAnimation(
+                      isAnimating: false, ////
+                      child: IconButton(
+                        onPressed: () async {
+                          await likeAndUnlikeReplyComment(cmt, widget.postID, parentCmtID);
+                          cmt.isLiked = !cmt.isLiked!;
+                          if(cmt.isLiked!) {
+                            cmt.likeCount = cmt.likeCount! + 1;
+                          } else {
+                            cmt.likeCount = cmt.likeCount! - 1;
+                          }
+                          setState(() {
+
+                          /*  likeAndUnlikeComment();
+                            isLiked = !isLiked;
+                            isHeartAnimating = !isHeartAnimating;
+                            _heartController.forward();*/
+                          });
+                        },
+                        icon: cmt.isLiked!
+                            ? const Icon(
+                          Icons.favorite_rounded,
+                          color: Colors.red,
+                          size: 15,
+                        )
+                            : const Icon(
+                          Icons.favorite_outline_rounded,
+                          size: 15,
+                        ),
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ),
+                    Text(
+                      cmt.likeCount.toString(),
+                      style: GoogleFonts.readexPro(color: Colors.grey),
+                    )
+                  ],
+                ),
+              ),
+            ],
+          ),
+          buildReplyButton(context),
+        ],
+      ),
+    );
+  }
+
+  _showPopupMenuForComment(Offset offset, Comment cmt) async {
+    double left = offset.dx;
+    double top = offset.dy;
+    await showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(left, top, 0, 0),
+      items: [
+        if(cmt.userID == user_info.user!.uid) PopupMenuItem<String>(
+            onTap: () async{
+              await deleteComment(cmt, widget.postID);
+              commentList.remove(cmt);
+              Fluttertoast.showToast(
+                  msg: "Deleted 1 comment",
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.CENTER,
+                  timeInSecForIosWeb: 1,
+                  textColor: Colors.white,
+                  fontSize: 16.0);
+            },
+            value: 'del',
+            child: const Text('Delete')),
+        if(cmt.userID == user_info.user!.uid) const PopupMenuItem<String>(
+            value: 'edit',
+            child: Text('Edit')),
+        if(cmt.userID != user_info.user!.uid) const PopupMenuItem<String>(
+            value: 'report',
+            child: Text('Report'))
+      ],
+      elevation: 8.0,
+    );
   }
 }

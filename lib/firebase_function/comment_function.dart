@@ -100,8 +100,8 @@ Future<List<Comment>> getAllReplyCommentOfUser(String userID, String postID, Str
   return replyCommentOfUser;
 }
 
-bool likeStatus(Map<String, dynamic> json, String userID) {
-  if((json as List).contains(userID))
+bool likeStatus(List json, String userID) {
+  if(json.contains(userID))
     {
       return true;
     }
@@ -114,6 +114,23 @@ Future<void> likeAndUnlikeComment(Comment cmt, String postID) async {
       .doc(postID)
       .collection('comments')
       .doc(cmt.id);
+  if (!cmt.isLiked!) {
+    doc.update({
+      'likedUsers': FieldValue.arrayUnion([user!.uid])
+    });
+  } else {
+    doc.update({
+      'likedUsers': FieldValue.arrayRemove([user!.uid])
+    });
+  }
+}
+
+Future<void> likeAndUnlikeReplyComment(Comment cmt, String postID, String parentCmtID) async {
+  final doc = FirebaseFirestore.instance
+      .collection('post')
+      .doc(postID)
+      .collection('comments')
+      .doc(parentCmtID).collection('replyComments').doc(cmt.id);
   if (!cmt.isLiked!) {
     doc.update({
       'likedUsers': FieldValue.arrayUnion([user!.uid])

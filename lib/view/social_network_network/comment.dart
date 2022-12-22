@@ -262,11 +262,9 @@ class _CommentWidgetState extends State<CommentWidget>
             : Container(),
         if(isReadAllReplyComments)
         ...replyComments.map((e) => ReplyCommentWidget(
-          selectCallback: (value){},
               cmt: e,
               postID: widget.postID,
-              callback: () {},
-              cmtID: widget.cmt.id,
+              parentCmtID: widget.cmt.id,
             ))
       ],
     );

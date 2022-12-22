@@ -14,13 +14,11 @@ class ReplyCommentWidget extends StatefulWidget {
   const ReplyCommentWidget(
       {Key? key,
         required this.cmt,
-        required this.postID, required this.callback, required this.cmtID, required this.selectCallback})
+        required this.postID, required this.parentCmtID,})
       : super(key: key);
   final Comment cmt;
   final String postID;
-  final String cmtID;
-  final StringCallback callback;
-  final CommentCallback selectCallback;
+  final String parentCmtID;
 
   @override
   State<ReplyCommentWidget> createState() => _ReplyCommentWidgetState();
@@ -70,7 +68,7 @@ class _ReplyCommentWidgetState extends State<ReplyCommentWidget>
   }
 
   Future<void> _likeAndUnlikeComment() async {
-    final doc = FirebaseFirestore.instance.collection('post').doc(widget.postID).collection('comments').doc(widget.cmtID).collection('replyComments').doc(widget.cmt.id);
+    final doc = FirebaseFirestore.instance.collection('post').doc(widget.postID).collection('comments').doc(widget.parentCmtID).collection('replyComments').doc(widget.cmt.id);
     if(!isLiked) {
       doc.update({'likedUsers': FieldValue.arrayUnion([user_info.user!.uid])});
       likeCount+=1;
@@ -207,9 +205,7 @@ class _ReplyCommentWidgetState extends State<ReplyCommentWidget>
     return Container(
       margin: EdgeInsets.only(left: 35),
       width: 60,
-      child: TextButton(onPressed: (){
-        widget.callback();
-      },
+      child: TextButton(onPressed: (){},
           style: TextButton.styleFrom(
               minimumSize: const Size(50, 30),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
