@@ -25,6 +25,8 @@ class _EventsState extends State<Events> {
     if (isloading) {
       (() async {
         await productProvider.getAll();
+        await productProvider.getThisMonth();
+        await productProvider.getNextMonth();
 
         setState(() {
           isloading = false;
@@ -113,7 +115,7 @@ class _EventsState extends State<Events> {
                           fontSize: 17, fontWeight: FontWeight.w500),
                     ),
                     Text(
-                      "View All",
+                      "",
                       style: GoogleFonts.readexPro(
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
@@ -139,7 +141,7 @@ class _EventsState extends State<Events> {
                             width: MediaQuery.of(context).size.width / 4,
                             height: 40,
                             decoration: const BoxDecoration(),
-                            child: Text("Today",
+                            child: Text("Next Month",
                                 style: GoogleFonts.readexPro(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w500,
@@ -161,7 +163,7 @@ class _EventsState extends State<Events> {
                             width: MediaQuery.of(context).size.width / 4,
                             height: 40,
                             decoration: const BoxDecoration(),
-                            child: Text("Tomorrow",
+                            child: Text("Expired",
                                 style: GoogleFonts.readexPro(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w500,
@@ -204,8 +206,8 @@ class _EventsState extends State<Events> {
                     onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: ((context) =>
-                                EventDetail(item: value.list[index])))),
+                            builder: ((context) => EventDetail(
+                                item: value.listNextMonth[index])))),
                     child: Container(
                       margin:
                           const EdgeInsets.only(left: 5, right: 5, bottom: 20),
@@ -226,7 +228,7 @@ class _EventsState extends State<Events> {
                             ClipRRect(
                               borderRadius: BorderRadius.circular(20),
                               child: Image.network(
-                                value.list[index].image.toString(),
+                                value.listNextMonth[index].image.toString(),
                                 height: 170,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
@@ -253,7 +255,7 @@ class _EventsState extends State<Events> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                value.list[index].name
+                                                value.listNextMonth[index].name
                                                     .toString(),
                                                 overflow: TextOverflow.ellipsis,
                                                 maxLines: 1,
@@ -263,7 +265,9 @@ class _EventsState extends State<Events> {
                                                     color: Colors.white),
                                               ),
                                               Text(
-                                                "09:30 pm",
+                                                value.listNextMonth[index].begin
+                                                    .toString()
+                                                    .split("T")[0],
                                                 style: GoogleFonts.readexPro(
                                                     fontSize: 13,
                                                     fontWeight: FontWeight.w300,
@@ -317,7 +321,7 @@ class _EventsState extends State<Events> {
                 },
                 viewportFraction: 0.8,
                 scale: 0.9,
-                itemCount: value.list.length,
+                itemCount: value.listNextMonth.length,
                 autoplay: true,
                 autoplayDelay: 5000,
               ),
@@ -341,12 +345,12 @@ class _EventsState extends State<Events> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Next Month Event",
+                      "This Month Event",
                       style: GoogleFonts.readexPro(
                           fontSize: 17, fontWeight: FontWeight.w500),
                     ),
                     Text(
-                      "View All",
+                      "",
                       style: GoogleFonts.readexPro(
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
@@ -357,66 +361,75 @@ class _EventsState extends State<Events> {
                 const SizedBox(
                   height: 15,
                 ),
-                ...value.list.map((e) => Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      width: MediaQuery.of(context).size.width,
-                      height: 90,
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.2),
-                              offset: const Offset(0, 5),
-                              blurRadius: 10,
-                            )
-                          ]),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Row(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(15),
-                              child: Image.network(e.image.toString(),
-                                  width: 70, height: 70, fit: BoxFit.cover),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 8.0, top: 3),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SizedBox(
-                                    width: 180,
-                                    child: Text(e.name.toString(),
-                                        overflow: TextOverflow.clip,
-                                        maxLines: 2,
-                                        style: GoogleFonts.readexPro(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w600)),
-                                  ),
-                                  const SizedBox(
-                                    height: 3,
-                                  ),
-                                  SizedBox(
-                                    width: 180,
-                                    child: Text(
-                                      e.address.toString(),
-                                      overflow: TextOverflow.clip,
-                                      maxLines: 1,
-                                      style: GoogleFonts.readexPro(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w400),
-                                    ),
-                                  ),
-                                ],
+                ...value.listThisMonth.map((e) => GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => EventDetail(item: e)));
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        width: MediaQuery.of(context).size.width,
+                        height: 90,
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.2),
+                                offset: const Offset(0, 5),
+                                blurRadius: 10,
+                              )
+                            ]),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(15),
+                                child: Image.network(e.image.toString(),
+                                    width: 70, height: 70, fit: BoxFit.cover),
                               ),
-                            ),
-                            const Expanded(
-                                child: Icon(
-                              Icons.arrow_forward_ios_outlined,
-                              color: Colors.grey,
-                            ))
-                          ],
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 8.0, top: 3),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      width: 180,
+                                      child: Text(e.name.toString(),
+                                          overflow: TextOverflow.clip,
+                                          maxLines: 2,
+                                          style: GoogleFonts.readexPro(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w600)),
+                                    ),
+                                    const SizedBox(
+                                      height: 3,
+                                    ),
+                                    SizedBox(
+                                      width: 180,
+                                      child: Text(
+                                        e.address.toString(),
+                                        overflow: TextOverflow.clip,
+                                        maxLines: 1,
+                                        style: GoogleFonts.readexPro(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Expanded(
+                                  child: Icon(
+                                Icons.arrow_forward_ios_outlined,
+                                color: Colors.grey,
+                              ))
+                            ],
+                          ),
                         ),
                       ),
                     ))

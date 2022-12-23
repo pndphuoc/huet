@@ -1,0 +1,37 @@
+import 'dart:convert';
+
+import 'package:flutter/cupertino.dart';
+// ignore: depend_on_referenced_packages
+import 'package:http/http.dart' as http;
+import 'package:hue_t/constants/host_url.dart' as url;
+import 'package:hue_t/model/accommodation/accommodationModel.dart';
+
+class AccomodationProvider extends ChangeNotifier {
+  List<hotelModel> list = [];
+  List<hotelModel> listFilter = [];
+
+  Future<void> getAll() async {
+    String apiURL = "${url.url}/api/hotel";
+    var client = http.Client();
+    var jsonString = await client.get(Uri.parse(apiURL));
+    var jsonObject = jsonDecode(jsonString.body);
+    var newsListObject = jsonObject as List;
+    list = newsListObject.map((e) {
+      return hotelModel.fromJson(e);
+    }).toList();
+    notifyListeners();
+  }
+
+  Future<List<hotelModel>> filter(String id, int limit) async {
+    String apiURL = "${url.url}/api/hotel/filterhotel/$id/$limit";
+    var client = http.Client();
+    var jsonString = await client.get(Uri.parse(apiURL));
+    var jsonObject = jsonDecode(jsonString.body);
+    var newsListObject = jsonObject as List;
+    listFilter = newsListObject.map((e) {
+      return hotelModel.fromJson(e);
+    }).toList();
+    notifyListeners();
+    return listFilter;
+  }
+}

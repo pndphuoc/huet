@@ -9,11 +9,11 @@ import 'package:hue_t/model/attraction/tourist_attraction.dart';
 import 'package:hue_t/view/social_network_network/search_tourist_attractions.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:hue_t/fake_data.dart' as faker;
 import 'package:video_player/video_player.dart';
 import 'dart:io';
 import 'image_item_widget.dart';
 import 'constants.dart' as constants;
+import '../../fake_data.dart' as faker;
 
 class CompleteUploadPage extends StatefulWidget {
   const CompleteUploadPage({Key? key, required this.medias}) : super(key: key);
