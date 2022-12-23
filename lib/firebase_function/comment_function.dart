@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hue_t/model/social_network/comment_model.dart';
 import 'package:hue_t/view/social_network_network/post.dart';
+import 'package:hue_t/view/social_network_network/post_comments.dart';
 import 'package:uuid/uuid.dart';
 import '../constants/user_info.dart';
 
@@ -31,36 +32,44 @@ Future<int> getCommentsCount(String postID) async {
 
 Future<int> getReplyCommentCount(String postID, String cmtID) async {
   final doc = await FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').doc(cmtID).collection('replyComments').count().get();
+  print("reply count $cmtID ${doc.count}");
   return doc.count;
 }
 
-Future<List<Comment>> getAllComment(String postID) async {
-  final doc = await FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').get();
+Future<List<Comment>> getTopComment(String postID, int commentLimit) async {
+  final doc = await FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').limit(commentLimit).get();
   final listDocComment = doc.docs;
-  //print(listDocComment.first.data());
+  lastComment = listDocComment.last;
   List<Comment> commentList = [];
-  print("get reply count");
   for(var e in listDocComment) {
     commentList.add(Comment.fromJson(e.data()));
     //final docsLen = await FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').doc(e.id).collection('replyComments').get();
     commentList.last.replyCount = await getReplyCommentCount(postID, e.id);
-    print(e.id);
   }
   return commentList;
 }
 
-Future<PostModel> getPostContent(String postID) async {
+QueryDocumentSnapshot? lastComment;
+
+Future<List<Comment>> getMoreComments(String postID, int commentLimit, ) async {
+  final doc = await FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').startAfterDocument(lastComment!).limit(commentLimit).get();
+  List<Comment> commentList = [];
+  for(var e in doc.docs) {
+    commentList.add(Comment.fromJson(e.data()));
+  }
+  return commentList;
+}
+
+Future<PostModel> getPostContent(String postID, int commentLimit) async {
   final doc = FirebaseFirestore.instance.collection('post').doc(postID);
   final post = await doc.get();
-  print("get post info");
   PostModel postContent = await PostModel.fromJson(post.data()!);
-  print("get all comment");
-  postContent.comments = await getAllComment(postContent.postID);
+  postContent.comments = await getTopComment(postContent.postID, commentLimit);
   return postContent;
 }
 
-Future<PostModel> displayUsersCommentFirst(String postID) async {
-  PostModel post = await getPostContent(postID);
+Future<PostModel> displayUsersCommentFirst(String postID, int commentLimit) async {
+  PostModel post = await getPostContent(postID, commentLimit);
   List<Comment> comments = [];
   for(var e in post.comments!) {
     if(e.userID == user!.uid) {
@@ -107,10 +116,12 @@ Future<List<Comment>> getReplyComments(String postID, String cmtID) async {
 
 Future<List<Comment>> getAllReplyCommentOfUser(String userID, String postID, String cmtID) async {
 
-  QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').doc(cmtID).collection('replyComments').get();
-  final docs = snapshot.docs.where((element) => (element.data() as Map<String, dynamic>)["userID"] == userID);
+  Query snapshot = FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').doc(cmtID).collection('replyComments').where('userID', isEqualTo: userID);
+  //final docs = snapshot.docs.where((element) => (element.data() as Map<String, dynamic>)["userID"] == userID);
+  final docs = await snapshot.get();
+  final replyComments = docs.docs;
   List<Comment> replyCommentOfUser = [];
-  for(var e in docs) {
+  for(var e in replyComments) {
     replyCommentOfUser.add(Comment.fromJson(e.data() as Map<String, dynamic>));
   }
   return replyCommentOfUser;

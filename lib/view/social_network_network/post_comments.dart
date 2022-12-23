@@ -1,22 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
 import 'package:hue_t/model/social_network/comment_model.dart';
 import 'package:hue_t/model/social_network/post_model.dart';
-import 'package:hue_t/view/social_network_network/comment.dart';
 import 'package:hue_t/view/social_network_network/posting_comment_widget.dart';
 import 'package:hue_t/view/social_network_network/posting_reply_comment_widget.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:oktoast/oktoast.dart';
 import '../../animation/heart_animation.dart';
 import '../../firebase_function/comment_function.dart';
 import '../../constants/user_info.dart' as user_info;
-import '../../firebase_function/comment_function.dart';
-import '../../firebase_function/comment_function.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
-
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../firebase_function/common_function.dart';
 
 class PostCommentsPage extends StatefulWidget {
@@ -29,14 +24,22 @@ class PostCommentsPage extends StatefulWidget {
 
 class _PostCommentsPageState extends State<PostCommentsPage>
     with TickerProviderStateMixin {
+
   late final AnimationController _heartController = AnimationController(
     duration: const Duration(milliseconds: 500),
     vsync: this,
   );
   final ScrollController _controller = ScrollController();
+
   late AutoScrollController _commentScrollController;
+
+  final RefreshController _refreshController =
+  RefreshController(initialRefresh: false);
+
   late String commentContent;
+
   final commentController = TextEditingController();
+
   late PostModel post;
   bool isLoading = true;
   bool isPostingComment = false;
@@ -54,10 +57,12 @@ class _PostCommentsPageState extends State<PostCommentsPage>
   Comment? commentIsLoadingReply;
   bool isHeartAnimating = false;
   bool isShowingCommentsOfCurrentUser = true;
-
+  bool _moreCommentsAvailable = true;
+  static const int commentLimit = 10;
+  bool isRefreshing = false;
   _getPostContent() async {
     //post = await displayUsersCommentFirst(widget.postID);
-    post = await getPostContent(widget.postID);
+    post = await getPostContent(widget.postID,commentLimit );
     commentList = post.comments!;
 
     List<Comment> myComments = [];
@@ -72,6 +77,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
       (a, b) => b.createDate.compareTo(a.createDate),
     );
     commentList = myComments + commentList;
+
     for (var e in commentList) {
       e.replyComments = await getAllReplyCommentOfUser(
           user_info.user!.uid, widget.postID, e.id);
@@ -109,6 +115,55 @@ class _PostCommentsPageState extends State<PostCommentsPage>
     _controller.dispose();
   }
 
+  void _onRefresh() async{
+    commentList.clear();
+    setState(() {
+      isRefreshing = true;
+      _moreCommentsAvailable = true;
+    });
+
+    // monitor network fetch
+    await _getPostContent();
+    // if failed,use refreshFailed()
+    setState(() {
+      isRefreshing = false;
+    });
+    _refreshController.refreshCompleted();
+  }
+
+  _getMoreComments() async {
+    if(_moreCommentsAvailable == false) {
+      _refreshController.loadComplete();
+      return;
+    }
+    List<Comment> moreCommentsList = await getMoreComments(widget.postID, commentLimit);
+    if(moreCommentsList.length < commentLimit) {
+      _moreCommentsAvailable = false;
+    }
+
+    for (var e in moreCommentsList) {
+      e.replyCount = await getReplyCommentCount(widget.postID, e.id);
+      e.replyComments = await getAllReplyCommentOfUser(
+          user_info.user!.uid, widget.postID, e.id);
+      e.replyComments!.sort((a, b) => a.createDate.compareTo(b.createDate),);
+    }
+
+    commentList.addAll(moreCommentsList);
+    setState(() {});
+    _refreshController.loadComplete();
+  }
+/*  void _onLoading() async{
+    // monitor network fetch
+    await Future.delayed(Duration(milliseconds: 1000));
+    // if failed,use loadFailed(),if no data return,use LoadNodata()
+    items.add((items.length+1).toString());
+    if(mounted)
+      setState(() {
+
+      });
+    _refreshController.loadComplete();
+  }*/
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -124,7 +179,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                 child: LoadingAnimationWidget.discreteCircle(
                     color: colors.primaryColor, size: 30),
               )
-            : SingleChildScrollView(
+            : /*SingleChildScrollView(
                 controller: _commentScrollController,
                 child: Column(
                   children: [
@@ -173,27 +228,70 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                                 e.replyComments != null)
                               ...e.replyComments!.map((reply) =>
                                   buildReplyCommentBlock(context, reply, e.id))
-
-                            /*if(e.replyComments != null && !showReplyCommentList.contains(e))
-                              ...e.replyComments!.map((replyCommentOfCurrentUser) => buildReplyCommentBlock(context, replyCommentOfCurrentUser, e.id)),
-                            if(showReplyCommentList.contains(e) && e.replyComments != null)
-                              ...e.replyComments!.map((reply) => buildReplyCommentBlock(context, reply, e.id))*/
-                            /*isPostingReplyComment
-                        ? commentAreBeingReplied == e
-                        ? postingReplyCommentBlock(
-                        context, commentContent)
-                        : Container()
-                        : Container()*/
                           ],
                         ),
                       );
                     }),
-                    const SizedBox(
-                      height: 80,
-                    )
                   ],
                 ),
-              ),
+              ),*/
+        SmartRefresher(controller: _refreshController,
+          enablePullDown: true,
+          enablePullUp: true,
+          header: WaterDropMaterialHeader(
+            backgroundColor: colors.backgroundColor,
+            color: colors.primaryColor,
+          ),
+          onRefresh: _onRefresh,
+          onLoading: !isLoading && !isRefreshing? _getMoreComments : (){},
+          child: ListView.builder(
+            itemCount: commentList.length,
+              itemBuilder: (context, index) {
+                return AutoScrollTag(
+                  key: ValueKey(index),
+                  controller: _commentScrollController,
+                  index: index,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      buildCommentBlock(context, commentList[index]),
+                      if (commentList[index].replyCount! > 0)
+                        if (isLoadingReplyComments &&
+                            commentIsLoadingReply != null &&
+                            commentIsLoadingReply == commentList[index])
+                          Center(
+                            child: LoadingAnimationWidget.fallingDot(
+                                color: colors.primaryColor, size: 15),
+                          )
+                        else
+                          buildReadReplyCommentButton(
+                              context, widget.postID, commentList[index]),
+                      //Hiển thị widget posting của reply comment
+                      isPostingReplyComment
+                          ? postingReplyCommentBlock(
+                          context, commentContent)
+                          : Container(),
+
+                      //Hiển thị các reply comment của user hiện tại
+                      if (commentList[index].replyComments!.isNotEmpty &&
+                          !showReplyCommentList.contains(commentList[index]) &&
+                          isShowingCommentsOfCurrentUser)
+                        ...commentList[index].replyComments!.map(
+                                (replyCommentOfCurrentUser) =>
+                                buildReplyCommentBlock(context,
+                                    replyCommentOfCurrentUser, commentList[index].id)),
+
+                      //Hiển thị các reply comment
+                      if (showReplyCommentList.contains(commentList[index]) &&
+                          commentList[index].replyComments != null)
+                        ...commentList[index].replyComments!.map((reply) =>
+                            buildReplyCommentBlock(context, reply, commentList[index].id))
+                    ],
+                  ),
+                );
+              }
+          )
+        ),
         bottomNavigationBar: buildWritingCommentBlock(context),
       ),
     );

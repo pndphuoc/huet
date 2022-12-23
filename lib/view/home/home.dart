@@ -322,9 +322,7 @@ class _HomePageState extends State<HomePage> {
               context,
               "https://cdn-icons-png.flaticon.com/512/9198/9198907.png",
               "Ở đâu ?",
-              const HueT(
-                index: 0,
-              )),
+              const HotelPage()),
           buttonLink(
               context,
               "https://cdn-icons-png.flaticon.com/512/2934/2934108.png",
