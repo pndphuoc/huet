@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart';
 import 'package:hue_t/view/sign_in_out/register_user.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:rive/rive.dart';
 import '../../conponents/AnimatedBtn.dart';
 import '../../main.dart';
@@ -14,13 +17,20 @@ class SignInPage extends StatefulWidget {
   const SignInPage({Key? key}) : super(key: key);
 
   @override
-  State<SignInPage> createState() => _SignInPageState();
+  State<SignInPage>  createState() =>
+      _SignInPageState();
 }
 
-
-class _SignInPageState extends State<SignInPage> {
-  late RiveAnimationController _btnAnimationController;
+class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateMixin{
   bool isShowSignInDialog = false;
+  late RiveAnimationController _btnAnimationController;
+
+  bool isLoading = false;
+
+  List<ColorTween> tweenAnimations = [];
+  int tweenIndex = 0;
+  late AnimationController controller;
+  List<Animation<Color?>> colorAnimations = [];
 
   @override
   void initState() {
@@ -29,11 +39,46 @@ class _SignInPageState extends State<SignInPage> {
       autoplay: false,
     );
     super.initState();
+    // controller = AnimationController(
+    //   vsync: this,
+    //   duration: duration,
+    // );
+    // for (int i = 0; i < colors.length - 1; i++) {
+    //   tweenAnimations.add(ColorTween(begin: colors[i], end: colors[i + 1]));
+    // }
+    // tweenAnimations
+    //     .add(ColorTween(begin: colors[colors.length - 1], end: colors[0]));
+    // for (int i = 0; i < colors.length; i++) {
+    //   Animation<Color?> animation = tweenAnimations[i].animate(CurvedAnimation(
+    //       parent: controller,
+    //       curve: Interval((1 / colors.length) * (i + 1) - 0.05,
+    //           (1 / colors.length) * (i + 1),
+    //           curve: Curves.linear)));
+    //
+    //   colorAnimations.add(animation);
+    // }
+    // if (kDebugMode) {
+    //   print(colorAnimations.length);
+    // }
+    // tweenIndex = 0;
+    // timer = Timer.periodic(duration, (Timer t) {
+    //   setState(() {
+    //     tweenIndex = (tweenIndex + 1) % colors.length;
+    //   });
+    // });
+    // controller.forward();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return isLoading? Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+          child: LoadingAnimationWidget.discreteCircle(
+            size: 50, color: primaryColor,
+      )),
+    ):
+    Scaffold(
       backgroundColor: primaryColor,
       resizeToAvoidBottomInset: true,
       body: SingleChildScrollView(
@@ -70,6 +115,13 @@ class _SignInPageState extends State<SignInPage> {
       ),
     );
   }
+
+  @override
+  // void dispose() {
+  //   timer.cancel();
+  //   controller.dispose();
+  //   super.dispose();
+  // }
 
   contentBlock(BuildContext context) {
     return Column(
@@ -231,8 +283,15 @@ class _SignInPageState extends State<SignInPage> {
           margin: const EdgeInsets.only(left: 30, right: 30),
           height: 60,
           child: ElevatedButton(
-            onPressed: () {
-              AuthService().signInWithGoogle();
+            onPressed: () async{
+                setState((){
+                  isLoading = true;
+                });
+              await AuthService().signInWithGoogle();
+              setState(() {
+                isLoading = false;
+              });
+                Navigator.push(context,MaterialPageRoute(builder: (context) => const HueT()));
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,

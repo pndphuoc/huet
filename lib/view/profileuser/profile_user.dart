@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as color;
@@ -8,6 +9,8 @@ import 'package:hue_t/view/profileuser/edit_profile.dart';
 import 'package:hue_t/view/profileuser/loginin_page.dart';
 import 'package:hue_t/view/sign_in_out/register_user.dart';
 import 'package:hue_t/view/sign_in_out/sign_in_page.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import '../../colors.dart';
 import '../../constants/user_info.dart' as user_constants;
 import 'auth_service.dart';
 import 'package:hue_t/colors.dart' as colors;
@@ -22,10 +25,25 @@ class ProfileUser extends StatefulWidget {
 class _ProfileUserState extends State<ProfileUser> {
   bool status = false;
   double sideLength = 50;
-
+  bool isLoading = false;
+  var isUserLoginWithGoogle = FirebaseAuth.instance.currentUser;
+  bool isUserGG = false;
+  @override
+  void initState() {
+    super.initState();
+    if(isUserLoginWithGoogle != null) {
+      isUserGG = true;
+    }
+  }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return isLoading? Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+          child: LoadingAnimationWidget.discreteCircle(
+            size: 50, color: primaryColor,
+          )),
+    ):Scaffold(
       body: ListView(
         children: [
           header(context),
@@ -107,7 +125,7 @@ class _ProfileUserState extends State<ProfileUser> {
                       height: 50,
                       child: ElevatedButton(
                         onPressed: () {
-                          accountNavigator(context,  AuthService().handleAuthState(const HueT()));
+                          accountNavigator(context,  AuthService().handleAuthState(const HueT(), const SignInPage()));
                         },
                         style: ElevatedButton.styleFrom(
                           elevation: 0,
@@ -131,7 +149,7 @@ class _ProfileUserState extends State<ProfileUser> {
                       height: 50,
                       child: ElevatedButton(
                         onPressed: () {
-                          accountNavigator(context, const RegisterUser());
+                          accountNavigator(context, AuthService().handleAuthState(const HueT(), const SignInPage()));
                         },
                         style: ElevatedButton.styleFrom(
                           elevation: 0,
@@ -178,12 +196,13 @@ class _ProfileUserState extends State<ProfileUser> {
                       ]),
                   child: ClipRRect(
                       borderRadius: BorderRadius.circular(150),
-                      child: Image.network(
+                      child:isUserGG? Image.network(
                         user_constants.user!.photoURL.toString(),
                         width: 150,
                         height: 150,
                         fit: BoxFit.cover,
-                      )),
+                      ):Image.asset('assets/images/socialNetwork/avatar.png')
+                  ),
                 ),
                 const SizedBox(height: 5),
                 Text(
@@ -459,8 +478,12 @@ class _ProfileUserState extends State<ProfileUser> {
                       padding: const EdgeInsets.only(top: 10, bottom: 10),
                       splashFactory: NoSplash.splashFactory
                     ),
-                    onPressed: () {
-                      AuthService().signOut(context);
+                    onPressed: () async {
+                      bool isLogout = await showDialog(context: context,
+                          builder: (BuildContext context) {//TOTO:BUG
+                            Navigator.of(context).push(_createRouteLogOut());
+                          }
+                      );
                     },
                     child: Row(
                       children: [
@@ -481,6 +504,65 @@ class _ProfileUserState extends State<ProfileUser> {
                   ),
             ],
           ),
+        ),
+      ],
+    );
+  }
+  Route _createRouteLogOut() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => _buildLogOutAlertDialog(context),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(0.0, 1.0);
+        const end = Offset.zero;
+        const curve = Curves.ease;
+
+        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child,
+        );
+      },
+    );
+  }
+
+  Widget _buildLogOutAlertDialog(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20)
+      ),
+      title: Text("Log Out?", style: GoogleFonts.readexPro(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 25), textAlign: TextAlign.center,),
+      content: Text("Are you sure want to log out", style: GoogleFonts.readexPro(color: Colors.grey,), textAlign: TextAlign.center,),
+      actionsAlignment: MainAxisAlignment.center,
+      actions: [
+        ElevatedButton(onPressed: (){
+          Navigator.of(context).pop(false);
+        },
+          style: ElevatedButton.styleFrom(
+              elevation: 0,
+              padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)
+              )
+          ), child: Text("No", style: GoogleFonts.readexPro(color: Colors.grey),),
+        ),
+        ElevatedButton(onPressed: () async {
+          setState(() {
+            isLoading = true;
+          });
+          await AuthService().signOut(context);
+          setState(() {
+            isLoading = false;
+          });
+        },
+          style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
+              backgroundColor: primaryColor,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)
+              )
+          ), child: const Text("Yes"),
         ),
       ],
     );

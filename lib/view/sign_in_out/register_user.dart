@@ -4,23 +4,30 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/view/sign_in_out/sign_in_page.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:rive/rive.dart';
 
 import '../../colors.dart';
+import '../../main.dart';
 import '../profileuser/auth_service.dart';
 import '../profileuser/profile_user.dart';
 
 class RegisterUser extends StatefulWidget {
-  const RegisterUser({Key? key}) : super(key: key);
-
+   const RegisterUser({Key? key}) : super(key: key);
   @override
   State<RegisterUser> createState() => _RegisterUserState();
 }
-
 class _RegisterUserState extends State<RegisterUser> {
+  bool isLoading = false;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return isLoading? Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+          child: LoadingAnimationWidget.discreteCircle(
+            size: 50, color: primaryColor,
+          )),
+    ): Scaffold(
       resizeToAvoidBottomInset: true,
       body: SingleChildScrollView(
         child: Stack(children: [
@@ -180,7 +187,15 @@ class _RegisterUserState extends State<RegisterUser> {
           height: 10,
         ),
         ElevatedButton(
-          onPressed: () {},
+          onPressed: () async{
+            setState((){
+              isLoading = true;
+            });
+            //Register
+            setState(() {
+              isLoading = false;
+            });
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color.fromARGB(255, 104, 104, 172),
             shape: RoundedRectangleBorder(
@@ -218,8 +233,15 @@ class _RegisterUserState extends State<RegisterUser> {
           margin: const EdgeInsets.only(left: 30, right: 30),
           height: 60,
           child: ElevatedButton(
-            onPressed: () {
-              AuthService().signInWithGoogle();
+            onPressed: () async {
+              setState(() {
+                isLoading = true;
+              });
+              await AuthService().signInWithGoogle();
+              setState(() {
+                isLoading = false;
+              });
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: AuthService().handleAuthState(const HueT(), const RegisterUser())), (route) => false);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
-import 'package:hue_t/fake_data.dart' as faker;
 import 'package:hue_t/model/attraction/tourist_attraction.dart';
-
 import 'complete_upload.dart';
+import 'package:hue_t/fake_data.dart' as faker;
 
-typedef void AttractionCallback(TouristAttaction val);
+typedef void AttractionCallback(TouristAttraction val);
 
 class SearchTouristAttractionPage extends StatefulWidget {
   final AttractionCallback callback;
@@ -43,13 +42,14 @@ class _SearchTouristAttractionPageState extends State<SearchTouristAttractionPag
             for (int i=0; i<10 && i<faker.listAttraction.length; i++)
               touristAttractionBlock(context, faker.listAttraction[i]),
 
-          ],
+
+        ],
         ),
       ),
     );
   }
 
-  touristAttractionBlock(BuildContext context, TouristAttaction att) {
+  touristAttractionBlock(BuildContext context, TouristAttraction att) {
     return Container(
       margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
       child: GestureDetector(
