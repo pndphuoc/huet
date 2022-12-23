@@ -33,7 +33,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
   late RefreshController _refreshController =
       RefreshController(initialRefresh: false);
 
-  static const int postsLimit = 2;
+  static const int postsLimit = 5;
 
   void _onRefresh() async {
     postList.clear();
@@ -71,6 +71,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
         .limit(postsLimit);
     QuerySnapshot querySnapshot = await q.get();
     _posts = querySnapshot.docs;
+
     if(querySnapshot.docs.isNotEmpty) {
       _lastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
     }
@@ -86,22 +87,23 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
       _refreshController.loadComplete();
       return;
     }
-
     Query q = _firestore
         .collection('post')
         .where('isDeleted', isEqualTo: false)
         .startAfterDocument(_posts.last)
         .limit(postsLimit);
-
     QuerySnapshot querySnapshot = await q.get();
     if (querySnapshot.docs.isEmpty) {
       _morePostsAvailable = false;
       _refreshController.loadComplete();
     }
+    print("aaaaaaa ${querySnapshot.docs.length}");
     if (querySnapshot.docs.length < postsLimit) {
       _morePostsAvailable = false;
     }
-
+    for(var e in querySnapshot.docs) {
+      postList.add(await PostModel.fromJson(e.data() as Map<String, dynamic>));
+    }
     _posts.addAll(querySnapshot.docs);
 
     setState(() {});
@@ -112,10 +114,6 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
   void dispose() {
     super.dispose();
     _refreshController.dispose();
-  }
-
-  _getPost() async {
-
   }
 
   @override
@@ -218,9 +216,10 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                                        if(deletePost) {
                                          FirebaseFirestore.instance.collection('post').doc(val).update(
                                              {"isDeleted": true});
+                                         postList.removeAt(index);
                                        }
                                        setState(() {
-                                         _getPosts();
+                                         //_getPosts();
                                        });
                                     },
                                   )
@@ -231,39 +230,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                                 bool deletePost = await showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(20)
-                                        ),
-                                        title: Text("Delete this post?", style: GoogleFonts.readexPro(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 25), textAlign: TextAlign.center,),
-                                        content: Text("You can restore this post within 30 days. After that, it will be permanently deleted", style: GoogleFonts.readexPro(color: Colors.grey,), textAlign: TextAlign.center,),
-                                        actionsAlignment: MainAxisAlignment.center,
-                                        actions: [
-                                          ElevatedButton(onPressed: (){
-                                            Navigator.of(context).pop(false);
-                                          },
-                                            style: ElevatedButton.styleFrom(
-                                                elevation: 0,
-                                                padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
-                                                backgroundColor: Colors.white,
-                                                shape: RoundedRectangleBorder(
-                                                    borderRadius: BorderRadius.circular(20)
-                                                )
-                                            ), child: Text("Cancel", style: GoogleFonts.readexPro(color: Colors.grey),),
-                                          ),
-                                          ElevatedButton(onPressed: (){
-                                            Navigator.of(context).pop(true);
-                                          },
-                                            style: ElevatedButton.styleFrom(
-                                                padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
-                                                backgroundColor: Colors.red,
-                                                shape: RoundedRectangleBorder(
-                                                    borderRadius: BorderRadius.circular(20)
-                                                )
-                                            ), child: const Text("Delete"),
-                                          ),
-                                        ],
-                                      );
+                                      return buildDeleteAlertDialog(context);
                                     }
                                 );
                                 if(deletePost) {
@@ -345,6 +312,42 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
           )
         ],
       ),
+    );
+  }
+
+  Widget buildDeleteAlertDialog(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20)
+      ),
+      title: Text("Delete this post?", style: GoogleFonts.readexPro(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 25), textAlign: TextAlign.center,),
+      content: Text("You can restore this post within 30 days. After that, it will be permanently deleted", style: GoogleFonts.readexPro(color: Colors.grey,), textAlign: TextAlign.center,),
+      actionsAlignment: MainAxisAlignment.center,
+      actions: [
+        ElevatedButton(onPressed: (){
+          Navigator.of(context).pop(false);
+        },
+          style: ElevatedButton.styleFrom(
+              elevation: 0,
+              padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)
+              )
+          ), child: Text("Cancel", style: GoogleFonts.readexPro(color: Colors.grey),),
+        ),
+        ElevatedButton(onPressed: (){
+          Navigator.of(context).pop(true);
+        },
+          style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)
+              )
+          ), child: const Text("Delete"),
+        ),
+      ],
     );
   }
 }

@@ -362,7 +362,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                 width: 10,
               ),
               Text(
-                widget.post.comments.length.toString(),
+                widget.post.commentsCount.toString(),
                 style: GoogleFonts.readexPro(
                   color: colors.SN_postTextColor,
                   fontSize: 15,

@@ -10,15 +10,16 @@ class Comment {
   int? replyCount = 0;
   int? likeCount;
   bool? isLiked;
-  Comment({required this.id, required this.userID, required this.content, required this.likedUsers, required this.createDate, this.replyCount, this.isLiked, this.likeCount});
+  Comment({required this.id, required this.userID, required this.content, required this.likedUsers, required this.createDate, this.replyCount, this.isLiked, this.likeCount, this.replyComments});
   static Comment fromJson(Map<String, dynamic> json) {
     return Comment(id: json['id'],
         userID: json['userID'],
         content: json['content'],
         likedUsers: json['likedUsers'].cast<String>(),
         createDate: json['createDate'].toDate(),
-        isLiked: likeStatus(json['likedUsers'],
-        user_info.user!.uid), likeCount: json['likedUsers'].cast<String>().length);
+        isLiked: likeStatus(json['likedUsers'], user_info.user!.uid),
+        likeCount: json['likedUsers'].cast<String>().length,
+    );
   }
 
   Map<String, dynamic> toJson() {

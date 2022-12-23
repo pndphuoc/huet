@@ -53,11 +53,12 @@ class _PostCommentsPageState extends State<PostCommentsPage>
   List<Comment> showReplyCommentList = [];
   Comment? commentIsLoadingReply;
   bool isHeartAnimating = false;
+  bool isShowingCommentsOfCurrentUser = true;
 
   _getPostContent() async {
     //post = await displayUsersCommentFirst(widget.postID);
     post = await getPostContent(widget.postID);
-    commentList = post.comments;
+    commentList = post.comments!;
 
     List<Comment> myComments = [];
     commentList.toList().forEach((element) async {
@@ -71,7 +72,13 @@ class _PostCommentsPageState extends State<PostCommentsPage>
       (a, b) => b.createDate.compareTo(a.createDate),
     );
     commentList = myComments + commentList;
+    for (var e in commentList) {
+      e.replyComments = await getAllReplyCommentOfUser(
+          user_info.user!.uid, widget.postID, e.id);
+        e.replyComments!.sort((a, b) => a.createDate.compareTo(b.createDate),);
+    }
     setState(() {
+      isShowingCommentsOfCurrentUser = true;
       isLoading = false;
     });
   }
@@ -136,14 +143,41 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                           children: [
                             buildCommentBlock(context, e),
                             if (e.replyCount! > 0)
-                              if (isLoadingReplyComments && commentIsLoadingReply != null && commentIsLoadingReply == e)
-                               Center(child:  LoadingAnimationWidget.fallingDot(
-                                   color: colors.primaryColor, size: 15),)
-                            else
+                              if (isLoadingReplyComments &&
+                                  commentIsLoadingReply != null &&
+                                  commentIsLoadingReply == e)
+                                Center(
+                                  child: LoadingAnimationWidget.fallingDot(
+                                      color: colors.primaryColor, size: 15),
+                                )
+                              else
                                 buildReadReplyCommentButton(
                                     context, widget.postID, e),
+                            //Hiển thị widget posting của reply comment
+                            isPostingReplyComment
+                                ? postingReplyCommentBlock(
+                                    context, commentContent)
+                                : Container(),
+
+                            //Hiển thị các reply comment của user hiện tại
+                            if (e.replyComments!.isNotEmpty &&
+                                !showReplyCommentList.contains(e) &&
+                                isShowingCommentsOfCurrentUser)
+                              ...e.replyComments!.map(
+                                  (replyCommentOfCurrentUser) =>
+                                      buildReplyCommentBlock(context,
+                                          replyCommentOfCurrentUser, e.id)),
+
+                            //Hiển thị các reply comment
+                            if (showReplyCommentList.contains(e) &&
+                                e.replyComments != null)
+                              ...e.replyComments!.map((reply) =>
+                                  buildReplyCommentBlock(context, reply, e.id))
+
+                            /*if(e.replyComments != null && !showReplyCommentList.contains(e))
+                              ...e.replyComments!.map((replyCommentOfCurrentUser) => buildReplyCommentBlock(context, replyCommentOfCurrentUser, e.id)),
                             if(showReplyCommentList.contains(e) && e.replyComments != null)
-                              ...e.replyComments!.map((reply) => buildReplyCommentBlock(context, reply, e.id))
+                              ...e.replyComments!.map((reply) => buildReplyCommentBlock(context, reply, e.id))*/
                             /*isPostingReplyComment
                         ? commentAreBeingReplied == e
                         ? postingReplyCommentBlock(
@@ -229,7 +263,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
 
   var focusNode = FocusNode();
 
-  buildWritingCommentBlock(BuildContext context) {
+  Widget buildWritingCommentBlock(BuildContext context) {
     return Padding(
       padding: MediaQuery.of(context).viewInsets,
       child: IntrinsicHeight(
@@ -321,7 +355,9 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                   ),
                   IconButton(
                     onPressed: () async {
+                      //Nếu text không rỗng
                       if (commentController.value.text.isNotEmpty) {
+                        //Kiểm tra có phải là reply 1 comment hay không
                         if (commentAreBeingReplied != null) {
                           FocusScope.of(context).requestFocus(FocusNode());
                           commentContent = commentController.text;
@@ -337,11 +373,13 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                               user_info.user!.uid,
                               widget.postID,
                               commentAreBeingReplied!.id);
+                          await _getPostContent();
                           setState(() {
                             isPostingReplyComment = false;
                             commentAreBeingReplied = null;
                           });
                         } else {
+                          // Nếu không thì là đang comment
                           _scrollUp();
                           FocusScope.of(context).requestFocus(FocusNode());
                           commentContent = commentController.text;
@@ -448,7 +486,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                         fontSize: 16.0);
                     commentList.remove(selectedItem!);
                     setState(() {
-                      post.comments.remove(selectedItem!);
+                      post.comments!.remove(selectedItem!);
                       selectedItem = null;
                       isSelectingItem = false;
                     });
@@ -462,12 +500,20 @@ class _PostCommentsPageState extends State<PostCommentsPage>
     );
   }
 
-  Widget buildReplyButton(BuildContext context) {
+  Widget buildReplyButton(BuildContext context, Comment cmt) {
     return Container(
       width: 60,
       margin: const EdgeInsets.only(left: 45),
       child: TextButton(
-          onPressed: () {},
+          onPressed: () {
+            commentAreBeingReplied = cmt;
+            isReplying = true;
+            focusNode.requestFocus();
+            commentController.text = "@${commentAreBeingReplied!.id} ";
+            commentController.selection =
+                TextSelection.collapsed(offset: commentController.text.length);
+            setState(() {});
+          },
           style: TextButton.styleFrom(
               minimumSize: const Size(50, 30),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -483,21 +529,128 @@ class _PostCommentsPageState extends State<PostCommentsPage>
 
   Widget buildModalBottom(BuildContext context) {
     return Container(
-      height: 200,
-      color: colors.backgroundColor,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          TextButton(onPressed: (){}, child: Text("Report", style: GoogleFonts.readexPro(fontSize: 20, color: Colors.black),)),
-          TextButton(onPressed: (){}, child: Text("Reply", style: GoogleFonts.readexPro(fontSize: 20, color: Colors.black),)),
-          TextButton(onPressed: (){}, child: Text("Copy comment", style: GoogleFonts.readexPro(fontSize: 20, color: Colors.black),)),
-          TextButton(onPressed: (){}, child: Text("Delete", style: GoogleFonts.readexPro(fontSize: 20, color: Colors.black),)),
-        ],
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: colors.backgroundColor,
+      ),
+      padding: const EdgeInsets.all(15),
+      child: IntrinsicHeight(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            TextButton(
+                onPressed: () {},
+                child: RichText(
+                  text: TextSpan(children: [
+                    const WidgetSpan(
+                        child: Icon(
+                      Icons.report_outlined,
+                      color: Colors.black,
+                    )),
+                    const WidgetSpan(
+                      child: SizedBox(
+                        width: 10,
+                      ),
+                    ),
+                    TextSpan(
+                        text: "Report",
+                        style: GoogleFonts.readexPro(
+                            fontSize: 20, color: Colors.black))
+                  ]),
+                )),
+            TextButton(
+                onPressed: () {},
+                child: RichText(
+                  text: TextSpan(children: [
+                    const WidgetSpan(
+                        child: Icon(
+                      Icons.reply_outlined,
+                      color: Colors.black,
+                    )),
+                    const WidgetSpan(
+                      child: SizedBox(
+                        width: 10,
+                      ),
+                    ),
+                    TextSpan(
+                        text: "Reply",
+                        style: GoogleFonts.readexPro(
+                            fontSize: 20, color: Colors.black))
+                  ]),
+                )),
+            TextButton(
+                onPressed: () {},
+                child: RichText(
+                  text: TextSpan(children: [
+                    const WidgetSpan(
+                        child: Icon(
+                      Icons.copy_outlined,
+                      color: Colors.black,
+                    )),
+                    const WidgetSpan(
+                      child: SizedBox(
+                        width: 10,
+                      ),
+                    ),
+                    TextSpan(
+                        text: "Copy to clipboard",
+                        style: GoogleFonts.readexPro(
+                            fontSize: 20, color: Colors.black))
+                  ]),
+                )),
+            selectedItem!.userID == user_info.user!.uid
+                ? TextButton(
+                    onPressed: () {},
+                    child: RichText(
+                      text: TextSpan(children: [
+                        const WidgetSpan(
+                            child: Icon(
+                          Icons.mode_edit_outline,
+                          color: Colors.black,
+                        )),
+                        const WidgetSpan(
+                          child: SizedBox(
+                            width: 10,
+                          ),
+                        ),
+                        TextSpan(
+                            text: "Edit",
+                            style: GoogleFonts.readexPro(
+                                fontSize: 20, color: Colors.black))
+                      ]),
+                    ))
+                : Container(),
+            selectedItem!.userID == user_info.user!.uid
+                ? TextButton(
+                    onPressed: () {},
+                    child: RichText(
+                      text: TextSpan(children: [
+                        const WidgetSpan(
+                            child: Icon(
+                          Icons.delete_outline,
+                          color: Colors.red,
+                        )),
+                        const WidgetSpan(
+                          child: SizedBox(
+                            width: 10,
+                          ),
+                        ),
+                        TextSpan(
+                            text: "Delete",
+                            style: GoogleFonts.readexPro(
+                                fontSize: 20,
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold))
+                      ]),
+                    ))
+                : Container(),
+          ],
+        ),
       ),
     );
   }
-  
+
   Widget buildCommentBlock(BuildContext context, Comment cmt) {
     bool isSelectingItem = false;
     return Column(
@@ -510,10 +663,10 @@ class _PostCommentsPageState extends State<PostCommentsPage>
             setState(() {});
             //_showPopupMenuForComment(details.globalPosition, cmt);
             await showModalBottomSheet<void>(
-                context: context,
-                builder: (BuildContext context) {
-                  return buildModalBottom(context);
-                },
+              context: context,
+              builder: (BuildContext context) {
+                return buildModalBottom(context);
+              },
             );
             selectedItem = null;
             setState(() {});
@@ -521,20 +674,21 @@ class _PostCommentsPageState extends State<PostCommentsPage>
           child: Container(
             padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
             decoration: BoxDecoration(
-                color:
-                    selectedItem == cmt ? Colors.black12 : colors.backgroundColor),
+                color: selectedItem == cmt
+                    ? Colors.black12
+                    : colors.backgroundColor),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(
+                    SizedBox(
                       height: 45,
                       width: 45,
                       child: CircleAvatar(
-                        backgroundImage: AssetImage(
-                          "assets/images/socialNetwork/lisaAvatar.png",
+                        backgroundImage: NetworkImage(
+                          user_info.user!.photoURL,
                         ),
                       ),
                     ),
@@ -549,7 +703,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                           Row(
                             children: [
                               Text(
-                                "lalalalisa_m",
+                                user_info.user!.name,
                                 style: GoogleFonts.readexPro(
                                     color: Colors.black, fontSize: 15),
                               ),
@@ -589,7 +743,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                               onPressed: () {
                                 likeAndUnlikeComment(cmt, widget.postID);
                                 cmt.isLiked = !cmt.isLiked!;
-                                if(cmt.isLiked!) {
+                                if (cmt.isLiked!) {
                                   cmt.likeCount = cmt.likeCount! + 1;
                                 } else {
                                   cmt.likeCount = cmt.likeCount! - 1;
@@ -625,7 +779,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                     ),
                   ],
                 ),
-                buildReplyButton(context),
+                buildReplyButton(context, cmt),
               ],
             ),
           ),
@@ -647,13 +801,15 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                 isLoadingReplyComments = true;
                 commentIsLoadingReply = cmt;
                 setState(() {});
-                cmt.replyComments ??= await getReplyComments(postID, cmt.id);
+                cmt.replyComments!.clear();
+                cmt.replyComments = await getReplyComments(postID, cmt.id);
                 setState(() {
                   isLoadingReplyComments = false;
                 });
-              }
-              else {
+              } else {
                 showReplyCommentList.remove(cmt);
+                isShowingCommentsOfCurrentUser = false;
+                setState(() {});
               }
               setState(() {});
             },
@@ -661,21 +817,21 @@ class _PostCommentsPageState extends State<PostCommentsPage>
               padding: EdgeInsets.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            child: !showReplyCommentList.contains(cmt)  ? Text(
-              "----- Read ${cmt.replyCount} reply comments",
-              style: GoogleFonts.readexPro(color: Colors.grey),
-            ) :
-            Text(
-              "----- Hide ${cmt.replyCount} reply comments",
-              style: GoogleFonts.readexPro(color: Colors.grey),
-            )
-        ));
+            child: !showReplyCommentList.contains(cmt)
+                ? Text(
+                    "----- Read ${cmt.replyCount} reply comments",
+                    style: GoogleFonts.readexPro(color: Colors.grey),
+                  )
+                : Text(
+                    "----- Hide ${cmt.replyCount} reply comments",
+                    style: GoogleFonts.readexPro(color: Colors.grey),
+                  )));
   }
 
-  Widget buildReplyCommentBlock(BuildContext context, Comment cmt, String parentCmtID) {
+  Widget buildReplyCommentBlock(
+      BuildContext context, Comment cmt, String parentCmtID) {
     return Container(
-      decoration: BoxDecoration(
-          color: colors.backgroundColor),
+      decoration: BoxDecoration(color: colors.backgroundColor),
       padding: const EdgeInsets.only(left: 55, top: 10, right: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -683,12 +839,12 @@ class _PostCommentsPageState extends State<PostCommentsPage>
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(
+              SizedBox(
                 height: 35,
                 width: 35,
                 child: CircleAvatar(
-                  backgroundImage: AssetImage(
-                    "assets/images/socialNetwork/lisaAvatar.png",
+                  backgroundImage: NetworkImage(
+                    user_info.user!.photoURL,
                   ),
                 ),
               ),
@@ -712,7 +868,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(
-                        "lalalalisa_m",
+                        user_info.user!.name,
                         style: GoogleFonts.readexPro(
                             color: Colors.black, fontSize: 15),
                       ),
@@ -721,14 +877,13 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                       ),
                       Text(
                         cmt.content,
-                        style:
-                        GoogleFonts.montserrat(color: Colors.black, fontSize: 15),
+                        style: GoogleFonts.montserrat(
+                            color: Colors.black, fontSize: 15),
                       ),
                       const SizedBox(
                         height: 5,
                       ),
                       buildDateFormat(cmt.createDate, Colors.grey, 10),
-
                     ],
                   ),
                 ),
@@ -743,16 +898,16 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                       isAnimating: false, ////
                       child: IconButton(
                         onPressed: () async {
-                          await likeAndUnlikeReplyComment(cmt, widget.postID, parentCmtID);
+                          await likeAndUnlikeReplyComment(
+                              cmt, widget.postID, parentCmtID);
                           cmt.isLiked = !cmt.isLiked!;
-                          if(cmt.isLiked!) {
+                          if (cmt.isLiked!) {
                             cmt.likeCount = cmt.likeCount! + 1;
                           } else {
                             cmt.likeCount = cmt.likeCount! - 1;
                           }
                           setState(() {
-
-                          /*  likeAndUnlikeComment();
+                            /*  likeAndUnlikeComment();
                             isLiked = !isLiked;
                             isHeartAnimating = !isHeartAnimating;
                             _heartController.forward();*/
@@ -760,14 +915,14 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                         },
                         icon: cmt.isLiked!
                             ? const Icon(
-                          Icons.favorite_rounded,
-                          color: Colors.red,
-                          size: 15,
-                        )
+                                Icons.favorite_rounded,
+                                color: Colors.red,
+                                size: 15,
+                              )
                             : const Icon(
-                          Icons.favorite_outline_rounded,
-                          size: 15,
-                        ),
+                                Icons.favorite_outline_rounded,
+                                size: 15,
+                              ),
                         splashColor: Colors.transparent,
                         highlightColor: Colors.transparent,
                         hoverColor: Colors.transparent,
@@ -784,7 +939,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
               ),
             ],
           ),
-          buildReplyButton(context),
+          buildReplyButton(context, cmt),
         ],
       ),
     );
@@ -797,26 +952,25 @@ class _PostCommentsPageState extends State<PostCommentsPage>
       context: context,
       position: RelativeRect.fromLTRB(left, top, 0, 0),
       items: [
-        if(cmt.userID == user_info.user!.uid) PopupMenuItem<String>(
-            onTap: () async{
-              await deleteComment(cmt, widget.postID);
-              commentList.remove(cmt);
-              Fluttertoast.showToast(
-                  msg: "Deleted 1 comment",
-                  toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.CENTER,
-                  timeInSecForIosWeb: 1,
-                  textColor: Colors.white,
-                  fontSize: 16.0);
-            },
-            value: 'del',
-            child: const Text('Delete')),
-        if(cmt.userID == user_info.user!.uid) const PopupMenuItem<String>(
-            value: 'edit',
-            child: Text('Edit')),
-        if(cmt.userID != user_info.user!.uid) const PopupMenuItem<String>(
-            value: 'report',
-            child: Text('Report'))
+        if (cmt.userID == user_info.user!.uid)
+          PopupMenuItem<String>(
+              onTap: () async {
+                await deleteComment(cmt, widget.postID);
+                commentList.remove(cmt);
+                Fluttertoast.showToast(
+                    msg: "Deleted 1 comment",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.CENTER,
+                    timeInSecForIosWeb: 1,
+                    textColor: Colors.white,
+                    fontSize: 16.0);
+              },
+              value: 'del',
+              child: const Text('Delete')),
+        if (cmt.userID == user_info.user!.uid)
+          const PopupMenuItem<String>(value: 'edit', child: Text('Edit')),
+        if (cmt.userID != user_info.user!.uid)
+          const PopupMenuItem<String>(value: 'report', child: Text('Report'))
       ],
       elevation: 8.0,
     );

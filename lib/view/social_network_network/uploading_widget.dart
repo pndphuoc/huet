@@ -111,7 +111,7 @@ class _UploadingWidgetState extends State<UploadingWidget> {
 
     final json = post.toJson();
     docPost.set(json);
-    FirebaseFirestore.instance.collection('post').doc(docPost.id).collection('comments').doc().set({});
+
   }
 
   Future<void> createPost() async {
