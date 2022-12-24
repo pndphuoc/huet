@@ -1,125 +1,298 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
 import 'package:hue_t/model/social_network/comment_model.dart';
-import 'package:hue_t/model/social_network/postModel.dart';
-import 'package:hue_t/view/social_network_network/comment.dart';
+import 'package:hue_t/model/social_network/post_model.dart';
+import 'package:hue_t/view/social_network_network/posting_comment_widget.dart';
+import 'package:hue_t/view/social_network_network/posting_reply_comment_widget.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import '../../animation/heart_animation.dart';
+import '../../firebase_function/comment_function.dart';
+import '../../constants/user_info.dart' as user_info;
+import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+import '../../firebase_function/common_function.dart';
 
 class PostCommentsPage extends StatefulWidget {
-  const PostCommentsPage({Key? key, required this.post}) : super(key: key);
-  final PostModel post;
+  const PostCommentsPage({Key? key, required this.postID}) : super(key: key);
+  final String postID;
 
   @override
   State<PostCommentsPage> createState() => _PostCommentsPageState();
 }
 
-List<CommentModel> commentList = [
-  CommentModel(
-      id: "1", userId: "1", postId: "1", content: "abcsdf", likeCount: 6999),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431),
-  CommentModel(
-      id: "2",
-      userId: "2",
-      postId: "1",
-      content: "Phuoc dep trai",
-      likeCount: 2431)
-];
+class _PostCommentsPageState extends State<PostCommentsPage>
+    with TickerProviderStateMixin {
 
-class _PostCommentsPageState extends State<PostCommentsPage> {
+  late final AnimationController _heartController = AnimationController(
+    duration: const Duration(milliseconds: 500),
+    vsync: this,
+  );
+  final ScrollController _controller = ScrollController();
+
+  late AutoScrollController _commentScrollController;
+
+  final RefreshController _refreshController =
+  RefreshController(initialRefresh: false);
+
+  late String commentContent;
+
+  final commentController = TextEditingController();
+
+  late PostModel post;
+  bool isLoading = true;
+  bool isPostingComment = false;
+  bool isPostingReplyComment = false;
+  bool isSelectingItem = false;
+  bool isSelectingItemIsReplyComment = false;
+  bool isLoadingReplyComments = false;
+  late String parentCommentID;
+  Comment? selectedItem;
+  late List<Comment> commentList;
+  bool isReplying = false;
+  Comment? commentAreBeingReplied;
+  List replyCommentsOfUser = [];
+  List<Comment> showReplyCommentList = [];
+  Comment? commentIsLoadingReply;
+  bool isHeartAnimating = false;
+  bool isShowingCommentsOfCurrentUser = true;
+  bool _moreCommentsAvailable = true;
+  static const int commentLimit = 10;
+  bool isRefreshing = false;
+  _getPostContent() async {
+    //post = await displayUsersCommentFirst(widget.postID);
+    post = await getPostContent(widget.postID,commentLimit );
+    commentList = post.comments!;
+
+    List<Comment> myComments = [];
+    commentList.toList().forEach((element) async {
+      //replyCommentsOfUser.addAll( await getAllReplyCommentOfUser(user_info.user!.uid, widget.postID, element.id));
+      if (element.userID == user_info.user!.uid) {
+        myComments.add(element);
+        commentList.remove(element);
+      }
+    });
+    myComments.sort(
+      (a, b) => b.createDate.compareTo(a.createDate),
+    );
+    commentList = myComments + commentList;
+
+    for (var e in commentList) {
+      e.replyComments = await getAllReplyCommentOfUser(
+          user_info.user!.uid, widget.postID, e.id);
+        e.replyComments!.sort((a, b) => a.createDate.compareTo(b.createDate),);
+    }
+    setState(() {
+      isShowingCommentsOfCurrentUser = true;
+      isLoading = false;
+    });
+  }
+
+  int index = 0;
+
+  void _scrollUp() {
+    _commentScrollController.animateTo(
+      _commentScrollController.position.minScrollExtent,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.fastOutSlowIn,
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _commentScrollController = AutoScrollController(
+        viewportBoundaryGetter: () =>
+            Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
+        axis: Axis.vertical);
+    _getPostContent();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
+
+  void _onRefresh() async{
+    commentList.clear();
+    setState(() {
+      isRefreshing = true;
+      _moreCommentsAvailable = true;
+    });
+
+    // monitor network fetch
+    await _getPostContent();
+    // if failed,use refreshFailed()
+    setState(() {
+      isRefreshing = false;
+    });
+    _refreshController.refreshCompleted();
+  }
+
+  _getMoreComments() async {
+    if(_moreCommentsAvailable == false) {
+      _refreshController.loadComplete();
+      return;
+    }
+    List<Comment> moreCommentsList = await getMoreComments(widget.postID, commentLimit);
+    if(moreCommentsList.length < commentLimit) {
+      _moreCommentsAvailable = false;
+    }
+
+    for (var e in moreCommentsList) {
+      e.replyCount = await getReplyCommentCount(widget.postID, e.id);
+      e.replyComments = await getAllReplyCommentOfUser(
+          user_info.user!.uid, widget.postID, e.id);
+      e.replyComments!.sort((a, b) => a.createDate.compareTo(b.createDate),);
+    }
+
+    commentList.addAll(moreCommentsList);
+    setState(() {});
+    _refreshController.loadComplete();
+  }
+/*  void _onLoading() async{
+    // monitor network fetch
+    await Future.delayed(Duration(milliseconds: 1000));
+    // if failed,use loadFailed(),if no data return,use LoadNodata()
+    items.add((items.length+1).toString());
+    if(mounted)
+      setState(() {
+
+      });
+    _refreshController.loadComplete();
+  }*/
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      onTap: () {
+        FocusManager.instance.primaryFocus?.unfocus();
+      },
       child: Scaffold(
-        appBar: AppBar(
-          iconTheme: const IconThemeData(color: Colors.black),
-          title: Text(
-            "Comments",
-            style: GoogleFonts.readexPro(color: Colors.black),
-          ),
-          backgroundColor: colors.backgroundColor,
-          elevation: 0,
-        ),
+        appBar:
+            !isSelectingItem ? appBar(context) : selectedItemAppBar(context),
         backgroundColor: colors.backgroundColor,
-        body: SafeArea(
-          child: Stack(children: [
-            SingleChildScrollView(
-              child: Column(
-                children: [
-                  contentBlock(context),
-                  ...commentList.map((e) => Comment(cmt: e)),
-                  const SizedBox(height: 80, )
-                ],
-              ),
-            ),
-            commentBlock(context)
-          ]),
+        body: isLoading
+            ? Center(
+                child: LoadingAnimationWidget.discreteCircle(
+                    color: colors.primaryColor, size: 30),
+              )
+            : /*SingleChildScrollView(
+                controller: _commentScrollController,
+                child: Column(
+                  children: [
+                    contentBlock(context),
+                    isPostingComment
+                        ? postingCommentBlock(context, commentContent)
+                        : Container(),
+                    ...commentList.map((e) {
+                      ++index;
+                      return AutoScrollTag(
+                        key: ValueKey(index),
+                        controller: _commentScrollController,
+                        index: index,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            buildCommentBlock(context, e),
+                            if (e.replyCount! > 0)
+                              if (isLoadingReplyComments &&
+                                  commentIsLoadingReply != null &&
+                                  commentIsLoadingReply == e)
+                                Center(
+                                  child: LoadingAnimationWidget.fallingDot(
+                                      color: colors.primaryColor, size: 15),
+                                )
+                              else
+                                buildReadReplyCommentButton(
+                                    context, widget.postID, e),
+                            //Hiển thị widget posting của reply comment
+                            isPostingReplyComment
+                                ? postingReplyCommentBlock(
+                                    context, commentContent)
+                                : Container(),
+
+                            //Hiển thị các reply comment của user hiện tại
+                            if (e.replyComments!.isNotEmpty &&
+                                !showReplyCommentList.contains(e) &&
+                                isShowingCommentsOfCurrentUser)
+                              ...e.replyComments!.map(
+                                  (replyCommentOfCurrentUser) =>
+                                      buildReplyCommentBlock(context,
+                                          replyCommentOfCurrentUser, e.id)),
+
+                            //Hiển thị các reply comment
+                            if (showReplyCommentList.contains(e) &&
+                                e.replyComments != null)
+                              ...e.replyComments!.map((reply) =>
+                                  buildReplyCommentBlock(context, reply, e.id))
+                          ],
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              ),*/
+        SmartRefresher(controller: _refreshController,
+          enablePullDown: true,
+          enablePullUp: true,
+          header: WaterDropMaterialHeader(
+            backgroundColor: colors.backgroundColor,
+            color: colors.primaryColor,
+          ),
+          onRefresh: _onRefresh,
+          onLoading: !isLoading && !isRefreshing? _getMoreComments : (){},
+          child: ListView.builder(
+            itemCount: commentList.length,
+              itemBuilder: (context, index) {
+                return AutoScrollTag(
+                  key: ValueKey(index),
+                  controller: _commentScrollController,
+                  index: index,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      buildCommentBlock(context, commentList[index]),
+                      if (commentList[index].replyCount! > 0)
+                        if (isLoadingReplyComments &&
+                            commentIsLoadingReply != null &&
+                            commentIsLoadingReply == commentList[index])
+                          Center(
+                            child: LoadingAnimationWidget.fallingDot(
+                                color: colors.primaryColor, size: 15),
+                          )
+                        else
+                          buildReadReplyCommentButton(
+                              context, widget.postID, commentList[index]),
+                      //Hiển thị widget posting của reply comment
+                      isPostingReplyComment
+                          ? postingReplyCommentBlock(
+                          context, commentContent)
+                          : Container(),
+
+                      //Hiển thị các reply comment của user hiện tại
+                      if (commentList[index].replyComments!.isNotEmpty &&
+                          !showReplyCommentList.contains(commentList[index]) &&
+                          isShowingCommentsOfCurrentUser)
+                        ...commentList[index].replyComments!.map(
+                                (replyCommentOfCurrentUser) =>
+                                buildReplyCommentBlock(context,
+                                    replyCommentOfCurrentUser, commentList[index].id)),
+
+                      //Hiển thị các reply comment
+                      if (showReplyCommentList.contains(commentList[index]) &&
+                          commentList[index].replyComments != null)
+                        ...commentList[index].replyComments!.map((reply) =>
+                            buildReplyCommentBlock(context, reply, commentList[index].id))
+                    ],
+                  ),
+                );
+              }
+          )
         ),
+        bottomNavigationBar: buildWritingCommentBlock(context),
       ),
     );
   }
@@ -166,7 +339,7 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
                     width: 10,
                   ),
                   Text(
-                    "${daysBetween(widget.post.createDate, DateTime.now())} days before",
+                    "${daysBetween(post.createDate, DateTime.now())} days before",
                     style: GoogleFonts.readexPro(color: Colors.grey),
                   )
                 ],
@@ -175,7 +348,7 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
                 height: 5,
               ),
               Text(
-                widget.post.caption!,
+                post.caption!,
                 style:
                     GoogleFonts.montserrat(color: Colors.black, fontSize: 15),
               )
@@ -186,64 +359,718 @@ class _PostCommentsPageState extends State<PostCommentsPage> {
     );
   }
 
-  commentBlock(BuildContext context) {
-    return Positioned(
-        bottom: 0,
-        left: 0,
-        right: 0,
-        child: IntrinsicHeight(
-          child: Container(
-            padding: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
-            width: MediaQuery.of(context).size.width,
-            decoration: BoxDecoration(
-              color: colors.SN_postBackgroundColor,
-              borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20))
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                SizedBox(
-                  height: 45,
-                  width: 45,
-                  child: const CircleAvatar(
-                    backgroundImage: AssetImage(
-                      "assets/images/socialNetwork/avatar.png",
+  var focusNode = FocusNode();
+
+  Widget buildWritingCommentBlock(BuildContext context) {
+    return Padding(
+      padding: MediaQuery.of(context).viewInsets,
+      child: IntrinsicHeight(
+        child: Column(
+          children: [
+            commentAreBeingReplied != null
+                ? AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    color: Colors.grey,
+                    height: isReplying ? 50 : 0,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                              padding: const EdgeInsets.only(left: 20),
+                              child: Text(
+                                "Replying to ${commentAreBeingReplied!.id}",
+                                style:
+                                    GoogleFonts.readexPro(color: Colors.white),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              )),
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 20),
+                          child: IconButton(
+                              onPressed: () {
+                                commentController.clear();
+                                setState(() {
+                                  isReplying = false;
+                                });
+                                Future.delayed(
+                                  const Duration(milliseconds: 200),
+                                  () => setState(() {
+                                    commentAreBeingReplied = null;
+                                  }),
+                                );
+                              },
+                              constraints: const BoxConstraints(),
+                              padding: EdgeInsets.zero,
+                              icon: const Icon(Icons.close)),
+                        )
+                      ],
+                    ),
+                  )
+                : Container(),
+            Container(
+              padding: const EdgeInsets.only(
+                  left: 20, right: 20, top: 10, bottom: 10),
+              width: MediaQuery.of(context).size.width,
+              decoration: BoxDecoration(
+                  color: colors.SN_postBackgroundColor,
+                  borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20))),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  const SizedBox(
+                    height: 45,
+                    width: 45,
+                    child: CircleAvatar(
+                      backgroundImage: AssetImage(
+                        "assets/images/socialNetwork/avatar.png",
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                const Expanded(child: TextField(
-                  autofocus: true,
-                  textInputAction: TextInputAction.send,
-                  keyboardType: TextInputType.multiline,
-                  maxLines: null,
-                  decoration: InputDecoration(
-                      contentPadding: EdgeInsets.fromLTRB(10, 15, 10, 10),
-                      border: InputBorder.none,
-                    hintText: "Write a comment"
+                  const SizedBox(
+                    width: 10,
                   ),
+                  Expanded(
+                      child: TextField(
+                    focusNode: focusNode,
+                    controller: commentController,
+                    autofocus: true,
+                    textInputAction: TextInputAction.send,
+                    keyboardType: TextInputType.multiline,
+                    maxLines: null,
+                    decoration: const InputDecoration(
+                        contentPadding: EdgeInsets.fromLTRB(10, 15, 10, 10),
+                        border: InputBorder.none,
+                        hintText: "Write a comment"),
+                  )),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      //Nếu text không rỗng
+                      if (commentController.value.text.isNotEmpty) {
+                        //Kiểm tra có phải là reply 1 comment hay không
+                        if (commentAreBeingReplied != null) {
+                          FocusScope.of(context).requestFocus(FocusNode());
+                          commentContent = commentController.text;
+                          isReplying = false;
+                          setState(() {
+                            isPostingReplyComment = true;
+                          });
+                          commentController.clear();
+                          await Future.delayed(
+                              const Duration(milliseconds: 500));
+                          await postReplyComment(
+                              commentContent,
+                              user_info.user!.uid,
+                              widget.postID,
+                              commentAreBeingReplied!.id);
+                          await _getPostContent();
+                          setState(() {
+                            isPostingReplyComment = false;
+                            commentAreBeingReplied = null;
+                          });
+                        } else {
+                          // Nếu không thì là đang comment
+                          _scrollUp();
+                          FocusScope.of(context).requestFocus(FocusNode());
+                          commentContent = commentController.text;
+                          isPostingComment = true;
+                          setState(() {});
+                          commentController.clear();
+                          await postComment(
+                              commentContent, user_info.user!.uid, post.postID);
+                          await _getPostContent();
+                          isPostingComment = false;
+                          setState(() {});
+                        }
+                      }
+                    },
+                    icon: Icon(
+                      Icons.send_rounded,
+                      color: colors.primaryColor,
+                      size: 30,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    splashColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget postingCommentBlock(BuildContext context, String content) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 5000),
+      color: isPostingComment ? Colors.black12 : colors.backgroundColor,
+      child: PostingCommentWidget(content: content),
+    );
+  }
+
+  Widget postingReplyCommentBlock(BuildContext context, String content) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 5000),
+      color: isPostingComment ? Colors.black12 : colors.backgroundColor,
+      child: PostingReplyCommentWidget(content: content),
+    );
+  }
+
+  AppBar appBar(BuildContext context) {
+    return AppBar(
+      iconTheme: const IconThemeData(color: Colors.black),
+      title: Text(
+        "Comments",
+        style: GoogleFonts.readexPro(color: Colors.black),
+      ),
+      backgroundColor: colors.backgroundColor,
+      elevation: 0,
+    );
+  }
+
+  AppBar selectedItemAppBar(BuildContext context) {
+    return AppBar(
+      leading: IconButton(
+        icon: const Icon(Icons.close),
+        onPressed: () {
+          setState(() {
+            isSelectingItem = false;
+          });
+        },
+      ),
+      iconTheme: const IconThemeData(color: Colors.black),
+      title: Text(
+        "1 item selected",
+        style: GoogleFonts.readexPro(color: Colors.black),
+      ),
+      actions: [
+        selectedItem!.userID == user_info.user!.uid
+            ? IconButton(
+                onPressed: () async {
+                  if (isSelectingItemIsReplyComment) {
+                    await deleteReplyComment(
+                        selectedItem!, widget.postID, parentCommentID);
+                    Fluttertoast.showToast(
+                        msg: "Deleted 1 reply comment",
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.CENTER,
+                        timeInSecForIosWeb: 1,
+                        textColor: Colors.white,
+                        fontSize: 16.0);
+                    setState(() {
+                      selectedItem = null;
+                      isSelectingItem = false;
+                    });
+                  } else {
+                    await deleteComment(selectedItem!, widget.postID);
+                    Fluttertoast.showToast(
+                        msg: "Deleted 1 comment",
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.CENTER,
+                        timeInSecForIosWeb: 1,
+                        textColor: Colors.white,
+                        fontSize: 16.0);
+                    commentList.remove(selectedItem!);
+                    setState(() {
+                      post.comments!.remove(selectedItem!);
+                      selectedItem = null;
+                      isSelectingItem = false;
+                    });
+                  }
+                },
+                icon: const Icon(Icons.delete))
+            : IconButton(onPressed: () {}, icon: const Icon(Icons.error)),
+      ],
+      backgroundColor: colors.primaryColor,
+      elevation: 0,
+    );
+  }
+
+  Widget buildReplyButton(BuildContext context, Comment cmt) {
+    return Container(
+      width: 60,
+      margin: const EdgeInsets.only(left: 45),
+      child: TextButton(
+          onPressed: () {
+            commentAreBeingReplied = cmt;
+            isReplying = true;
+            focusNode.requestFocus();
+            commentController.text = "@${commentAreBeingReplied!.id} ";
+            commentController.selection =
+                TextSelection.collapsed(offset: commentController.text.length);
+            setState(() {});
+          },
+          style: TextButton.styleFrom(
+              minimumSize: const Size(50, 30),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              splashFactory: NoSplash.splashFactory,
+              alignment: Alignment.center),
+          child: Text(
+            "Reply",
+            style: GoogleFonts.readexPro(
+                color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w600),
+          )),
+    );
+  }
+
+  Widget buildModalBottom(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: colors.backgroundColor,
+      ),
+      padding: const EdgeInsets.all(15),
+      child: IntrinsicHeight(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            TextButton(
+                onPressed: () {},
+                child: RichText(
+                  text: TextSpan(children: [
+                    const WidgetSpan(
+                        child: Icon(
+                      Icons.report_outlined,
+                      color: Colors.black,
+                    )),
+                    const WidgetSpan(
+                      child: SizedBox(
+                        width: 10,
+                      ),
+                    ),
+                    TextSpan(
+                        text: "Report",
+                        style: GoogleFonts.readexPro(
+                            fontSize: 20, color: Colors.black))
+                  ]),
                 )),
-                const SizedBox(
-                  width: 10,
+            TextButton(
+                onPressed: () {},
+                child: RichText(
+                  text: TextSpan(children: [
+                    const WidgetSpan(
+                        child: Icon(
+                      Icons.reply_outlined,
+                      color: Colors.black,
+                    )),
+                    const WidgetSpan(
+                      child: SizedBox(
+                        width: 10,
+                      ),
+                    ),
+                    TextSpan(
+                        text: "Reply",
+                        style: GoogleFonts.readexPro(
+                            fontSize: 20, color: Colors.black))
+                  ]),
+                )),
+            TextButton(
+                onPressed: () {},
+                child: RichText(
+                  text: TextSpan(children: [
+                    const WidgetSpan(
+                        child: Icon(
+                      Icons.copy_outlined,
+                      color: Colors.black,
+                    )),
+                    const WidgetSpan(
+                      child: SizedBox(
+                        width: 10,
+                      ),
+                    ),
+                    TextSpan(
+                        text: "Copy to clipboard",
+                        style: GoogleFonts.readexPro(
+                            fontSize: 20, color: Colors.black))
+                  ]),
+                )),
+            selectedItem!.userID == user_info.user!.uid
+                ? TextButton(
+                    onPressed: () {},
+                    child: RichText(
+                      text: TextSpan(children: [
+                        const WidgetSpan(
+                            child: Icon(
+                          Icons.mode_edit_outline,
+                          color: Colors.black,
+                        )),
+                        const WidgetSpan(
+                          child: SizedBox(
+                            width: 10,
+                          ),
+                        ),
+                        TextSpan(
+                            text: "Edit",
+                            style: GoogleFonts.readexPro(
+                                fontSize: 20, color: Colors.black))
+                      ]),
+                    ))
+                : Container(),
+            selectedItem!.userID == user_info.user!.uid
+                ? TextButton(
+                    onPressed: () {},
+                    child: RichText(
+                      text: TextSpan(children: [
+                        const WidgetSpan(
+                            child: Icon(
+                          Icons.delete_outline,
+                          color: Colors.red,
+                        )),
+                        const WidgetSpan(
+                          child: SizedBox(
+                            width: 10,
+                          ),
+                        ),
+                        TextSpan(
+                            text: "Delete",
+                            style: GoogleFonts.readexPro(
+                                fontSize: 20,
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold))
+                      ]),
+                    ))
+                : Container(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildCommentBlock(BuildContext context, Comment cmt) {
+    bool isSelectingItem = false;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onLongPressStart: (details) async {
+            selectedItem = cmt;
+            setState(() {});
+            //_showPopupMenuForComment(details.globalPosition, cmt);
+            await showModalBottomSheet<void>(
+              context: context,
+              builder: (BuildContext context) {
+                return buildModalBottom(context);
+              },
+            );
+            selectedItem = null;
+            setState(() {});
+          },
+          child: Container(
+            padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
+            decoration: BoxDecoration(
+                color: selectedItem == cmt
+                    ? Colors.black12
+                    : colors.backgroundColor),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: 45,
+                      width: 45,
+                      child: CircleAvatar(
+                        backgroundImage: NetworkImage(
+                          user_info.user!.photoURL,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                user_info.user!.name,
+                                style: GoogleFonts.readexPro(
+                                    color: Colors.black, fontSize: 15),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              /*Text(
+                                "${daysBetween(widget.post.createDate, DateTime.now())} days before",
+                                style: GoogleFonts.readexPro(color: Colors.grey),
+                              )*/
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 5,
+                          ),
+                          Text(
+                            cmt.content,
+                            style: GoogleFonts.montserrat(
+                                color: Colors.black, fontSize: 15),
+                          ),
+                          const SizedBox(
+                            height: 5,
+                          ),
+                          buildDateFormat(cmt.createDate, Colors.grey, 10),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    IntrinsicWidth(
+                      child: Column(
+                        children: [
+                          HeartAnimation(
+                            isAnimating: isHeartAnimating, ////
+                            child: IconButton(
+                              onPressed: () {
+                                likeAndUnlikeComment(cmt, widget.postID);
+                                cmt.isLiked = !cmt.isLiked!;
+                                if (cmt.isLiked!) {
+                                  cmt.likeCount = cmt.likeCount! + 1;
+                                } else {
+                                  cmt.likeCount = cmt.likeCount! - 1;
+                                }
+                                setState(() {
+                                  isHeartAnimating = !isHeartAnimating;
+                                  _heartController.forward();
+                                });
+                              },
+                              icon: cmt.isLiked!
+                                  ? const Icon(
+                                      Icons.favorite_rounded,
+                                      color: Colors.red,
+                                      size: 15,
+                                    )
+                                  : const Icon(
+                                      Icons.favorite_outline_rounded,
+                                      size: 15,
+                                    ),
+                              splashColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              hoverColor: Colors.transparent,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                          ),
+                          Text(
+                            cmt.likeCount.toString(),
+                            style: GoogleFonts.readexPro(color: Colors.grey),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                IconButton(
-                  onPressed: () {},
-                  icon: Icon(
-                    Icons.send_rounded,
-                    color: colors.primaryColor,
-                    size: 30,
-                  ),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  splashColor: Colors.transparent,
-                  hoverColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                )
+                buildReplyButton(context, cmt),
               ],
             ),
           ),
-        ));
+        ),
+      ],
+    );
+  }
+
+  Widget buildReadReplyCommentButton(
+      BuildContext context, String postID, Comment cmt) {
+    return Container(
+        margin: const EdgeInsets.only(left: 55),
+        child: TextButton(
+            onPressed: () async {
+              /*   replyList = await getReplyComments(postID, cmtID);
+              print(replyList.length);*/
+              if (!showReplyCommentList.contains(cmt)) {
+                showReplyCommentList.add(cmt);
+                isLoadingReplyComments = true;
+                commentIsLoadingReply = cmt;
+                setState(() {});
+                cmt.replyComments!.clear();
+                cmt.replyComments = await getReplyComments(postID, cmt.id);
+                setState(() {
+                  isLoadingReplyComments = false;
+                });
+              } else {
+                showReplyCommentList.remove(cmt);
+                isShowingCommentsOfCurrentUser = false;
+                setState(() {});
+              }
+              setState(() {});
+            },
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: !showReplyCommentList.contains(cmt)
+                ? Text(
+                    "----- Read ${cmt.replyCount} reply comments",
+                    style: GoogleFonts.readexPro(color: Colors.grey),
+                  )
+                : Text(
+                    "----- Hide ${cmt.replyCount} reply comments",
+                    style: GoogleFonts.readexPro(color: Colors.grey),
+                  )));
+  }
+
+  Widget buildReplyCommentBlock(
+      BuildContext context, Comment cmt, String parentCmtID) {
+    return Container(
+      decoration: BoxDecoration(color: colors.backgroundColor),
+      padding: const EdgeInsets.only(left: 55, top: 10, right: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 35,
+                width: 35,
+                child: CircleAvatar(
+                  backgroundImage: NetworkImage(
+                    user_info.user!.photoURL,
+                  ),
+                ),
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Expanded(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onLongPressStart: (details) {
+                    //_showPopupMenu(details.globalPosition);
+                  },
+                  /*  onLongPress: () {
+                    dynamic state = _menuKey.currentState;
+                    state.showButtonMenu();
+                    //widget.selectCallback(widget.cmt);
+                    setState(() {});
+                  },*/
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        user_info.user!.name,
+                        style: GoogleFonts.readexPro(
+                            color: Colors.black, fontSize: 15),
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Text(
+                        cmt.content,
+                        style: GoogleFonts.montserrat(
+                            color: Colors.black, fontSize: 15),
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      buildDateFormat(cmt.createDate, Colors.grey, 10),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              IntrinsicWidth(
+                child: Column(
+                  children: [
+                    HeartAnimation(
+                      isAnimating: false, ////
+                      child: IconButton(
+                        onPressed: () async {
+                          await likeAndUnlikeReplyComment(
+                              cmt, widget.postID, parentCmtID);
+                          cmt.isLiked = !cmt.isLiked!;
+                          if (cmt.isLiked!) {
+                            cmt.likeCount = cmt.likeCount! + 1;
+                          } else {
+                            cmt.likeCount = cmt.likeCount! - 1;
+                          }
+                          setState(() {
+                            /*  likeAndUnlikeComment();
+                            isLiked = !isLiked;
+                            isHeartAnimating = !isHeartAnimating;
+                            _heartController.forward();*/
+                          });
+                        },
+                        icon: cmt.isLiked!
+                            ? const Icon(
+                                Icons.favorite_rounded,
+                                color: Colors.red,
+                                size: 15,
+                              )
+                            : const Icon(
+                                Icons.favorite_outline_rounded,
+                                size: 15,
+                              ),
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                    ),
+                    Text(
+                      cmt.likeCount.toString(),
+                      style: GoogleFonts.readexPro(color: Colors.grey),
+                    )
+                  ],
+                ),
+              ),
+            ],
+          ),
+          buildReplyButton(context, cmt),
+        ],
+      ),
+    );
+  }
+
+  _showPopupMenuForComment(Offset offset, Comment cmt) async {
+    double left = offset.dx;
+    double top = offset.dy;
+    await showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(left, top, 0, 0),
+      items: [
+        if (cmt.userID == user_info.user!.uid)
+          PopupMenuItem<String>(
+              onTap: () async {
+                await deleteComment(cmt, widget.postID);
+                commentList.remove(cmt);
+                Fluttertoast.showToast(
+                    msg: "Deleted 1 comment",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.CENTER,
+                    timeInSecForIosWeb: 1,
+                    textColor: Colors.white,
+                    fontSize: 16.0);
+              },
+              value: 'del',
+              child: const Text('Delete')),
+        if (cmt.userID == user_info.user!.uid)
+          const PopupMenuItem<String>(value: 'edit', child: Text('Edit')),
+        if (cmt.userID != user_info.user!.uid)
+          const PopupMenuItem<String>(value: 'report', child: Text('Report'))
+      ],
+      elevation: 8.0,
+    );
   }
 }

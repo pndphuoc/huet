@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
-import 'package:hue_t/fake_data.dart' as faker;
 import 'package:hue_t/model/attraction/tourist_attraction.dart';
+import '../../fake_data.dart' as faker;
 
 import 'complete_upload.dart';
 
