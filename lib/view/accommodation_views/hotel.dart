@@ -1,7 +1,9 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hue_t/animation/show_right.dart';
 import 'package:hue_t/providers/accommodation_provider.dart';
@@ -43,9 +45,6 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
   String selectedCheckInDate = '';
   String selectedCheckOutDate = '';
   late final TabController _tabController;
-  List<hotelModel> listHotel = [];
-  List<hotelModel> listResort = [];
-  List<hotelModel> listHomestays = [];
 
   Future<void> distanceCaculating(Position value, List<hotelModel> list) async {
     for (int i = 0; i < list.length; i++) {
@@ -68,23 +67,26 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
     _tabController = TabController(length: 3, vsync: this);
   }
 
-  bool isLoading = true;
+  // bool isLoading = true;
 
   @override
   Widget build(BuildContext context) {
     var accommodationProvider = Provider.of<AccomodationProvider>(context);
 
-    if (isLoading) {
+    if (accommodationProvider.isloading) {
       (() async {
         await accommodationProvider.getAll();
-        listHotel = await accommodationProvider.filter("1", 5);
-        listResort = await accommodationProvider.filter("2", 5);
-        listHomestays = await accommodationProvider.filter("3", 5);
+        accommodationProvider.listHotel =
+            await accommodationProvider.filter("1", 5);
+        accommodationProvider.listResort =
+            await accommodationProvider.filter("2", 5);
+        accommodationProvider.listHomestays =
+            await accommodationProvider.filter("3", 5);
         await userLocation.getUserCurrentLocation().then((value) async {
           await distanceCaculating(value, accommodationProvider.list);
         });
         setState(() {
-          isLoading = false;
+          accommodationProvider.isloading = false;
         });
       })();
     }
@@ -111,7 +113,7 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
             ? colors.backgroundColorDarkMode
             : colors.backgroundColor,
         resizeToAvoidBottomInset: false,
-        body: isLoading
+        body: accommodationProvider.isloading
             ? Center(
                 child: LoadingAnimationWidget.staggeredDotsWave(
                     color: colors.primaryColor, size: 50),
@@ -124,10 +126,12 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                     child: Column(
                       children: [
                         searchBlock(context),
-                        accommodationBlock(context, "Hotels", listHotel),
                         accommodationBlock(
-                            context, "Resorts & Villas", listResort),
-                        accommodationBlock(context, "Homestays", listHomestays),
+                            context, "Hotels", accommodationProvider.listHotel),
+                        accommodationBlock(context, "Resorts & Villas",
+                            accommodationProvider.listResort),
+                        accommodationBlock(context, "Homestays",
+                            accommodationProvider.listHomestays),
                         Container(
                           margin: const EdgeInsets.only(
                               left: 20, right: 20, top: 15, bottom: 10),
@@ -185,11 +189,29 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
             onTap: () {
               StatefulWidget direction;
               if (name == "Hotels") {
-                direction = const HotelsPage();
+                direction = const HotelsPage(
+                  idAccomodation: "1",
+                  title: "Hot Hotels",
+                  content: "Best-rated hotels in the last month",
+                  image:
+                      "https://cdn4.tropicalsky.co.uk/images/1800x600/indochine-palace-main-image.jpg",
+                );
               } else if (name == "Resorts & Villas") {
-                direction = const ResortsPage();
+                direction = const HotelsPage(
+                  idAccomodation: "2",
+                  title: "Resorts",
+                  content: "Best-rated resort in the last month",
+                  image:
+                      "https://cdn4.tropicalsky.co.uk/images/1800x600/indochine-palace-main-image.jpg",
+                );
               } else {
-                direction = const HomestaysPage();
+                direction = const HotelsPage(
+                  idAccomodation: "3",
+                  title: "Homestays",
+                  content: "Best-rated homestays in the last month",
+                  image:
+                      "https://cdn4.tropicalsky.co.uk/images/1800x600/indochine-palace-main-image.jpg",
+                );
               }
               Navigator.push(
                   context, MaterialPageRoute(builder: (context) => direction));
@@ -248,8 +270,10 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
   }
 
   accommodationItemHorizonal(BuildContext context, int index, list) {
-    return ShowUp(
-      delay: 400 + index * 100,
+    return ElasticInUp(
+      from: 100,
+      delay: const Duration(milliseconds: 500),
+      duration: Duration(milliseconds: 1500 + index * 300),
       child: Container(
         decoration: BoxDecoration(
             color: colors.isDarkMode
@@ -431,15 +455,16 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
 
   popularAccommondationItem(BuildContext context, int index) {
     return Consumer<AccomodationProvider>(builder: (context, value, child) {
-      return ShowRight(
-        delay: 400 + index * 100,
+      return BounceInLeft(
+        delay: const Duration(milliseconds: 500),
+        duration: Duration(milliseconds: 500 + index * 300),
         child: Container(
           margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
           child: ElevatedButton(
             onPressed: () {
               Navigator.push(context, MaterialPageRoute(builder: (context) {
                 // do something
-                return HotelDetail(model: faker.listHotels[index]);
+                return HotelDetail(model: value.list[index]);
               }));
             },
             style: ElevatedButton.styleFrom(

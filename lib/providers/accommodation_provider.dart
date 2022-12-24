@@ -7,8 +7,12 @@ import 'package:hue_t/constants/host_url.dart' as url;
 import 'package:hue_t/model/accommodation/accommodationModel.dart';
 
 class AccomodationProvider extends ChangeNotifier {
+  bool isloading = true;
   List<hotelModel> list = [];
   List<hotelModel> listFilter = [];
+  List<hotelModel> listHotel = [];
+  List<hotelModel> listResort = [];
+  List<hotelModel> listHomestays = [];
 
   Future<void> getAll() async {
     String apiURL = "${url.url}/api/hotel";

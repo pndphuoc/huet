@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:geocoder/geocoder.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hue_t/view/accommodation_views/all_reviews.dart';
@@ -24,8 +26,9 @@ class HotelDetail extends StatefulWidget {
 }
 
 class _HotelDetailState extends State<HotelDetail> {
+  bool isloading = true;
+  String address = "";
   int currentPos = 0;
-
   late GoogleMapController mapController;
 
   final LatLng _center = const LatLng(45.521563, -122.677433);
@@ -73,29 +76,36 @@ class _HotelDetailState extends State<HotelDetail> {
   @override
   void initState() {
     super.initState();
+
     userLocation.getUserCurrentLocation().then((value) async {
       // marker added for hotels location
+      final coordinates = Coordinates(
+          widget.model.accommodationLocation.latitude,
+          widget.model.accommodationLocation.longitude);
+      var addresses =
+          await Geocoder.local.findAddressesFromCoordinates(coordinates);
+      address = addresses.first.addressLine.toString();
       _markers.add(Marker(
           markerId: const MarkerId("3"),
-          position: LatLng(widget.model.accommodationLocation!.latitude,
-              widget.model.accommodationLocation!.longitude),
+          position: LatLng(widget.model.accommodationLocation.latitude,
+              widget.model.accommodationLocation.longitude),
           infoWindow: const InfoWindow(title: "Hotel's Locations")));
 
       double miny =
-          (value.latitude <= widget.model.accommodationLocation!.latitude)
+          (value.latitude <= widget.model.accommodationLocation.latitude)
               ? value.latitude
-              : widget.model.accommodationLocation!.latitude;
+              : widget.model.accommodationLocation.latitude;
       double minx =
-          (value.longitude <= widget.model.accommodationLocation!.longitude)
+          (value.longitude <= widget.model.accommodationLocation.longitude)
               ? value.longitude
-              : widget.model.accommodationLocation!.longitude;
+              : widget.model.accommodationLocation.longitude;
       double maxy =
-          (value.latitude <= widget.model.accommodationLocation!.latitude)
-              ? widget.model.accommodationLocation!.latitude
+          (value.latitude <= widget.model.accommodationLocation.latitude)
+              ? widget.model.accommodationLocation.latitude
               : value.latitude;
       double maxx =
-          (value.longitude <= widget.model.accommodationLocation!.longitude)
-              ? widget.model.accommodationLocation!.longitude
+          (value.longitude <= widget.model.accommodationLocation.longitude)
+              ? widget.model.accommodationLocation.longitude
               : value.longitude;
 
       double southWestLatitude = miny;
@@ -163,15 +173,17 @@ class _HotelDetailState extends State<HotelDetail> {
                       items: widget.model.images.map((e) {
                         return Builder(builder: (BuildContext context) {
                           return Container(
+                            alignment: Alignment.center,
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(25)),
                             child: Center(
                                 child: ClipRRect(
                               child: Image.network(
                                 e ?? "",
+                                width: double.infinity,
                                 height:
                                     MediaQuery.of(context).size.height / 2.8,
-                                fit: BoxFit.fitHeight,
+                                fit: BoxFit.cover,
                               ),
                             )),
                           );
@@ -180,30 +192,43 @@ class _HotelDetailState extends State<HotelDetail> {
                     ),
                     Positioned(
                       bottom: 10,
-                      left: 1,
-                      right: 1,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: widget.model.images.map((e) {
-                          int index = widget.model.images.indexOf(e);
-                          return AnimatedContainer(
-                            duration: const Duration(milliseconds: 100),
-                            width: currentPos == index ? 20 : 8.0,
-                            height: 8.0,
-                            margin: const EdgeInsets.symmetric(
-                                vertical: 10.0, horizontal: 2.0),
-                            decoration: BoxDecoration(
-                                shape: currentPos == index
-                                    ? BoxShape.rectangle
-                                    : BoxShape.rectangle,
-                                borderRadius: currentPos == index
-                                    ? BorderRadius.circular(8)
-                                    : BorderRadius.circular(8),
-                                color: currentPos == index
-                                    ? const Color.fromRGBO(255, 255, 255, 10)
-                                    : const Color.fromRGBO(236, 236, 236, 0.5)),
-                          );
-                        }).toList(),
+                      right: 10,
+                      //   child: Row(
+                      //     mainAxisAlignment: MainAxisAlignment.center,
+                      //     children: widget.model.images.map((e) {
+                      //       int index = widget.model.images.indexOf(e);
+                      //       return AnimatedContainer(
+                      //         duration: const Duration(milliseconds: 100),
+                      //         width: currentPos == index ? 20 : 8.0,
+                      //         height: 8.0,
+                      //         margin: const EdgeInsets.symmetric(
+                      //             vertical: 10.0, horizontal: 2.0),
+                      //         decoration: BoxDecoration(
+                      //             shape: currentPos == index
+                      //                 ? BoxShape.rectangle
+                      //                 : BoxShape.rectangle,
+                      //             borderRadius: currentPos == index
+                      //                 ? BorderRadius.circular(8)
+                      //                 : BorderRadius.circular(8),
+                      //             color: currentPos == index
+                      //                 ? const Color.fromRGBO(255, 255, 255, 10)
+                      //                 : const Color.fromRGBO(236, 236, 236, 0.5)),
+                      //       );
+                      //     }).toList(),
+                      //   ),
+                      child: Container(
+                        padding: const EdgeInsets.only(left: 10, right: 10),
+                        height: 27,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.black54.withOpacity(0.5)),
+                        child: Center(
+                            child: Text(
+                          "${currentPos + 1}/${widget.model.images.length + 1}",
+                          style: GoogleFonts.readexPro(
+                              fontWeight: FontWeight.w400,
+                              color: Colors.white.withOpacity(0.7)),
+                        )),
                       ),
                     )
                   ],
@@ -217,11 +242,11 @@ class _HotelDetailState extends State<HotelDetail> {
                     margin: const EdgeInsets.only(top: 15),
                     child: Text(
                       widget.model.name,
-                      style: GoogleFonts.quicksand(
+                      style: GoogleFonts.readexPro(
                           color:
                               colors.isDarkMode ? Colors.white : Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 30),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 22),
                     ),
                   ),
                 ),
@@ -242,13 +267,13 @@ class _HotelDetailState extends State<HotelDetail> {
                               colors.isDarkMode ? Colors.white : Colors.black,
                         )),
                         TextSpan(
-                            text: " ${widget.model.address}",
-                            style: GoogleFonts.nunitoSans(
-                                fontWeight: FontWeight.w600,
+                            text: address,
+                            style: GoogleFonts.readexPro(
+                                fontWeight: FontWeight.w400,
                                 color: colors.isDarkMode
                                     ? Colors.white
                                     : Colors.black,
-                                fontSize: 20))
+                                fontSize: 18))
                       ]),
                     ),
                   ),
@@ -276,11 +301,12 @@ class _HotelDetailState extends State<HotelDetail> {
                                 borderRadius: BorderRadius.circular(15)),
                             child: Center(
                                 child: Text(
-                              e.name,
-                              style: GoogleFonts.quicksand(
+                              e['name'],
+                              style: GoogleFonts.readexPro(
                                   color: colors.isDarkMode
                                       ? Colors.white
-                                      : Colors.black),
+                                      : Colors.black,
+                                  fontWeight: FontWeight.w300),
                             )),
                           ))
                     ],
@@ -296,8 +322,8 @@ class _HotelDetailState extends State<HotelDetail> {
                     delay: 600,
                     child: Text(
                       "Map",
-                      style: GoogleFonts.montserrat(
-                          fontSize: 25,
+                      style: GoogleFonts.readexPro(
+                          fontSize: 20,
                           color:
                               colors.isDarkMode ? Colors.white : Colors.black),
                     )),
@@ -392,11 +418,11 @@ class _HotelDetailState extends State<HotelDetail> {
                         children: [
                           Text(
                             "Reviews",
-                            style: GoogleFonts.montserrat(
+                            style: GoogleFonts.readexPro(
                                 color: colors.isDarkMode
                                     ? Colors.white
                                     : Colors.black,
-                                fontSize: 25),
+                                fontSize: 21),
                           ),
                           Row(
                             children: [
@@ -439,7 +465,7 @@ class _HotelDetailState extends State<HotelDetail> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) =>
-                                          AllReviews(hotelId: 1)));
+                                          const AllReviews(hotelId: 1)));
                             },
                             style: ButtonStyle(
                                 overlayColor: MaterialStateColor.resolveWith(
@@ -448,8 +474,8 @@ class _HotelDetailState extends State<HotelDetail> {
                               text: TextSpan(children: [
                                 TextSpan(
                                     text: "See all",
-                                    style: GoogleFonts.montserrat(
-                                        color: Colors.black, fontSize: 20)),
+                                    style: GoogleFonts.readexPro(
+                                        color: Colors.black, fontSize: 18)),
                                 const WidgetSpan(
                                     child: Icon(
                                   Icons.chevron_right_outlined,
@@ -513,11 +539,11 @@ class _HotelDetailState extends State<HotelDetail> {
                 RichText(
                     text: TextSpan(children: [
                   TextSpan(
-                    text: "\$${widget.model.price}",
-                    style: GoogleFonts.montserrat(
+                    text: "\$${widget.model.price}" " VND",
+                    style: GoogleFonts.readexPro(
                         color: Colors.black,
-                        fontSize: 25,
-                        fontWeight: FontWeight.w600),
+                        fontSize: 22,
+                        fontWeight: FontWeight.w500),
                   ),
                   TextSpan(
                       text: "/night",
