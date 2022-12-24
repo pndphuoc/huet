@@ -321,6 +321,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.3.0"
+  flutter_geocoder:
+    dependency: "direct main"
+    description:
+      name: flutter_geocoder
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.2-nullsafety"
   flutter_html:
     dependency: "direct main"
     description:
@@ -448,13 +455,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.2"
-  geocoder:
-    dependency: "direct main"
-    description:
-      name: geocoder
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.2.1"
   geolocator:
     dependency: "direct main"
     description:

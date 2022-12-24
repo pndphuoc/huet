@@ -24,7 +24,6 @@ class PostCommentsPage extends StatefulWidget {
 
 class _PostCommentsPageState extends State<PostCommentsPage>
     with TickerProviderStateMixin {
-
   late final AnimationController _heartController = AnimationController(
     duration: const Duration(milliseconds: 500),
     vsync: this,
@@ -34,7 +33,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
   late AutoScrollController _commentScrollController;
 
   final RefreshController _refreshController =
-  RefreshController(initialRefresh: false);
+      RefreshController(initialRefresh: false);
 
   late String commentContent;
 
@@ -60,9 +59,10 @@ class _PostCommentsPageState extends State<PostCommentsPage>
   bool _moreCommentsAvailable = true;
   static const int commentLimit = 10;
   bool isRefreshing = false;
+
   _getPostContent() async {
     //post = await displayUsersCommentFirst(widget.postID);
-    post = await getPostContent(widget.postID,commentLimit );
+    post = await getPostContent(widget.postID, commentLimit);
     commentList = post.comments!;
 
     List<Comment> myComments = [];
@@ -81,7 +81,9 @@ class _PostCommentsPageState extends State<PostCommentsPage>
     for (var e in commentList) {
       e.replyComments = await getAllReplyCommentOfUser(
           user_info.user!.uid, widget.postID, e.id);
-        e.replyComments!.sort((a, b) => a.createDate.compareTo(b.createDate),);
+      e.replyComments!.sort(
+        (a, b) => a.createDate.compareTo(b.createDate),
+      );
     }
     setState(() {
       isShowingCommentsOfCurrentUser = true;
@@ -90,14 +92,6 @@ class _PostCommentsPageState extends State<PostCommentsPage>
   }
 
   int index = 0;
-
-  void _scrollUp() {
-    _commentScrollController.animateTo(
-      _commentScrollController.position.minScrollExtent,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.fastOutSlowIn,
-    );
-  }
 
   @override
   void initState() {
@@ -115,7 +109,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
     _controller.dispose();
   }
 
-  void _onRefresh() async{
+  void _onRefresh() async {
     commentList.clear();
     setState(() {
       isRefreshing = true;
@@ -132,12 +126,15 @@ class _PostCommentsPageState extends State<PostCommentsPage>
   }
 
   _getMoreComments() async {
-    if(_moreCommentsAvailable == false) {
+    if (_moreCommentsAvailable == false) {
       _refreshController.loadComplete();
       return;
     }
-    List<Comment> moreCommentsList = await getMoreComments(widget.postID, commentLimit);
-    if(moreCommentsList.length < commentLimit) {
+    List<Comment> moreCommentsList = [];
+    if (!isPostingComment && !isPostingReplyComment) {
+      moreCommentsList = await getMoreComments(widget.postID, commentLimit);
+    }
+    if (moreCommentsList.length < commentLimit) {
       _moreCommentsAvailable = false;
     }
 
@@ -145,24 +142,15 @@ class _PostCommentsPageState extends State<PostCommentsPage>
       e.replyCount = await getReplyCommentCount(widget.postID, e.id);
       e.replyComments = await getAllReplyCommentOfUser(
           user_info.user!.uid, widget.postID, e.id);
-      e.replyComments!.sort((a, b) => a.createDate.compareTo(b.createDate),);
+      e.replyComments!.sort(
+        (a, b) => a.createDate.compareTo(b.createDate),
+      );
     }
 
     commentList.addAll(moreCommentsList);
     setState(() {});
     _refreshController.loadComplete();
   }
-/*  void _onLoading() async{
-    // monitor network fetch
-    await Future.delayed(Duration(milliseconds: 1000));
-    // if failed,use loadFailed(),if no data return,use LoadNodata()
-    items.add((items.length+1).toString());
-    if(mounted)
-      setState(() {
-
-      });
-    _refreshController.loadComplete();
-  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -171,8 +159,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
         FocusManager.instance.primaryFocus?.unfocus();
       },
       child: Scaffold(
-        appBar:
-            !isSelectingItem ? appBar(context) : selectedItemAppBar(context),
+        appBar: appBar(context),
         backgroundColor: colors.backgroundColor,
         body: isLoading
             ? Center(
@@ -235,63 +222,100 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                   ],
                 ),
               ),*/
-        SmartRefresher(controller: _refreshController,
-          enablePullDown: true,
-          enablePullUp: true,
-          header: WaterDropMaterialHeader(
-            backgroundColor: colors.backgroundColor,
-            color: colors.primaryColor,
-          ),
-          onRefresh: _onRefresh,
-          onLoading: !isLoading && !isRefreshing? _getMoreComments : (){},
-          child: ListView.builder(
-            itemCount: commentList.length,
-              itemBuilder: (context, index) {
-                return AutoScrollTag(
-                  key: ValueKey(index),
-                  controller: _commentScrollController,
-                  index: index,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      buildCommentBlock(context, commentList[index]),
-                      if (commentList[index].replyCount! > 0)
-                        if (isLoadingReplyComments &&
-                            commentIsLoadingReply != null &&
-                            commentIsLoadingReply == commentList[index])
-                          Center(
-                            child: LoadingAnimationWidget.fallingDot(
-                                color: colors.primaryColor, size: 15),
-                          )
-                        else
-                          buildReadReplyCommentButton(
-                              context, widget.postID, commentList[index]),
-                      //Hiển thị widget posting của reply comment
-                      isPostingReplyComment
-                          ? postingReplyCommentBlock(
-                          context, commentContent)
-                          : Container(),
+            Column(
+                children: [
+                  contentBlock(context),
+                  isPostingComment
+                      ? postingCommentBlock(context, commentContent)
+                      : Container(),
+                  Expanded(
+                    child: SmartRefresher(
+                        controller: _refreshController,
+                        enablePullDown: true,
+                        enablePullUp: true,
+                        header: WaterDropMaterialHeader(
+                          backgroundColor: colors.backgroundColor,
+                          color: colors.primaryColor,
+                        ),
+                        onRefresh: _onRefresh,
+                        onLoading: !isLoading && !isRefreshing
+                            ? _getMoreComments
+                            : () {},
+                        child: ListView.builder(
+                            itemCount: commentList.length,
+                            itemBuilder: (context, index) {
+                              return Column(
+                                children: [
+                                  AutoScrollTag(
+                                    key: ValueKey(index),
+                                    controller: _commentScrollController,
+                                    index: index,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        buildCommentBlock(
+                                            context, commentList[index]),
+                                        if (commentList[index].replyCount! > 0)
+                                          if (isLoadingReplyComments &&
+                                              commentIsLoadingReply != null &&
+                                              commentIsLoadingReply ==
+                                                  commentList[index])
+                                            Center(
+                                              child: LoadingAnimationWidget
+                                                  .fallingDot(
+                                                      color:
+                                                          colors.primaryColor,
+                                                      size: 15),
+                                            )
+                                          else
+                                            buildReadReplyCommentButton(
+                                                context,
+                                                widget.postID,
+                                                commentList[index]),
 
-                      //Hiển thị các reply comment của user hiện tại
-                      if (commentList[index].replyComments!.isNotEmpty &&
-                          !showReplyCommentList.contains(commentList[index]) &&
-                          isShowingCommentsOfCurrentUser)
-                        ...commentList[index].replyComments!.map(
-                                (replyCommentOfCurrentUser) =>
-                                buildReplyCommentBlock(context,
-                                    replyCommentOfCurrentUser, commentList[index].id)),
-
-                      //Hiển thị các reply comment
-                      if (showReplyCommentList.contains(commentList[index]) &&
-                          commentList[index].replyComments != null)
-                        ...commentList[index].replyComments!.map((reply) =>
-                            buildReplyCommentBlock(context, reply, commentList[index].id))
-                    ],
-                  ),
-                );
-              }
-          )
-        ),
+                                        //Hiển thị các reply comment của user hiện tại
+                                        if (commentList[index]
+                                                .replyComments!
+                                                .isNotEmpty &&
+                                            !showReplyCommentList
+                                                .contains(commentList[index]) &&
+                                            isShowingCommentsOfCurrentUser)
+                                          ...commentList[index]
+                                              .replyComments!
+                                              .map((replyCommentOfCurrentUser) =>
+                                                  buildReplyCommentBlock(
+                                                      context,
+                                                      replyCommentOfCurrentUser,
+                                                      commentList[index].id)),
+//Hiển thị widget posting của reply comment
+                                        isPostingReplyComment &&
+                                                commentAreBeingReplied! ==
+                                                    commentList[index]
+                                            ? postingReplyCommentBlock(
+                                                context, commentContent)
+                                            : Container(),
+                                        //Hiển thị các reply comment
+                                        if (showReplyCommentList
+                                                .contains(commentList[index]) &&
+                                            commentList[index].replyComments !=
+                                                null)
+                                          ...commentList[index]
+                                              .replyComments!
+                                              .map((reply) =>
+                                                  buildReplyCommentBlock(
+                                                      context,
+                                                      reply,
+                                                      commentList[index].id))
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              );
+                            })),
+                  )
+                ],
+              ),
         bottomNavigationBar: buildWritingCommentBlock(context),
       ),
     );
@@ -464,29 +488,44 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                             isPostingReplyComment = true;
                           });
                           commentController.clear();
-                          await Future.delayed(
-                              const Duration(milliseconds: 500));
-                          await postReplyComment(
-                              commentContent,
-                              user_info.user!.uid,
+                          final justPostReplyComment = await getReplyComment(
                               widget.postID,
-                              commentAreBeingReplied!.id);
-                          await _getPostContent();
+                              commentAreBeingReplied!.id,
+                              await postReplyComment(
+                                  commentContent,
+                                  user_info.user!.uid,
+                                  widget.postID,
+                                  commentAreBeingReplied!.id));
+                          final temp = commentList[
+                              commentList.indexOf(commentAreBeingReplied!)];
+                          temp.replyComments!.add(justPostReplyComment);
+                          temp.replyCount = 0;
+                          commentList[commentList
+                              .indexOf(commentAreBeingReplied!)] = temp;
+                          //await _getPostContent();
                           setState(() {
                             isPostingReplyComment = false;
                             commentAreBeingReplied = null;
                           });
                         } else {
                           // Nếu không thì là đang comment
-                          _scrollUp();
+                          //_scrollUp();
+                          _commentScrollController.animateTo(0,
+                              duration: Duration(milliseconds: 500),
+                              curve: Curves.fastOutSlowIn);
                           FocusScope.of(context).requestFocus(FocusNode());
                           commentContent = commentController.text;
                           isPostingComment = true;
                           setState(() {});
                           commentController.clear();
-                          await postComment(
-                              commentContent, user_info.user!.uid, post.postID);
-                          await _getPostContent();
+                          final justPostComment = await getComment(
+                              widget.postID,
+                              await postComment(commentContent,
+                                  user_info.user!.uid, widget.postID));
+                          justPostComment.replyComments = [];
+                          justPostComment.replyCount = 0;
+                          commentList.insert(0, justPostComment);
+                          //await _getPostContent();
                           isPostingComment = false;
                           setState(() {});
                         }
@@ -515,7 +554,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
   Widget postingCommentBlock(BuildContext context, String content) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 5000),
-      color: isPostingComment ? Colors.black12 : colors.backgroundColor,
+      color: Colors.black12,
       child: PostingCommentWidget(content: content),
     );
   }
@@ -523,7 +562,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
   Widget postingReplyCommentBlock(BuildContext context, String content) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 5000),
-      color: isPostingComment ? Colors.black12 : colors.backgroundColor,
+      color: Colors.black12,
       child: PostingReplyCommentWidget(content: content),
     );
   }
@@ -536,64 +575,6 @@ class _PostCommentsPageState extends State<PostCommentsPage>
         style: GoogleFonts.readexPro(color: Colors.black),
       ),
       backgroundColor: colors.backgroundColor,
-      elevation: 0,
-    );
-  }
-
-  AppBar selectedItemAppBar(BuildContext context) {
-    return AppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.close),
-        onPressed: () {
-          setState(() {
-            isSelectingItem = false;
-          });
-        },
-      ),
-      iconTheme: const IconThemeData(color: Colors.black),
-      title: Text(
-        "1 item selected",
-        style: GoogleFonts.readexPro(color: Colors.black),
-      ),
-      actions: [
-        selectedItem!.userID == user_info.user!.uid
-            ? IconButton(
-                onPressed: () async {
-                  if (isSelectingItemIsReplyComment) {
-                    await deleteReplyComment(
-                        selectedItem!, widget.postID, parentCommentID);
-                    Fluttertoast.showToast(
-                        msg: "Deleted 1 reply comment",
-                        toastLength: Toast.LENGTH_SHORT,
-                        gravity: ToastGravity.CENTER,
-                        timeInSecForIosWeb: 1,
-                        textColor: Colors.white,
-                        fontSize: 16.0);
-                    setState(() {
-                      selectedItem = null;
-                      isSelectingItem = false;
-                    });
-                  } else {
-                    await deleteComment(selectedItem!, widget.postID);
-                    Fluttertoast.showToast(
-                        msg: "Deleted 1 comment",
-                        toastLength: Toast.LENGTH_SHORT,
-                        gravity: ToastGravity.CENTER,
-                        timeInSecForIosWeb: 1,
-                        textColor: Colors.white,
-                        fontSize: 16.0);
-                    commentList.remove(selectedItem!);
-                    setState(() {
-                      post.comments!.remove(selectedItem!);
-                      selectedItem = null;
-                      isSelectingItem = false;
-                    });
-                  }
-                },
-                icon: const Icon(Icons.delete))
-            : IconButton(onPressed: () {}, icon: const Icon(Icons.error)),
-      ],
-      backgroundColor: colors.primaryColor,
       elevation: 0,
     );
   }
@@ -625,7 +606,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
     );
   }
 
-  Widget buildModalBottom(BuildContext context) {
+  Widget buildModalBottom(BuildContext context, String parentCmtId) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -721,7 +702,37 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                 : Container(),
             selectedItem!.userID == user_info.user!.uid
                 ? TextButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      if (parentCmtId.isEmpty) {
+                        await deleteComment(selectedItem!.id, widget.postID);
+                        commentList.remove(selectedItem!);
+                        Navigator.pop(context);
+                        Fluttertoast.showToast(
+                            msg: "Deleted",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.CENTER,
+                            timeInSecForIosWeb: 1,
+                            textColor: Colors.white,
+                            fontSize: 16.0);
+                        setState(() {});
+                      } else {
+                        await deleteReplyComment(
+                            selectedItem!.id, widget.postID, parentCmtId);
+                        commentList[commentList.lastIndexWhere(
+                                (element) => element.id == parentCmtId)]
+                            .replyComments!
+                            .remove(selectedItem!);
+                        Navigator.pop(context);
+                        Fluttertoast.showToast(
+                            msg: "Deleted",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.CENTER,
+                            timeInSecForIosWeb: 1,
+                            textColor: Colors.white,
+                            fontSize: 16.0);
+                        setState(() {});
+                      }
+                    },
                     child: RichText(
                       text: TextSpan(children: [
                         const WidgetSpan(
@@ -763,7 +774,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
             await showModalBottomSheet<void>(
               context: context,
               builder: (BuildContext context) {
-                return buildModalBottom(context);
+                return buildModalBottom(context, "");
               },
             );
             selectedItem = null;
@@ -848,6 +859,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                                 }
                                 setState(() {
                                   isHeartAnimating = !isHeartAnimating;
+
                                   _heartController.forward();
                                 });
                               },
@@ -929,7 +941,8 @@ class _PostCommentsPageState extends State<PostCommentsPage>
   Widget buildReplyCommentBlock(
       BuildContext context, Comment cmt, String parentCmtID) {
     return Container(
-      decoration: BoxDecoration(color: colors.backgroundColor),
+      decoration: BoxDecoration(
+          color: selectedItem == cmt ? Colors.black12 : colors.backgroundColor),
       padding: const EdgeInsets.only(left: 55, top: 10, right: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -952,8 +965,19 @@ class _PostCommentsPageState extends State<PostCommentsPage>
               Expanded(
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  onLongPressStart: (details) {
+                  onLongPressStart: (details) async {
                     //_showPopupMenu(details.globalPosition);
+                    selectedItem = cmt;
+                    setState(() {});
+                    //_showPopupMenuForComment(details.globalPosition, cmt);
+                    await showModalBottomSheet<void>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return buildModalBottom(context, parentCmtID);
+                      },
+                    );
+                    selectedItem = null;
+                    setState(() {});
                   },
                   /*  onLongPress: () {
                     dynamic state = _menuKey.currentState;
@@ -1040,37 +1064,6 @@ class _PostCommentsPageState extends State<PostCommentsPage>
           buildReplyButton(context, cmt),
         ],
       ),
-    );
-  }
-
-  _showPopupMenuForComment(Offset offset, Comment cmt) async {
-    double left = offset.dx;
-    double top = offset.dy;
-    await showMenu(
-      context: context,
-      position: RelativeRect.fromLTRB(left, top, 0, 0),
-      items: [
-        if (cmt.userID == user_info.user!.uid)
-          PopupMenuItem<String>(
-              onTap: () async {
-                await deleteComment(cmt, widget.postID);
-                commentList.remove(cmt);
-                Fluttertoast.showToast(
-                    msg: "Deleted 1 comment",
-                    toastLength: Toast.LENGTH_SHORT,
-                    gravity: ToastGravity.CENTER,
-                    timeInSecForIosWeb: 1,
-                    textColor: Colors.white,
-                    fontSize: 16.0);
-              },
-              value: 'del',
-              child: const Text('Delete')),
-        if (cmt.userID == user_info.user!.uid)
-          const PopupMenuItem<String>(value: 'edit', child: Text('Edit')),
-        if (cmt.userID != user_info.user!.uid)
-          const PopupMenuItem<String>(value: 'report', child: Text('Report'))
-      ],
-      elevation: 8.0,
     );
   }
 }

@@ -95,7 +95,7 @@ class _CommentWidgetState extends State<CommentWidget>
     _getReplyComments();
     likeCount = widget.cmt.likedUsers.length;
   }
-  _showPopupMenu(Offset offset) async {
+ /* _showPopupMenu(Offset offset) async {
     double left = offset.dx;
     double top = offset.dy;
     await showMenu(
@@ -121,7 +121,7 @@ class _CommentWidgetState extends State<CommentWidget>
             child: Text('Edit')),],
       elevation: 8.0,
     );
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -131,7 +131,7 @@ class _CommentWidgetState extends State<CommentWidget>
         GestureDetector(
           behavior: HitTestBehavior.opaque,
           onLongPressStart: (details) {
-            _showPopupMenu(details.globalPosition);
+            //_showPopupMenu(details.globalPosition);
            /* setState(() {
               isSelectingItem = true;
             });*/

@@ -104,10 +104,10 @@ dependencies:
   firebase_auth: ^4.2.1
   flutter_html: ^3.0.0-alpha.6
   html: ^0.15.1
-  geocoder: ^0.2.1
   geocode: ^1.0.2
   uuid: ^3.0.7
   email_validator: ^2.1.17
+  flutter_geocoder: ^0.2.2-nullsafety
 
 dev_dependencies:
   flutter_test:
