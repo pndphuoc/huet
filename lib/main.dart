@@ -19,6 +19,7 @@ import 'package:hue_t/providers/user_provider.dart';
 import 'package:hue_t/providers/weather_provider.dart';
 import 'package:hue_t/view/Foodstore/foodstore.dart';
 import 'package:hue_t/view/events/events.dart';
+import 'package:hue_t/view/foodstore/foodstore.dart';
 import 'package:hue_t/view/foodstore/foodstoredetail.dart';
 import 'package:hue_t/animation/show_up.dart';
 import 'package:hue_t/view/Foodstore/foodstore.dart';
@@ -100,8 +101,9 @@ class _SplashScreenState extends State<SplashScreen> {
           uid: FirebaseAuth.instance.currentUser!.uid,
           phoneNumber: FirebaseAuth.instance.currentUser!.phoneNumber);
     }
-    Future.delayed(const Duration(seconds: 4)).then((value) => Navigator.of(context)
-        .pushReplacement(CupertinoPageRoute(builder: (ctx) => const HueT())));
+    Future.delayed(const Duration(seconds: 4)).then((value) =>
+        Navigator.of(context).pushReplacement(
+            CupertinoPageRoute(builder: (ctx) => const HueT())));
   }
 
   @override
@@ -218,11 +220,11 @@ class _HueTState extends State<HueT> {
     const Color(0xFFF4E4CE),
   ];
 
-  int _selectedItemPosition = 2;
+  int _selectedItemPosition = 1;
   final List<Widget> _children = [
     const SocialNetWorkPage(),
     const HomePage(),
-    const ProfileUser()
+    const ProfileUser(),
   ];
 
   bottomNavigationBar(BuildContext context) {

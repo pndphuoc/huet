@@ -329,14 +329,12 @@ class _HomePageState extends State<HomePage> {
               context,
               "https://cdn-icons-png.flaticon.com/512/2934/2934108.png",
               "Ăn gì ?",
-              const HueT(index: 1)),
+              const Foodstore()),
           buttonLink(
               context,
               "https://cdn-icons-png.flaticon.com/512/2972/2972857.png",
               "Đi đâu ?",
-              const HueT(
-                index: 5,
-              )),
+              const TouristAttraction()),
           buttonLink(
               context,
               "https://cdn-icons-png.flaticon.com/512/4612/4612366.png",
@@ -397,8 +395,7 @@ class _HomePageState extends State<HomePage> {
       BuildContext context, String image, String name, Widget? page) {
     return GestureDetector(
       onTap: () {
-        Navigator.pushAndRemoveUntil(context,
-            MaterialPageRoute(builder: (context) => page!), (route) => false);
+        Navigator.push(context, MaterialPageRoute(builder: (context) => page!));
       },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -516,13 +513,8 @@ class _HomePageState extends State<HomePage> {
             items: listSlider.map((e) {
               return Builder(builder: (BuildContext context) {
                 return GestureDetector(
-                  onTap: () => Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const HueT(
-                                index: 6,
-                              )),
-                      (route) => false),
+                  onTap: () => Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => const Events())),
                   child: Container(
                     width: MediaQuery.of(context).size.width,
                     margin: const EdgeInsets.only(right: 8),
