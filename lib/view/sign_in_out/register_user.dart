@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:animate_do/animate_do.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -17,10 +18,12 @@ import '../profileuser/auth_service.dart';
 import '../profileuser/profile_user.dart';
 
 class RegisterUser extends StatefulWidget {
-   const RegisterUser({Key? key}) : super(key: key);
+  const RegisterUser({Key? key}) : super(key: key);
+
   @override
   State<RegisterUser> createState() => _RegisterUserState();
 }
+
 class _RegisterUserState extends State<RegisterUser> {
   bool isLoading = false;
   String? name;
@@ -30,51 +33,54 @@ class _RegisterUserState extends State<RegisterUser> {
 
   @override
   Widget build(BuildContext context) {
-    return isLoading? Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-          child: LoadingAnimationWidget.discreteCircle(
-            size: 50, color: primaryColor,
-          )),
-    ): Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: Form(
-        key: _formkey,
-        child: SingleChildScrollView(
-          child: Stack(children: [
-            Positioned(
-              width: MediaQuery.of(context).size.width * 1.7,
-              left: 100,
-              bottom: 100,
-              child: Image.asset(
-                "assets/Backgrounds/Spline.png",
+    return isLoading
+        ? Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+                child: LoadingAnimationWidget.discreteCircle(
+              size: 50,
+              color: primaryColor,
+            )),
+          )
+        : Scaffold(
+            resizeToAvoidBottomInset: true,
+            body: Form(
+              key: _formkey,
+              child: SingleChildScrollView(
+                child: Stack(children: [
+                  Positioned(
+                    width: MediaQuery.of(context).size.width * 1.7,
+                    left: 100,
+                    bottom: 100,
+                    child: Image.asset(
+                      "assets/Backgrounds/Spline.png",
+                    ),
+                  ),
+                  Positioned.fill(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                      child: const SizedBox(),
+                    ),
+                  ),
+                  const RiveAnimation.asset(
+                    "assets/RiveAssets/shapes.riv",
+                  ),
+                  Positioned.fill(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                      child: const SizedBox(),
+                    ),
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width,
+                    child: contentBlock(context),
+                  ),
+                  backButton(context),
+                ]),
               ),
             ),
-            Positioned.fill(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                child: const SizedBox(),
-              ),
-            ),
-            const RiveAnimation.asset(
-              "assets/RiveAssets/shapes.riv",
-            ),
-            Positioned.fill(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-                child: const SizedBox(),
-              ),
-            ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-              child: contentBlock(context),
-            ),
-            backButton(context),
-          ]),
-        ),
-      ),
-    );
+          );
   }
 
   contentBlock(BuildContext context) {
@@ -220,65 +226,86 @@ class _RegisterUserState extends State<RegisterUser> {
             'OR',
             style: GoogleFonts.readexPro(
                 fontWeight: FontWeight.w300, color: Colors.grey),
-          ),  const SizedBox(
-          height: 10,
-        ),
-        Container(
-          margin: const EdgeInsets.only(left: 30, right: 30),
-          height: 60,
-          child: ElevatedButton(
-            onPressed: () async {
-              setState(() {
-                isLoading = true;
-              });
-              await AuthService().signInWithGoogle();
-              setState(() {
-                isLoading = false;
-              });
-              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: AuthService().handleAuthState(const HueT(index:1), const RegisterUser())), (route) => false);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          Container(
+            margin: const EdgeInsets.only(left: 30, right: 30),
+            height: 60,
+            child: ElevatedButton(
+              onPressed: () async {
+                setState(() {
+                  isLoading = true;
+                });
+                await AuthService().signInWithGoogle();
+                setState(() {
+                  isLoading = false;
+                });
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(
+                        builder: AuthService().handleAuthState(
+                            const HueT(index: 1), const RegisterUser())),
+                    (route) => false);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(40),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Image.asset(
+                    'assets/images/profileuser/google_logo.png',
+                    width: 30,
+                    height: 30,
+                  ),
+                  Text(
+                    'Register with Google',
+                    style: GoogleFonts.readexPro(
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black,
+                        fontSize: 17),
+                  ),
+                  const SizedBox(
+                    width: 30,
+                  )
+                ],
               ),
             ),
+          ),
+          const SizedBox(
+            height: 15,
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => SlideInLeft(
+                          duration: const Duration(seconds: 1),
+                          child: const SignInPage())));
+            },
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset(
-                  'assets/images/profileuser/google_logo.png',
-                  width: 30,
-                  height: 30,
+                Text(
+                  "Already have an account? ",
+                  style: GoogleFonts.readexPro(
+                      fontWeight: FontWeight.w300, color: Colors.grey),
                 ),
                 Text(
-                  'Register with Google',
+                  "Log In",
                   style: GoogleFonts.readexPro(
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black,
-                      fontSize: 17),
-                ),
-                const SizedBox(
-                  width: 30,
+                      fontWeight: FontWeight.w500, color: primaryColor),
                 )
               ],
             ),
           ),
-        ),
-        const SizedBox(height: 15,),
-        GestureDetector(
-          onTap: () {
-            Navigator.push(context,MaterialPageRoute(builder: (context) => const SignInPage()));
-          },
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("Already have an account? ", style: GoogleFonts.readexPro(fontWeight: FontWeight.w300, color: Colors.grey),),
-              Text("Log In", style: GoogleFonts.readexPro(fontWeight: FontWeight.w500, color: primaryColor),)
-            ],
-          ),
-        ),
-      ],
+        ],
       ),
     );
   }
@@ -390,6 +417,7 @@ class _RegisterUserState extends State<RegisterUser> {
       },
     );
   }
+
 /*ElevatedButton(
           onPressed: () async{
             setState((){
@@ -417,7 +445,7 @@ class _RegisterUserState extends State<RegisterUser> {
                   'REGISTER NOW',
                   style: GoogleFonts.readexPro(
                       fontSize: 14, fontWeight: FontWeight.w400),
-                      
+
                 ),
               ],
             ),

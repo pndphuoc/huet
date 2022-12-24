@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/foundation.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
@@ -390,8 +391,12 @@ class _SignInPageState extends State<SignInPage>
         ),
         GestureDetector(
           onTap: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const RegisterUser()));
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => SlideInRight(
+                        duration: const Duration(milliseconds: 700),
+                        child: const RegisterUser())));
           },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
