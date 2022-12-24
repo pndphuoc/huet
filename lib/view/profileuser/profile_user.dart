@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -481,7 +482,7 @@ class _ProfileUserState extends State<ProfileUser> {
                     onPressed: () async {
                       bool isLogout = await showDialog(context: context,
                           builder: (BuildContext context) {//TOTO:BUG
-                            Navigator.of(context).push(_createRouteLogOut());
+                            return _buildLogOutAlertDialog(context);
                           }
                       );
                     },
@@ -508,63 +509,56 @@ class _ProfileUserState extends State<ProfileUser> {
       ],
     );
   }
-  Route _createRouteLogOut() {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => _buildLogOutAlertDialog(context),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(0.0, 1.0);
-        const end = Offset.zero;
-        const curve = Curves.ease;
 
-        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-
-        return SlideTransition(
-          position: animation.drive(tween),
-          child: child,
-        );
-      },
-    );
-  }
 
   Widget _buildLogOutAlertDialog(BuildContext context) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20)
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          FadeInUp(
+            duration: const Duration(milliseconds:200 ),
+          child: AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20)
+            ),
+            title: Text("Log Out?", style: GoogleFonts.readexPro(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 25), textAlign: TextAlign.center,),
+            content: Text("Are you sure want to log out", style: GoogleFonts.readexPro(color: Colors.grey,), textAlign: TextAlign.center,),
+            actionsAlignment: MainAxisAlignment.center,
+            actions: [
+              ElevatedButton(onPressed: (){
+                Navigator.of(context).pop(false);
+              },
+                style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20)
+                    )
+                ), child: Text("No", style: GoogleFonts.readexPro(color: Colors.grey),),
+              ),
+              ElevatedButton(onPressed: () async {
+                setState(() {
+                  isLoading = true;
+                });
+                await AuthService().signOut(context);
+                setState(() {
+                  isLoading = false;
+                });
+              },
+                style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
+                    backgroundColor: primaryColor,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20)
+                    )
+                ), child: const Text("Yes"),
+              ),
+            ],
+          ),)
+        ],
       ),
-      title: Text("Log Out?", style: GoogleFonts.readexPro(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 25), textAlign: TextAlign.center,),
-      content: Text("Are you sure want to log out", style: GoogleFonts.readexPro(color: Colors.grey,), textAlign: TextAlign.center,),
-      actionsAlignment: MainAxisAlignment.center,
-      actions: [
-        ElevatedButton(onPressed: (){
-          Navigator.of(context).pop(false);
-        },
-          style: ElevatedButton.styleFrom(
-              elevation: 0,
-              padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)
-              )
-          ), child: Text("No", style: GoogleFonts.readexPro(color: Colors.grey),),
-        ),
-        ElevatedButton(onPressed: () async {
-          setState(() {
-            isLoading = true;
-          });
-          await AuthService().signOut(context);
-          setState(() {
-            isLoading = false;
-          });
-        },
-          style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
-              backgroundColor: primaryColor,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)
-              )
-          ), child: const Text("Yes"),
-        ),
-      ],
     );
   }
 }
