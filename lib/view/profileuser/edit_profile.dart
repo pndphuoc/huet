@@ -12,6 +12,14 @@ class EditProfile extends StatefulWidget {
 }
 
 class _EditProfileState extends State<EditProfile> {
+  var isUserLoginWithGoogle = FirebaseAuth.instance.currentUser;
+  bool isUserGG = false;
+  @override
+  void initState() {
+    if(isUserLoginWithGoogle != null){
+      isUserGG = true;
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -163,7 +171,18 @@ class _EditProfileState extends State<EditProfile> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Password',style:GoogleFonts.readexPro(fontSize: 17, fontWeight: FontWeight.w400, color: Colors.black87),),
-                const SizedBox(height: 10,),
+                SizedBox(height: 10,),
+                isUserGG?TextField(
+                  obscureText: true,
+                  enabled: false,
+                  obscuringCharacter: "*",
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    labelText: '******',
+                  ),
+                ):
                 TextField(
                   obscureText: true,
                   obscuringCharacter: "*",

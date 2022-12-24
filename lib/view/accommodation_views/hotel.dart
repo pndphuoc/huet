@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+<<<<<<< HEAD
 import 'package:flutter_geocoder/geocoder.dart';
+=======
+>>>>>>> bcb71f7b74ee50f4556d0801b88b3238dc255c80
 import 'package:geolocator/geolocator.dart';
 import 'package:hue_t/animation/show_right.dart';
 import 'package:hue_t/providers/accommodation_provider.dart';

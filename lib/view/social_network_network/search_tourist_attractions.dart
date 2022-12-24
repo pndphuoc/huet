@@ -5,6 +5,7 @@ import 'package:hue_t/model/attraction/tourist_attraction.dart';
 import '../../fake_data.dart' as faker;
 
 import 'complete_upload.dart';
+import 'package:hue_t/fake_data.dart' as faker;
 
 typedef void AttractionCallback(TouristAttraction val);
 
