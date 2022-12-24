@@ -3,14 +3,28 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/animation/show_up.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:provider/provider.dart';
 import '../../animation/show_right.dart';
 import '../../colors.dart' as colors;
+import '../../model/accommodation/accommodationModel.dart';
+import '../../providers/accommodation_provider.dart';
 import 'hotel_detail.dart';
 import '../../fake_data.dart' as faker;
-import 'package:hue_t/permission/get_user_location.dart' as user_location;
+import 'package:hue_t/permission/get_user_location.dart' as userLocation;
 
 class HotelsPage extends StatefulWidget {
-  const HotelsPage({Key? key}) : super(key: key);
+  final String idAccomodation;
+  final String title;
+  final String content;
+  final String image;
+  const HotelsPage(
+      {Key? key,
+      required this.idAccomodation,
+      required this.title,
+      required this.content,
+      required this.image})
+      : super(key: key);
 
   @override
   State<HotelsPage> createState() => _HotelsPageState();
@@ -19,16 +33,16 @@ class HotelsPage extends StatefulWidget {
 bool isRecommendationHotel = true;
 
 class _HotelsPageState extends State<HotelsPage> {
-  Future<void> distanceCaculating(Position value) async {
-    for (int i = 0; i < faker.listHotels.length; i++) {
-      faker.listHotels[i].distance =
-          GeolocatorPlatform.instance.distanceBetween(
-                value.latitude,
-                value.longitude,
-                faker.listHotels[i].accommodationLocation.latitude,
-                faker.listHotels[i].accommodationLocation.longitude,
-              ) /
-              1000;
+  List<hotelModel> listHotel = [];
+  Future<void> distanceCaculating(Position value, List<hotelModel> list) async {
+    for (int i = 0; i < list.length; i++) {
+      list[i].distance = GeolocatorPlatform.instance.distanceBetween(
+            value.latitude,
+            value.longitude,
+            list[i].accommodationLocation.latitude,
+            list[i].accommodationLocation.longitude,
+          ) /
+          1000;
     }
   }
 
@@ -36,31 +50,43 @@ class _HotelsPageState extends State<HotelsPage> {
 
   @override
   Widget build(BuildContext context) {
+    var accommodationProvider = Provider.of<AccomodationProvider>(context);
+
     if (isLoading) {
-      user_location.getUserCurrentLocation().then((value) async {
-        await distanceCaculating(value);
+      (() async {
+        listHotel =
+            await accommodationProvider.filter(widget.idAccomodation, 100);
+
+        await userLocation.getUserCurrentLocation().then((value) async {
+          await distanceCaculating(value, listHotel);
+        });
         setState(() {
           isLoading = false;
         });
-      });
+      })();
     }
-    if (isRecommendationHotel) {
-      faker.listHotels.sort(
+    if (isRecommendationHotel && isLoading == false) {
+      listHotel.sort(
         (b, a) {
           return a.rating!.compareTo(b.rating!);
         },
       );
-    } else {
-      faker.listHotels.sort(
+    } else if (isLoading == false && isRecommendationHotel == false) {
+      listHotel.sort(
         (a, b) {
           return a.distance!.compareTo(b.distance!);
         },
       );
     }
     return Scaffold(
-      body: Stack(
-        children: [contentBlock(context), backButton(context)],
-      ),
+      body: isLoading
+          ? Center(
+              child: LoadingAnimationWidget.staggeredDotsWave(
+                  color: colors.primaryColor, size: 50),
+            )
+          : Stack(
+              children: [contentBlock(context), backButton(context)],
+            ),
     );
   }
 
@@ -69,19 +95,18 @@ class _HotelsPageState extends State<HotelsPage> {
       child: Column(
         children: [
           banner(context),
-          SizedBox(
+          const SizedBox(
             height: 15,
           ),
           descriptionBlock(context),
-          SizedBox(
+          const SizedBox(
             height: 15,
           ),
           sortBlock(context),
-          SizedBox(
+          const SizedBox(
             height: 15,
           ),
-          ...faker.listHotels
-              .map((e) => hotelItem(context, faker.listHotels.indexOf(e)))
+          ...listHotel.map((e) => hotelItem(context, listHotel.indexOf(e)))
         ],
       ),
     );
@@ -92,12 +117,15 @@ class _HotelsPageState extends State<HotelsPage> {
       decoration: BoxDecoration(
           color: Colors.black.withOpacity(0.3),
           borderRadius: BorderRadius.circular(15)),
-      margin: EdgeInsets.only(top: 40, left: 20),
+      margin: const EdgeInsets.only(top: 40, left: 20),
       child: IconButton(
           onPressed: () {
+            isLoading = true;
+            isRecommendationHotel = true;
+
             Navigator.pop(context);
           },
-          icon: Icon(
+          icon: const Icon(
             Icons.arrow_back_outlined,
             color: Colors.white,
           ),
@@ -113,7 +141,7 @@ class _HotelsPageState extends State<HotelsPage> {
       child: Container(
         height: 50,
         width: MediaQuery.of(context).size.width,
-        margin: EdgeInsets.only(
+        margin: const EdgeInsets.only(
           left: 20,
           right: 20,
         ),
@@ -134,7 +162,7 @@ class _HotelsPageState extends State<HotelsPage> {
           ),*/
           LayoutBuilder(builder: (ctx, constraints) {
             return AnimatedContainer(
-              duration: Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 300),
               margin: EdgeInsets.only(
                   left: isRecommendationHotel ? 5 : constraints.maxWidth * 0.5,
                   top: 5,
@@ -153,7 +181,7 @@ class _HotelsPageState extends State<HotelsPage> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Expanded(
-                child: Container(
+                child: SizedBox(
                     width: MediaQuery.of(context).size.width,
                     child: TextButton(
                         style: ButtonStyle(
@@ -167,14 +195,14 @@ class _HotelsPageState extends State<HotelsPage> {
                         child: Text(
                           "Recommendation",
                           style: isRecommendationHotel == true
-                              ? GoogleFonts.montserrat(
+                              ? GoogleFonts.readexPro(
                                   color: colors.primaryColor,
                                   fontWeight: FontWeight.w600)
-                              : GoogleFonts.montserrat(color: Colors.black),
+                              : GoogleFonts.readexPro(color: Colors.black),
                         ))),
               ),
               Expanded(
-                  child: Container(
+                  child: SizedBox(
                       child: TextButton(
                           style: ButtonStyle(
                               overlayColor: MaterialStateColor.resolveWith(
@@ -187,10 +215,10 @@ class _HotelsPageState extends State<HotelsPage> {
                           child: Text(
                             "Near to you",
                             style: isRecommendationHotel == false
-                                ? GoogleFonts.montserrat(
+                                ? GoogleFonts.readexPro(
                                     color: colors.primaryColor,
                                     fontWeight: FontWeight.w600)
-                                : GoogleFonts.montserrat(color: Colors.black),
+                                : GoogleFonts.readexPro(color: Colors.black),
                           ))))
             ],
           ),
@@ -206,8 +234,7 @@ class _HotelsPageState extends State<HotelsPage> {
         height: MediaQuery.of(context).size.height / 4,
         decoration: BoxDecoration(
             image: DecorationImage(
-                image: NetworkImage(
-                    "https://cdn4.tropicalsky.co.uk/images/1800x600/indochine-palace-main-image.jpg"),
+                image: NetworkImage(widget.image),
                 fit: BoxFit.cover,
                 alignment: Alignment.topCenter)),
       ),
@@ -217,21 +244,21 @@ class _HotelsPageState extends State<HotelsPage> {
   descriptionBlock(BuildContext context) {
     return ShowUp(
       delay: 100,
-      child: Container(
+      child: SizedBox(
         width: MediaQuery.of(context).size.width,
         child: Center(
           child: Column(
             children: [
               Text(
-                "Hot Hotels",
-                style: GoogleFonts.poppins(
+                widget.title,
+                style: GoogleFonts.readexPro(
                     fontSize: 25,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                     color: Colors.black),
                 textAlign: TextAlign.center,
               ),
-              Text("Best-rated hotels in the last month",
-                  style: GoogleFonts.poppins(
+              Text(widget.content,
+                  style: GoogleFonts.readexPro(
                       fontSize: 15, fontWeight: FontWeight.w300),
                   textAlign: TextAlign.center),
             ],
@@ -245,12 +272,12 @@ class _HotelsPageState extends State<HotelsPage> {
     return ShowRight(
       delay: 300 + index * 100,
       child: Container(
-        margin: EdgeInsets.only(left: 20, right: 20, bottom: 20),
+        margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
         child: ElevatedButton(
           onPressed: () {
             Navigator.push(context, MaterialPageRoute(builder: (context) {
               // do something
-              return HotelDetail(model: faker.listHotels[index]);
+              return HotelDetail(model: listHotel[index]);
             }));
           },
           style: ElevatedButton.styleFrom(
@@ -260,18 +287,18 @@ class _HotelsPageState extends State<HotelsPage> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
               )),
-          child: Container(
+          child: SizedBox(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Container(
-                  margin: EdgeInsets.only(top: 15, bottom: 15),
+                  margin: const EdgeInsets.only(top: 15, bottom: 15),
                   decoration:
                       BoxDecoration(borderRadius: BorderRadius.circular(10)),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: Image.network(
-                      faker.listHotels[index].images.first,
+                      listHotel[index].image.toString(),
                       fit: BoxFit.cover,
                       height: 100,
                       width: 100,
@@ -280,7 +307,7 @@ class _HotelsPageState extends State<HotelsPage> {
                 ),
                 Expanded(
                   child: Container(
-                    padding: EdgeInsets.only(
+                    padding: const EdgeInsets.only(
                         top: 20, right: 20, bottom: 20, left: 10),
                     height: 130,
                     child: Column(
@@ -288,10 +315,10 @@ class _HotelsPageState extends State<HotelsPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          faker.listHotels[index].name,
-                          style: GoogleFonts.notoSans(
+                          listHotel[index].name,
+                          style: GoogleFonts.readexPro(
                               fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w500,
                               color: Colors.black),
                           maxLines: 1,
                         ),
@@ -300,68 +327,67 @@ class _HotelsPageState extends State<HotelsPage> {
                           WidgetSpan(
                             child: RatingBar(
                               ratingWidget: RatingWidget(
-                                  full: Icon(
+                                  full: const Icon(
                                     Icons.star,
                                     color: Colors.yellow,
                                   ),
-                                  half: Icon(
+                                  half: const Icon(
                                     Icons.star_half,
                                     color: Colors.yellow,
                                   ),
-                                  empty: Icon(
+                                  empty: const Icon(
                                     Icons.star_border,
                                     color: Colors.yellow,
                                   )),
                               onRatingUpdate: (rating) {},
                               itemSize: 15,
                               allowHalfRating: true,
-                              initialRating:
-                                  faker.listHotels[index].rating != null
-                                      ? faker.listHotels[index].rating!
-                                      : 0,
+                              initialRating: listHotel[index].rating != null
+                                  ? listHotel[index].rating!
+                                  : 0,
                             ),
                           ),
-                          TextSpan(text: " "),
+                          const TextSpan(text: " "),
                           TextSpan(
-                              text: faker.listHotels[index].rating != null
-                                  ? faker.listHotels[index].rating!.toString()
+                              text: listHotel[index].rating != null
+                                  ? listHotel[index].rating!.toString()
                                   : "No review",
-                              style: GoogleFonts.montserrat(
+                              style: GoogleFonts.readexPro(
                                   color: Colors.black, fontSize: 11))
                         ])),
                         RichText(
                             text: TextSpan(children: [
-                          WidgetSpan(
+                          const WidgetSpan(
                               child: Icon(
                             Icons.map_outlined,
                             size: 16,
                             color: Colors.grey,
                           )),
                           TextSpan(
-                              text: faker.listHotels[index].distance != null
-                                  ? " ${faker.listHotels[index].distance!.toStringAsFixed(2)} km"
+                              text: listHotel[index].distance != null
+                                  ? " ${listHotel[index].distance!.toStringAsFixed(2)} km"
                                   : " km",
-                              style:
-                                  TextStyle(fontSize: 12, color: Colors.black))
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.black))
                         ])),
                         RichText(
                             text: TextSpan(children: [
-                          WidgetSpan(
+                          const WidgetSpan(
                               child: Icon(
                             Icons.attach_money,
                             size: 20,
                             color: Colors.black,
                           )),
                           TextSpan(
-                              text: faker.listHotels[index].price.toString(),
-                              style: GoogleFonts.montserrat(
+                              text: "${listHotel[index].price} VND",
+                              style: GoogleFonts.readexPro(
                                 color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 17,
                               )),
                           TextSpan(
                               text: "/night",
-                              style: GoogleFonts.montserrat(
+                              style: GoogleFonts.readexPro(
                                   fontSize: 12, color: Colors.grey))
                         ]))
                       ],

@@ -71,6 +71,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => AccomodationProvider()),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         useInheritedMediaQuery: true,
         locale: DevicePreview.locale(context),
         builder: DevicePreview.appBuilder,
@@ -297,6 +298,7 @@ class _HueTState extends State<HueT> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Hue Travel',
       theme: ThemeData(
         primarySwatch: Colors.blue,

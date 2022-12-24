@@ -10,6 +10,7 @@ import 'package:hue_t/view/tourist_attraction/filter_tourist_attraction.dart';
 import 'package:hue_t/view/tourist_attraction/tourist_attraction_detail.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class DataModel {
   final String title;
@@ -204,16 +205,30 @@ class _TouristAttractionState extends State<TouristAttraction> {
                   decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(30),
-                      image: DecorationImage(
-                          image: NetworkImage(
-                              "https://khamphahue.com.vn/${data.image}"),
-                          fit: BoxFit.cover),
                       boxShadow: const [
                         BoxShadow(
                             offset: Offset(0, 4),
                             blurRadius: 4,
                             color: Colors.black26)
                       ]),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(30),
+                    child: CachedNetworkImage(
+                      imageUrl: "https://khamphahue.com.vn/${data.image}",
+                      fit: BoxFit.cover,
+                      progressIndicatorBuilder:
+                          (context, url, downloadProgress) => Center(
+                        child: SizedBox(
+                          height: 50,
+                          width: 50,
+                          child: CircularProgressIndicator(
+                              value: downloadProgress.progress),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) =>
+                          const Icon(Icons.error),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -268,7 +283,7 @@ class _TouristAttractionState extends State<TouristAttraction> {
                 "Temples",
                 "https://sayhellovietnam.com/wp-content/uploads/2020/03/hue-pagoda.jpg",
                 "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/1b/23/9e/e2/pagoda.jpg?w=1200&h=900&s=1",
-                "https://sdl.thuathienhue.gov.vn/UploadFiles/TinTuc/2020/7/4/huetourism_thanh_pho_lang_mo_16.png",
+                "https://previews.agefotostock.com/previewimage/medibigoff/772edb9ede97b6e4987867951744a221/bep-bew1a4253e.jpg",
                 2),
             items(
                 context,

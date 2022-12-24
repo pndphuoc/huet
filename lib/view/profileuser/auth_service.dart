@@ -16,7 +16,6 @@ class AuthService {
     return StreamBuilder(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (BuildContext context, snapshot) {
-          print("1111111111111111111111111111111111");
           if (snapshot.hasData) {
             userConstant.user = userModel.User(
                 name: FirebaseAuth.instance.currentUser!.displayName!,

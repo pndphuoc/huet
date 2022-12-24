@@ -107,6 +107,9 @@ dependencies:
   tiengviet: ^0.5.0
   email_validator: ^2.1.17
   flutter_html: ^3.0.0-alpha.6
+  html: ^0.15.1
+  geocoder: ^0.2.1
+  geocode: ^1.0.2
 
 dev_dependencies:
   flutter_test:

@@ -26,9 +26,9 @@ class Restaurant {
   String? close;
   int? mincost;
   int? maxcost;
-  double? latitude;
-  double? longitude;
-
+  double latitude;
+  double longitude;
+  double? distance;
   Restaurant(
       {this.id,
       this.title,
@@ -44,8 +44,8 @@ class Restaurant {
       this.close,
       this.mincost,
       this.maxcost,
-      this.latitude,
-      this.longitude});
+      required this.latitude,
+      required this.longitude});
 
   factory Restaurant.fromJson(Map<String, dynamic> obj) {
     return Restaurant(

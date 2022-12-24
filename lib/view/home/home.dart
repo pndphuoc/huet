@@ -13,6 +13,7 @@ import 'package:hue_t/view/sign_in_out/sign_in_page.dart';
 import 'package:hue_t/view/tourist_attraction/tourist_attraction.dart';
 import 'package:provider/provider.dart';
 import '../../constants/user_info.dart' as user_constants;
+import 'package:hue_t/view/profileuser/auth_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -50,13 +51,13 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    var productProvider = Provider.of<WeatherProvider>(context);
+    var weatherProvider = Provider.of<WeatherProvider>(context);
 
-    if (isloading) {
+    if (weatherProvider.isloading) {
       (() async {
-        await productProvider.getWeather();
+        await weatherProvider.getWeather();
         setState(() {
-          isloading = false;
+          weatherProvider.isloading = false;
         });
       })();
     }
@@ -139,7 +140,8 @@ class _HomePageState extends State<HomePage> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const SignInPage()));
+                                  builder: (context) => AuthService()
+                                      .handleAuthState(const HueT())));
                         },
                         child: Container(
                           alignment: Alignment.centerRight,
