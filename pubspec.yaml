@@ -52,11 +52,8 @@ dependencies:
   carousel_slider: ^4.1.1
   flutter:
     sdk: flutter
-
-  firebase_core: ^2.4.0
   firebase_analytics: ^10.0.4
-  firebase_auth: ^4.2.0
-  google_sign_in: ^4.5.1
+  google_sign_in:
   provider:
 
   rxdart: ^0.27.7
@@ -100,13 +97,14 @@ dependencies:
   visibility_detector: ^0.3.3
   inview_notifier_list: ^3.0.0
   lazy_load_scrollview: ^1.3.0
-  video_thumbnail: ^0.5.3
   dropdown_button2: ^1.9.2
   quickalert: ^1.0.1
   html_unescape: ^2.0.0
   tiengviet: ^0.5.0
-  email_validator: ^2.1.17
+  firebase_auth: ^4.2.1
   flutter_html: ^3.0.0-alpha.6
+  uuid: ^3.0.7
+  email_validator: ^2.1.17
 
 dev_dependencies:
   flutter_test:

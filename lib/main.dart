@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
@@ -38,7 +37,6 @@ import 'view/accommodation_views/homestays_list.dart';
 import 'view/accommodation_views/hotels_list.dart';
 import 'view/accommodation_views/resorts_list.dart';
 import 'colors.dart' as colors;
-import 'fake_data.dart' as faker;
 import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
 import 'package:hue_t/view/home/home.dart';
 import 'package:hue_t/view/accommodation_views/hotel.dart';
@@ -101,9 +99,8 @@ class _SplashScreenState extends State<SplashScreen> {
           uid: FirebaseAuth.instance.currentUser!.uid,
           phoneNumber: FirebaseAuth.instance.currentUser!.phoneNumber);
     }
-    Future.delayed(const Duration(seconds: 4)).then((value) =>
-        Navigator.of(context).pushReplacement(
-            CupertinoPageRoute(builder: (ctx) => const HueT())));
+    Future.delayed(const Duration(seconds: 4)).then((value) => Navigator.of(context)
+        .pushReplacement(CupertinoPageRoute(builder: (ctx) => const HueT())));
   }
 
   @override
@@ -222,13 +219,9 @@ class _HueTState extends State<HueT> {
 
   int _selectedItemPosition = 2;
   final List<Widget> _children = [
-    const HotelPage(),
-    const Foodstore(),
-    const HomePage(),
     const SocialNetWorkPage(),
-    const ProfileUser(),
-    const TouristAttraction(),
-    const Events(),
+    const HomePage(),
+    const ProfileUser()
   ];
 
   bottomNavigationBar(BuildContext context) {
@@ -261,21 +254,13 @@ class _HueTState extends State<HueT> {
       },
       items: const [
         BottomNavigationBarItem(
-            icon: Icon(Icons.hotel_outlined),
-            label: 'Accommodations',
-            activeIcon: Icon(Icons.hotel)),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.fastfood_outlined),
-            label: 'Food stores',
-            activeIcon: Icon(Icons.fastfood)),
+            icon: Icon(Icons.camera_alt_outlined),
+            label: 'Social network',
+            activeIcon: Icon(Icons.camera_alt)),
         BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
             label: 'Home',
             activeIcon: Icon(Icons.home)),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.camera_alt_outlined),
-            label: 'Social network',
-            activeIcon: Icon(Icons.camera_alt)),
         BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             label: 'Personal Infomation',
@@ -304,7 +289,7 @@ class _HueTState extends State<HueT> {
       home: Scaffold(
         body: GestureDetector(
           onTap: () {
-            FocusScope.of(context).requestFocus(new FocusNode());
+            FocusScope.of(context).requestFocus(FocusNode());
           },
           child: Stack(children: [
             _children[_selectedItemPosition],

@@ -18,6 +18,8 @@ class AuthService {
         builder: (BuildContext context, snapshot) {
           print("1111111111111111111111111111111111");
           if (snapshot.hasData) {
+            print(FirebaseAuth.instance.currentUser!.displayName!);
+            //print(FirebaseAuth.instance.currentUser!.email!);
             userConstant.user = userModel.User(
                 name: FirebaseAuth.instance.currentUser!.displayName!,
                 mail: FirebaseAuth.instance.currentUser!.email!,
@@ -47,7 +49,7 @@ class AuthService {
   signInWithGoogle() async {
     // Trigger the authentication flow
 
-    final GoogleSignInAccount googleUser =
+    final GoogleSignInAccount? googleUser =
         await GoogleSignIn(scopes: <String>["email"]).signIn();
 
     // Obtain the auth details from the request
@@ -65,14 +67,17 @@ class AuthService {
   }
 
   //Sign out
-  Future<void> signOut(BuildContext context) async {
+  Future<void> signOut(BuildContext context)async {
+    GoogleSignIn _googleSignIn = GoogleSignIn();
+    await _googleSignIn.disconnect();
     await FirebaseAuth.instance.signOut();
     userConstant.user = null;
-    Navigator.pushReplacement(
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
         builder: (BuildContext context) => const HueT(),
       ),
+          (Route<dynamic> route) => false,
     );
   }
 }

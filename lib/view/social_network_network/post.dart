@@ -7,26 +7,24 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/animation/heart_animation.dart';
 import 'package:hue_t/colors.dart' as colors;
-import 'package:hue_t/model/foodstore/restaurant.dart';
-import 'package:hue_t/model/social_network/postModel.dart';
+import 'package:hue_t/model/social_network/post_model.dart';
 import 'package:hue_t/view/social_network_network/post_comments.dart';
 import 'package:hue_t/view/social_network_network/video_widget.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:intl/intl.dart';
+import '../../constants/user_info.dart' as user_info;
+import '../../firebase_function/common_function.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
 import 'dart:io';
 import 'constants.dart' as constants;
 
 class Post extends StatefulWidget {
-  const Post({Key? key, required this.samplePost, required this.isInView, required this.documentSnapshot, required this.callback}) : super(key: key);
-  final PostModel samplePost;
+  const Post({Key? key, required this.post, required this.isInView, required this.callback}) : super(key: key);
+  final PostModel post;
   final bool isInView;
-  final DocumentSnapshot documentSnapshot;
   final DeleteCallback callback;
   @override
   State<Post> createState() => _PostState();
@@ -48,32 +46,45 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
   bool isHeartButtonAnimating = false;
   bool isMark = false;
   String? selectedValue;
-
+  late int likeCount;
   @override
   void dispose() {
     _heartController.dispose();
     super.dispose();
   }
 
-  Future<String?> getVideoThumbnail(String url) async {
-    String? fileName;
-    if(!widget.samplePost.medias.first.isPhoto) {
-      fileName = await VideoThumbnail.thumbnailFile(
-        video: url,
-        thumbnailPath: (await getTemporaryDirectory()).path,
-        imageFormat: ImageFormat.JPEG,// specify the height of the thumbnail, let the width auto-scaled to keep the source aspect ratio
-        quality: 75,
-      );
+  _likeStatus() async {
+    await FirebaseFirestore.instance.collection('post').doc(widget.post.postID).get().then((doc) {
+      if (doc.data()!["likedUsers"].contains(user_info.user!.uid)) {
+        setState(() {
+          isLiked = true;
+        });
+      }
+    });
+  }
+
+  Future<void> _likeAndUnlikePost() async {
+    final docPost = FirebaseFirestore.instance.collection('post').doc(widget.post.postID);
+    if(!isLiked) {
+      docPost.update({'likedUsers': FieldValue.arrayUnion([user_info.user!.uid])});
+      likeCount += 1;
     }
-    return fileName;
+    else {
+      docPost.update({'likedUsers': FieldValue.arrayRemove([user_info.user!.uid])});
+      likeCount -= 1;
+    }
+    setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
-    documentSnapshotID = widget.documentSnapshot.id;
-    post = widget.samplePost;
+    //documentSnapshotID = widget.documentSnapshot.id;
+    post = widget.post;
+    _likeStatus();
+    likeCount = post.likedUsers.length;
   }
+
   Widget buildNameAndAttraction(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(left: 15, right: 15, top: 15),
@@ -137,7 +148,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
               onChanged: (value) {
                 MenuItem selected = value as MenuItem;
                 if(selected.text == 'Delete') {
-                  widget.callback(widget.documentSnapshot.id.toString());
+                  widget.callback(widget.post.postID.toString());
                 }
                 MenuItems.onChanged(context, value as MenuItem);
               },
@@ -164,6 +175,9 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
       width: double.infinity,
       child: GestureDetector(
         onDoubleTap: () {
+          if(!isLiked) {
+            _likeAndUnlikePost();
+          }
           setState(() {
             isLiked = true;
             isHeartAnimating = true;
@@ -187,7 +201,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                         currentPos = index;
                       });
                     }),
-                items: widget.samplePost.medias.map((e) {
+                items: widget.post.medias.map((e) {
                   return Builder(builder: (BuildContext context) {
                     if (e.isPhoto) {
                       return CachedNetworkImage(
@@ -227,8 +241,8 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
               right: 1,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: widget.samplePost.medias.map((e) {
-                  int index = widget.samplePost.medias.indexOf(e);
+                children: widget.post.medias.map((e) {
+                  int index = widget.post.medias.indexOf(e);
                   return AnimatedContainer(
                     duration: const Duration(milliseconds: 100),
                     width: currentPos == index ? 12 : 6.0,
@@ -288,6 +302,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                 child: IconButton(
                   constraints: const BoxConstraints(),
                   onPressed: () {
+                    _likeAndUnlikePost();
                     setState(() {
                       isLiked = !isLiked;
                       isHeartButtonAnimating = !isHeartButtonAnimating;
@@ -314,7 +329,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                 width: 10,
               ),
               Text(
-                widget.samplePost.likeCount.toString(),
+                likeCount.toString(),
                 style: GoogleFonts.readexPro(
                   color: colors.SN_postTextColor,
                   fontSize: 15,
@@ -331,7 +346,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                       context,
                       MaterialPageRoute(
                           builder: (context) => PostCommentsPage(
-                                post: widget.samplePost,
+                                postID: widget.post.postID,
                               )));
                   FocusManager.instance.primaryFocus?.unfocus();
                 },
@@ -347,7 +362,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                 width: 10,
               ),
               Text(
-                widget.samplePost.commentCount.toString(),
+                widget.post.commentsCount.toString(),
                 style: GoogleFonts.readexPro(
                   color: colors.SN_postTextColor,
                   fontSize: 15,
@@ -386,7 +401,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
     return Container(
         margin: const EdgeInsets.only(left: 15, right: 15, top: 15),
         child: Text(
-          widget.samplePost.caption!,
+          widget.post.caption!,
           style: GoogleFonts.readexPro(color: Colors.black, fontSize: 16),
         ));
   }
@@ -444,11 +459,11 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
   Widget buildCreateDateBlock(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(top: 10, left: 15, right: 15),
-      child: buildDateFormat(widget.samplePost.createDate),
+      child: buildDateFormat(widget.post.createDate, Colors.grey, 10),
     );
   }
 
-  Widget buildDateFormat(DateTime createDate) {
+  Widget buildDateFormat(DateTime createDate, Color color, double fontSize) {
     return Text(
       // 86400
       daysBetween(createDate, DateTime.now()) < 60
@@ -478,7 +493,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                       :
                       //Trên 7 ngày
                       DateFormat('dd-MM-yy').format(createDate),
-      style: GoogleFonts.readexPro(fontSize: 10, color: Colors.grey),
+      style: GoogleFonts.readexPro(fontSize: fontSize, color: color),
     );
   }
 
@@ -503,7 +518,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
           buildNameAndAttraction(context),
           buildMediasBlock(context),
           buildActionBlock(context),
-          widget.samplePost.caption!.isNotEmpty
+          widget.post.caption!.isNotEmpty
               ? buildCaptionBlock(context)
               : Container(),
           buildCreateDateBlock(context),

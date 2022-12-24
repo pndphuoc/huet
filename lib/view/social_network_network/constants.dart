@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hue_t/model/social_network/postModel.dart';
+import 'package:hue_t/model/social_network/post_model.dart';
 
 const kHeadTextStyle = TextStyle(
   color: Colors.black,

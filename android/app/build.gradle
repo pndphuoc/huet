@@ -95,6 +95,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-inappmessaging-display:17.2.0'
     implementation 'com.google.guava:guava:27.0.1-android'
     implementation 'com.android.support:multidex:1.0.3'
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.android.gms:play-services-auth:20.4.0'
 }
 /*plugins {
     id 'com.android.application'
