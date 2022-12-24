@@ -7,21 +7,22 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/providers/user_provider.dart';
 import 'package:hue_t/view/profileuser/loginin_page.dart';
 import 'package:hue_t/view/sign_in_out/sign_in_page.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:rive/rive.dart';
 
 import '../../colors.dart';
+import '../../main.dart';
 import '../profileuser/auth_service.dart';
 import '../profileuser/profile_user.dart';
 
 class RegisterUser extends StatefulWidget {
-  const RegisterUser({Key? key}) : super(key: key);
-
+   const RegisterUser({Key? key}) : super(key: key);
   @override
   State<RegisterUser> createState() => _RegisterUserState();
 }
-
 class _RegisterUserState extends State<RegisterUser> {
+  bool isLoading = false;
   String? name;
   String? email;
   String? password;
@@ -29,7 +30,13 @@ class _RegisterUserState extends State<RegisterUser> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return isLoading? Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+          child: LoadingAnimationWidget.discreteCircle(
+            size: 50, color: primaryColor,
+          )),
+    ): Scaffold(
       resizeToAvoidBottomInset: true,
       body: Form(
         key: _formkey,
@@ -213,70 +220,65 @@ class _RegisterUserState extends State<RegisterUser> {
             'OR',
             style: GoogleFonts.readexPro(
                 fontWeight: FontWeight.w300, color: Colors.grey),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Container(
-            margin: const EdgeInsets.only(left: 30, right: 30),
-            height: 60,
-            child: ElevatedButton(
-              onPressed: () {
-                AuthService().signInWithGoogle();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(40),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Image.asset(
-                    'assets/images/profileuser/google_logo.png',
-                    width: 30,
-                    height: 30,
-                  ),
-                  Text(
-                    'Register with Google',
-                    style: GoogleFonts.readexPro(
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black,
-                        fontSize: 17),
-                  ),
-                  const SizedBox(
-                    width: 30,
-                  )
-                ],
+          ),  const SizedBox(
+          height: 10,
+        ),
+        Container(
+          margin: const EdgeInsets.only(left: 30, right: 30),
+          height: 60,
+          child: ElevatedButton(
+            onPressed: () async {
+              setState(() {
+                isLoading = true;
+              });
+              await AuthService().signInWithGoogle();
+              setState(() {
+                isLoading = false;
+              });
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: AuthService().handleAuthState(const HueT(index:1), const RegisterUser())), (route) => false);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(40),
               ),
             ),
-          ),
-          const SizedBox(
-            height: 15,
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const SignInPage()));
-            },
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  "Already have an account? ",
-                  style: GoogleFonts.readexPro(
-                      fontWeight: FontWeight.w300, color: Colors.grey),
+                Image.asset(
+                  'assets/images/profileuser/google_logo.png',
+                  width: 30,
+                  height: 30,
                 ),
                 Text(
-                  "Log In",
+                  'Register with Google',
                   style: GoogleFonts.readexPro(
-                      fontWeight: FontWeight.w500, color: primaryColor),
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black,
+                      fontSize: 17),
+                ),
+                const SizedBox(
+                  width: 30,
                 )
               ],
             ),
           ),
-        ],
+        ),
+        const SizedBox(height: 15,),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(context,MaterialPageRoute(builder: (context) => const SignInPage()));
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Already have an account? ", style: GoogleFonts.readexPro(fontWeight: FontWeight.w300, color: Colors.grey),),
+              Text("Log In", style: GoogleFonts.readexPro(fontWeight: FontWeight.w500, color: primaryColor),)
+            ],
+          ),
+        ),
+      ],
       ),
     );
   }
@@ -388,7 +390,98 @@ class _RegisterUserState extends State<RegisterUser> {
       },
     );
   }
+/*ElevatedButton(
+          onPressed: () async{
+            setState((){
+              isLoading = true;
+            });
+            //Register
+            setState(() {
+              isLoading = false;
+            });
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color.fromARGB(255, 104, 104, 172),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(40),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.only(
+                top: 20, bottom: 20, right: 95, left: 95),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'REGISTER NOW',
+                  style: GoogleFonts.readexPro(
+                      fontSize: 14, fontWeight: FontWeight.w400),
+                      
+                ),
+              ],
+            ),
+          ), */
 
+  /*const SizedBox(
+          height: 10,
+        ),
+        Container(
+          margin: const EdgeInsets.only(left: 30, right: 30),
+          height: 60,
+          child: ElevatedButton(
+            onPressed: () async {
+              setState(() {
+                isLoading = true;
+              });
+              await AuthService().signInWithGoogle();
+              setState(() {
+                isLoading = false;
+              });
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: AuthService().handleAuthState(const HueT(), const RegisterUser())), (route) => false);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(40),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Image.asset(
+                  'assets/images/profileuser/google_logo.png',
+                  width: 30,
+                  height: 30,
+                ),
+                Text(
+                  'Register with Google',
+                  style: GoogleFonts.readexPro(
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black,
+                      fontSize: 17),
+                ),
+                const SizedBox(
+                  width: 30,
+                )
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 15,),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(context,MaterialPageRoute(builder: (context) => const SignInPage()));
+          },
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Already have an account? ", style: GoogleFonts.readexPro(fontWeight: FontWeight.w300, color: Colors.grey),),
+              Text("Log In", style: GoogleFonts.readexPro(fontWeight: FontWeight.w500, color: primaryColor),)
+            ],
+          ),
+        ),
+      ], */
   Widget inputPasswordAgain(
       String hintDataText, String labelDataText, String validatorValue) {
     return TextFormField(

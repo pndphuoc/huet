@@ -218,7 +218,7 @@ class _HueTState extends State<HueT> {
     const Color(0xFFF4E4CE),
   ];
 
-  int _selectedItemPosition = 2;
+  int _selectedItemPosition = 1;
   final List<Widget> _children = [
     const SocialNetWorkPage(),
     const HomePage(),

@@ -13,7 +13,7 @@ import 'package:video_player/video_player.dart';
 import 'dart:io';
 import 'image_item_widget.dart';
 import 'constants.dart' as constants;
-import '../../fake_data.dart' as faker;
+import 'package:hue_t/fake_data.dart'as faker;
 
 class CompleteUploadPage extends StatefulWidget {
   const CompleteUploadPage({Key? key, required this.medias}) : super(key: key);

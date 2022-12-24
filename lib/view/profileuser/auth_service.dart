@@ -6,13 +6,15 @@ import 'package:hue_t/view/home/home.dart';
 import 'package:hue_t/model/user/user.dart' as userModel;
 import 'package:hue_t/view/profileuser/loginin_page.dart';
 import 'package:hue_t/view/profileuser/profile_user.dart';
+import 'package:hue_t/view/sign_in_out/register_user.dart';
 import 'package:hue_t/view/sign_in_out/sign_in_page.dart';
 import '../../constants/user_info.dart' as userConstant;
 import '../../main.dart';
 
+
 class AuthService {
   //Determine if the user is authenticated.
-  handleAuthState(Widget page) {
+  handleAuthState(Widget page, Widget targetWidget) {
     return StreamBuilder(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (BuildContext context, snapshot) {
@@ -27,7 +29,7 @@ class AuthService {
                 phoneNumber: FirebaseAuth.instance.currentUser!.phoneNumber);
             return page;
           } else {
-            return const SignInPage();
+            return targetWidget;
           }
         });
   }
@@ -45,12 +47,12 @@ class AuthService {
         });
   }*/
 
+
   signInWithGoogle() async {
     // Trigger the authentication flow
 
     final GoogleSignInAccount? googleUser =
         await GoogleSignIn(scopes: <String>["email"]).signIn();
-
     // Obtain the auth details from the request
     final GoogleSignInAuthentication googleAuth =
         await googleUser!.authentication;
