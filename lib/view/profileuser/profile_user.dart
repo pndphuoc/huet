@@ -150,7 +150,7 @@ class _ProfileUserState extends State<ProfileUser> {
                       height: 50,
                       child: ElevatedButton(
                         onPressed: () {
-                          accountNavigator(context, AuthService().handleAuthState(const HueT(), const SignInPage()));
+                          accountNavigator(context, AuthService().handleAuthState(const HueT(), const RegisterUser()));
                         },
                         style: ElevatedButton.styleFrom(
                           elevation: 0,

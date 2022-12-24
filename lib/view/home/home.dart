@@ -3,14 +3,17 @@ import 'dart:async';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hue_t/accommodation_views/hotel.dart';
+import 'package:hue_t/view/accommodation_views/hotel.dart';
 import 'package:hue_t/colors.dart' as color;
 import 'package:hue_t/main.dart';
 import 'package:hue_t/providers/weather_provider.dart';
 import 'package:hue_t/view/events/events.dart';
 import 'package:hue_t/view/foodstore/foodstore.dart';
+import 'package:hue_t/view/sign_in_out/sign_in_page.dart';
 import 'package:hue_t/view/tourist_attraction/tourist_attraction.dart';
 import 'package:provider/provider.dart';
+import '../../constants/user_info.dart' as user_constants;
+import 'package:hue_t/view/profileuser/auth_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -48,13 +51,13 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    var productProvider = Provider.of<WeatherProvider>(context);
+    var weatherProvider = Provider.of<WeatherProvider>(context);
 
-    if (isloading) {
+    if (weatherProvider.isloading) {
       (() async {
-        await productProvider.getWeather();
+        await weatherProvider.getWeather();
         setState(() {
-          isloading = false;
+          weatherProvider.isloading = false;
         });
       })();
     }
@@ -131,17 +134,52 @@ class _HomePageState extends State<HomePage> {
                 padding: const EdgeInsets.only(left: 40),
                 width: MediaQuery.of(context).size.width,
                 height: 80,
-                child: users
-                    ? Container(
+                child: user_constants.user == null
+                    ? GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => AuthService()
+                                      .handleAuthState(const HueT(), const SignInPage())));
+                        },
+                        child: Container(
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.only(left: 35),
+                          width: 150,
+                          height: 45,
+                          decoration: BoxDecoration(
+                              color: const Color.fromARGB(255, 165, 165, 250),
+                              borderRadius: BorderRadius.circular(50)),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.lock_open_outlined,
+                                color: Colors.white,
+                                size: 18,
+                              ),
+                              const SizedBox(
+                                width: 5,
+                              ),
+                              Text("Đăng nhập",
+                                  style: GoogleFonts.readexPro(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white)),
+                            ],
+                          ),
+                        ),
+                      )
+                    : Container(
                         padding: const EdgeInsets.only(left: 40),
                         height: 45,
                         alignment: Alignment.centerLeft,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("NGUYỄN ĐĂNG QUANG",
+                            Text(user_constants.user!.name,
                                 style: GoogleFonts.readexPro(
-                                    fontSize: 13,
+                                    fontSize: 15,
                                     fontWeight: FontWeight.w500,
                                     color: Colors.white)),
                             const SizedBox(
@@ -152,32 +190,6 @@ class _HomePageState extends State<HomePage> {
                                     fontSize: 12,
                                     fontWeight: FontWeight.w400,
                                     color: Colors.white.withOpacity(0.7))),
-                          ],
-                        ),
-                      )
-                    : Container(
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(left: 35),
-                        width: 150,
-                        height: 45,
-                        decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 165, 165, 250),
-                            borderRadius: BorderRadius.circular(50)),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.lock_open_outlined,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                            const SizedBox(
-                              width: 5,
-                            ),
-                            Text("Đăng nhập",
-                                style: GoogleFonts.readexPro(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white)),
                           ],
                         ),
                       ),
@@ -194,7 +206,9 @@ class _HomePageState extends State<HomePage> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(70),
                     child: Image.network(
-                      "https://i.kym-cdn.com/photos/images/facebook/001/124/155/20e.jpg",
+                      user_constants.user == null
+                          ? "https://st3.depositphotos.com/13159112/17145/v/600/depositphotos_171453724-stock-illustration-default-avatar-profile-icon-grey.jpg"
+                          : user_constants.user!.photoURL,
                       width: 70,
                       height: 70,
                       fit: BoxFit.cover,
@@ -310,20 +324,18 @@ class _HomePageState extends State<HomePage> {
               context,
               "https://cdn-icons-png.flaticon.com/512/9198/9198907.png",
               "Ở đâu ?",
-              const HueT(
-                index: 0,
-              )),
+              const HotelPage()),
           buttonLink(
               context,
               "https://cdn-icons-png.flaticon.com/512/2934/2934108.png",
               "Ăn gì ?",
-              const HueT(index: 1)),
+              const Foodstore()),
           buttonLink(
               context,
               "https://cdn-icons-png.flaticon.com/512/2972/2972857.png",
               "Đi đâu ?",
-              const HueT(
-                index: 5,
+              const TouristAttraction(
+
               )),
           buttonLink(
               context,
@@ -385,8 +397,7 @@ class _HomePageState extends State<HomePage> {
       BuildContext context, String image, String name, Widget? page) {
     return GestureDetector(
       onTap: () {
-        Navigator.pushAndRemoveUntil(context,
-            MaterialPageRoute(builder: (context) => page!), (route) => false);
+        Navigator.push(context, MaterialPageRoute(builder: (context) => page!));
       },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -397,12 +408,12 @@ class _HomePageState extends State<HomePage> {
             height: 80,
             decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
                       blurRadius: 3,
                       offset: const Offset(0, 2),
-                      color: Colors.grey.withOpacity(0.3))
+                      color: Colors.grey.withOpacity(0.1))
                 ]),
             child: Center(
               child: Image.network(image),

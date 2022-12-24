@@ -1,6 +1,4 @@
-
 import 'dart:ui';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,14 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:hue_t/providers/accommodation_provider.dart';
 
-import 'package:hue_t/accommodation_views/hotel_detail.dart';
+import 'package:hue_t/view/accommodation_views/hotel_detail.dart';
 import 'package:hue_t/animation/show_up.dart';
 import 'package:hue_t/model/user/user.dart';
 import 'package:hue_t/provider/google_sign_in.dart';
 import 'package:hue_t/providers/event_provider.dart';
 import 'package:hue_t/providers/foodstore_provider.dart';
 import 'package:hue_t/providers/tourist_provider.dart';
+import 'package:hue_t/providers/user_provider.dart';
 import 'package:hue_t/providers/weather_provider.dart';
 import 'package:hue_t/view/Foodstore/foodstore.dart';
 import 'package:hue_t/view/events/events.dart';
@@ -24,7 +24,7 @@ import 'package:hue_t/animation/show_up.dart';
 import 'package:hue_t/view/Foodstore/foodstore.dart';
 import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
 import 'package:hue_t/view/home/home.dart';
-import 'package:hue_t/accommodation_views/hotel.dart';
+import 'package:hue_t/view/accommodation_views/hotel.dart';
 import 'package:hue_t/view/profileuser/auth_service.dart';
 import 'package:hue_t/view/profileuser/loginin_page.dart';
 import 'package:hue_t/view/profileuser/profile_user.dart';
@@ -33,16 +33,16 @@ import 'package:hue_t/view/social_network_network/socialNetwork.dart';
 import 'package:provider/provider.dart';
 import 'package:rive/rive.dart' as rive;
 import 'package:hue_t/view/tourist_attraction/tourist_attraction.dart';
-import 'accommodation_views/homestays_list.dart';
-import 'accommodation_views/hotels_list.dart';
-import 'accommodation_views/resorts_list.dart';
+import 'view/accommodation_views/homestays_list.dart';
+import 'view/accommodation_views/hotels_list.dart';
+import 'view/accommodation_views/resorts_list.dart';
 import 'colors.dart' as colors;
 import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
 import 'package:hue_t/view/home/home.dart';
-import 'package:hue_t/accommodation_views/hotel.dart';
-import 'accommodation_views/homestays_list.dart';
-import 'accommodation_views/hotels_list.dart';
-import 'accommodation_views/resorts_list.dart';
+import 'package:hue_t/view/accommodation_views/hotel.dart';
+import 'view/accommodation_views/homestays_list.dart';
+import 'view/accommodation_views/hotels_list.dart';
+import 'view/accommodation_views/resorts_list.dart';
 import 'colors.dart' as colors;
 import 'constants/user_info.dart' as userConstant;
 import 'model/user/user.dart' as userModel;
@@ -50,11 +50,8 @@ import 'model/user/user.dart' as userModel;
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(
-    MyApp(), // Wrap your app
-  );
+  runApp(const MyApp());
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -68,8 +65,11 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
             create: (context) => TouristAttractionProvider()),
         ChangeNotifierProvider(create: (context) => WeatherProvider()),
+        ChangeNotifierProvider(create: (context) => UserProvider()),
+        ChangeNotifierProvider(create: (context) => AccomodationProvider()),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         useInheritedMediaQuery: true,
         locale: DevicePreview.locale(context),
         builder: DevicePreview.appBuilder,
@@ -100,8 +100,8 @@ class _SplashScreenState extends State<SplashScreen> {
           uid: FirebaseAuth.instance.currentUser!.uid,
           phoneNumber: FirebaseAuth.instance.currentUser!.phoneNumber);
     }
-    Future.delayed(Duration(seconds: 4)).then((value) => Navigator.of(context)
-        .pushReplacement(CupertinoPageRoute(builder: (ctx) => HueT())));
+    Future.delayed(const Duration(seconds: 4)).then((value) => Navigator.of(context)
+        .pushReplacement(CupertinoPageRoute(builder: (ctx) => const HueT())));
   }
 
   @override
@@ -146,7 +146,7 @@ class _SplashScreenState extends State<SplashScreen> {
       Positioned(
           top: 100,
           child: ElasticInUp(
-            duration: Duration(milliseconds: 3000),
+            duration: const Duration(milliseconds: 3000),
             child: Image.asset(
               'assets/images/splashscreen/2.png',
               width: MediaQuery.of(context).size.width,
@@ -154,11 +154,11 @@ class _SplashScreenState extends State<SplashScreen> {
           )),
       Positioned(
           top: 700,
-          child: Container(
+          child: SizedBox(
             width: MediaQuery.of(context).size.width,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+              children: const [
                 SpinKitThreeBounce(
                   color: Colors.white,
                   duration: Duration(milliseconds: 1000),
@@ -218,13 +218,11 @@ class _HueTState extends State<HueT> {
     const Color(0xFFF4E4CE),
   ];
 
-  int _selectedItemPosition = 2;
+  int _selectedItemPosition = 1;
   final List<Widget> _children = [
-    HotelPage(),
-    Foodstore(),
-    HomePage(),
-    SocialNetWorkPage(),
-    ProfileUser()
+    const SocialNetWorkPage(),
+    const HomePage(),
+    const ProfileUser()
   ];
 
   bottomNavigationBar(BuildContext context) {
@@ -255,23 +253,15 @@ class _HueTState extends State<HueT> {
           _selectedItemPosition = index;
         });
       },
-      items: [
-        BottomNavigationBarItem(
-            icon: Icon(Icons.hotel_outlined),
-            label: 'Accommodations',
-            activeIcon: Icon(Icons.hotel)),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.fastfood_outlined),
-            label: 'Food stores',
-            activeIcon: Icon(Icons.fastfood)),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: 'Home',
-            activeIcon: Icon(Icons.home)),
+      items: const [
         BottomNavigationBarItem(
             icon: Icon(Icons.camera_alt_outlined),
             label: 'Social network',
             activeIcon: Icon(Icons.camera_alt)),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            label: 'Home',
+            activeIcon: Icon(Icons.home)),
         BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
             label: 'Personal Infomation',
@@ -289,9 +279,11 @@ class _HueTState extends State<HueT> {
       });
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Hue Travel',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -299,7 +291,7 @@ class _HueTState extends State<HueT> {
       home: Scaffold(
         body: GestureDetector(
           onTap: () {
-            FocusScope.of(context).requestFocus(new FocusNode());
+            FocusScope.of(context).requestFocus(FocusNode());
           },
           child: Stack(children: [
             _children[_selectedItemPosition],

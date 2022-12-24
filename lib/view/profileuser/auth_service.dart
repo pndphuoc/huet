@@ -19,6 +19,8 @@ class AuthService {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (BuildContext context, snapshot) {
           if (snapshot.hasData) {
+            print(FirebaseAuth.instance.currentUser!.displayName!);
+            //print(FirebaseAuth.instance.currentUser!.email!);
             userConstant.user = userModel.User(
                 name: FirebaseAuth.instance.currentUser!.displayName!,
                 mail: FirebaseAuth.instance.currentUser!.email!,
@@ -48,6 +50,7 @@ class AuthService {
 
   signInWithGoogle() async {
     // Trigger the authentication flow
+
     final GoogleSignInAccount? googleUser =
         await GoogleSignIn(scopes: <String>["email"]).signIn();
     // Obtain the auth details from the request

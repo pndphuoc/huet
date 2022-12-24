@@ -140,7 +140,7 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
                 Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(
                         builder: (context) => const HueT(
-                              index: 3,
+                              index: 0,
                             )),
                     (route) => false);
               }

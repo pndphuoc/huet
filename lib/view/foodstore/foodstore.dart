@@ -1,19 +1,19 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:card_swiper/card_swiper.dart';
+
+// ignore: import_of_legacy_library_into_null_safe
+import 'package:flutter_geocoder/geocoder.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/providers/foodstore_provider.dart';
 import 'package:hue_t/view/foodstore/foodstoredetail.dart';
 import 'package:hue_t/view/foodstore/search_foodstore.dart';
-import 'package:hue_t/view/navigationbar/navigationbar.dart' as NavigationBar;
-import 'package:hue_t/model/foodstore/restaurant.dart' as restaurant;
 import 'package:hue_t/colors.dart' as color;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import '../../permission/get_user_location.dart' as userLocation;
+
+import '../../model/foodstore/restaurant.dart';
 
 class Category {
   String? id;
@@ -32,35 +32,29 @@ class Foodstore extends StatefulWidget {
 
 class _FoodstoreState extends State<Foodstore> {
   var popular1 = true;
-  bool isloading = true;
-  List imageslide = [
-    "assets/images/foodstore/food3.jpg",
-    "assets/images/foodstore/food1.jpg",
-    "assets/images/foodstore/food2.png",
-    "assets/images/foodstore/food4.jpg",
-  ];
-
+  // bool isloading = true;
+  String address = "";
   List<Category> categories = [
     Category(
         id: '3',
         name: "Coffee",
         image: "assets/images/foodstore/category/1.png",
-        color: Color.fromARGB(255, 227, 245, 223)),
+        color: const Color.fromARGB(255, 227, 245, 223)),
     Category(
         id: '4',
         name: "Specialty food",
         image: "assets/images/foodstore/category/2.png",
-        color: Color.fromARGB(255, 252, 225, 232)),
+        color: const Color.fromARGB(255, 252, 225, 232)),
     Category(
         id: '1',
         name: "Popular restaurant",
         image: "assets/images/foodstore/category/4.png",
-        color: Color.fromARGB(255, 225, 233, 248)),
+        color: const Color.fromARGB(255, 225, 233, 248)),
     Category(
         id: '2',
         name: "Luxury restaurant",
         image: "assets/images/foodstore/category/3.png",
-        color: Color.fromARGB(255, 250, 247, 220)),
+        color: const Color.fromARGB(255, 250, 247, 220)),
   ];
   // @override
   // void initState() {
@@ -70,24 +64,42 @@ class _FoodstoreState extends State<Foodstore> {
   //
   //   });
   // }
+  Future<void> distanceCaculating(Position value, List<Restaurant> list) async {
+    for (int i = 0; i < list.length; i++) {
+      list[i].distance = GeolocatorPlatform.instance.distanceBetween(
+            value.latitude,
+            value.longitude,
+            list[i].latitude,
+            list[i].longitude,
+          ) /
+          1000;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    var productProvider = Provider.of<FoodstoreProvider>(context);
+    var restaurantProvider = Provider.of<FoodstoreProvider>(context);
 
-    if (isloading) {
+    if (restaurantProvider.isloading) {
       (() async {
-        await productProvider.gettop();
+        await restaurantProvider.gettop();
 
-        await productProvider.sort();
+        await restaurantProvider.sort();
+        await userLocation.getUserCurrentLocation().then((value) async {
+          final coordinates = Coordinates(value.latitude, value.longitude);
+          var addresses =
+              await Geocoder.local.findAddressesFromCoordinates(coordinates);
+          address = addresses.first.addressLine.toString();
 
+          await distanceCaculating(value, restaurantProvider.list);
+        });
         setState(() {
-          isloading = false;
+          restaurantProvider.isloading = false;
         });
       })();
     }
     return Scaffold(
-      body: isloading
+      body: restaurantProvider.isloading
           ? Center(
               child: LoadingAnimationWidget.staggeredDotsWave(
                   color: color.primaryColor, size: 50),
@@ -145,13 +157,15 @@ class _FoodstoreState extends State<Foodstore> {
           ),
           TextField(
             onSubmitted: (value) {
-              setState(() {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            SearchFoodStore(value: "0", searchValue: value)));
-              });
+              if (value != "") {
+                setState(() {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              SearchFoodStore(value: "0", searchValue: value)));
+                });
+              }
             },
             decoration: const InputDecoration(
                 filled: true,
@@ -259,14 +273,18 @@ class _FoodstoreState extends State<Foodstore> {
           const SizedBox(
             height: 3,
           ),
-          Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
             const Icon(Icons.location_on_outlined,
                 size: 18, color: Color.fromARGB(255, 102, 102, 102)),
-            Text("Your Location: 102 Tuy Ly Vuong, TP Hue",
-                style: GoogleFonts.readexPro(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: Color.fromARGB(255, 87, 86, 86)))
+            SizedBox(
+              width: MediaQuery.of(context).size.width - 50,
+              child: Text("My Location: $address",
+                  maxLines: 2,
+                  style: GoogleFonts.readexPro(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: const Color.fromARGB(255, 87, 86, 86))),
+            )
           ]),
           Container(
             margin: const EdgeInsets.only(top: 10),
@@ -277,14 +295,20 @@ class _FoodstoreState extends State<Foodstore> {
               builder: (context, value, child) => ListView(
                 scrollDirection: Axis.horizontal,
                 children: [
-                  ...value.list.map((e) => GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      FoodstoreDetail(item: e)));
-                        },
+                  ...value.list.map((e) {
+                    var index = value.list.indexOf(e);
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    FoodstoreDetail(item: e)));
+                      },
+                      child: BounceInDown(
+                        delay: const Duration(milliseconds: 600),
+                        from: 50,
+                        duration: Duration(milliseconds: 700 + index * 300),
                         child: Container(
                           margin: const EdgeInsets.only(right: 20, bottom: 10),
                           width: 180,
@@ -359,7 +383,8 @@ class _FoodstoreState extends State<Foodstore> {
                                                             255, 247, 95, 95),
                                                         size: 14,
                                                       ),
-                                                      Text("0.3km",
+                                                      Text(
+                                                          "${e.distance!.toStringAsFixed(2)} km",
                                                           style: GoogleFonts
                                                               .readexPro(
                                                             fontSize: 13,
@@ -443,7 +468,9 @@ class _FoodstoreState extends State<Foodstore> {
                             ],
                           ),
                         ),
-                      ))
+                      ),
+                    );
+                  })
                 ],
               ),
             ),
@@ -529,14 +556,21 @@ class _FoodstoreState extends State<Foodstore> {
                   child: Consumer<FoodstoreProvider>(
                     builder: (context, value, child) => Column(
                       children: [
-                        ...value.list.map((e) => GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            FoodstoreDetail(item: e)));
-                              },
+                        ...value.list.map((e) {
+                          var index = value.list.indexOf(e);
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          FoodstoreDetail(item: e)));
+                            },
+                            child: BounceInLeft(
+                              from: 150,
+                              delay: const Duration(milliseconds: 500),
+                              duration:
+                                  Duration(milliseconds: 700 + index * 300),
                               child: Container(
                                 margin: const EdgeInsets.only(bottom: 10),
                                 width: MediaQuery.of(context).size.width,
@@ -609,15 +643,22 @@ class _FoodstoreState extends State<Foodstore> {
                                                   ),
                                                 ),
                                                 Row(
-                                                  children: const [
-                                                    Icon(
+                                                  children: [
+                                                    const Icon(
                                                         Icons
                                                             .location_on_outlined,
                                                         size: 17),
-                                                    SizedBox(
+                                                    const SizedBox(
                                                       width: 3,
                                                     ),
-                                                    Text("0.3km")
+                                                    Text(
+                                                        "${e.distance!.toStringAsFixed(2)} km",
+                                                        style: GoogleFonts
+                                                            .readexPro(
+                                                          fontSize: 13,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                        )),
                                                   ],
                                                 ),
                                                 const Padding(
@@ -680,7 +721,9 @@ class _FoodstoreState extends State<Foodstore> {
                                   ),
                                 ),
                               ),
-                            ))
+                            ),
+                          );
+                        })
                       ],
                     ),
                   ),
@@ -767,15 +810,22 @@ class _FoodstoreState extends State<Foodstore> {
                                                   ),
                                                 ),
                                                 Row(
-                                                  children: const [
-                                                    Icon(
+                                                  children: [
+                                                    const Icon(
                                                         Icons
                                                             .location_on_outlined,
                                                         size: 17),
-                                                    SizedBox(
+                                                    const SizedBox(
                                                       width: 3,
                                                     ),
-                                                    Text("0.3km")
+                                                    Text(
+                                                        "${e.distance!.toStringAsFixed(2)} km",
+                                                        style: GoogleFonts
+                                                            .readexPro(
+                                                          fontSize: 13,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                        ))
                                                   ],
                                                 ),
                                                 const Padding(

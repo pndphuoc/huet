@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:hue_t/animation/show_up.dart';
 import 'package:hue_t/model/foodstore/restaurant.dart';
-import 'package:hue_t/model/reviewModel.dart';
+import 'package:hue_t/model/accommodation/reviewModel.dart';
 import 'package:hue_t/colors.dart' as color;
+import 'package:map_launcher/map_launcher.dart' as mapp;
+
+import 'dart:async';
+import '../../permission/get_user_location.dart' as userLocation;
 
 class FoodstoreDetail extends StatefulWidget {
   final Restaurant item;
@@ -16,6 +22,85 @@ class FoodstoreDetail extends StatefulWidget {
 class _FoodstoreDetailState extends State<FoodstoreDetail> {
   var link = 1;
   DateTime now = DateTime.now();
+
+  late GoogleMapController mapController;
+
+  final LatLng _center = const LatLng(45.521563, -122.677433);
+
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+  }
+
+  final Completer<GoogleMapController> _controller = Completer();
+
+  // on below line we have specified camera position
+  static const CameraPosition _kGoogle = CameraPosition(
+    target: LatLng(16.462766512813303, 107.58981951625772),
+    zoom: 14.4746,
+  );
+
+  // on below line we have created the list of markers
+  final List<Marker> _markers = <Marker>[];
+  @override
+  void initState() {
+    super.initState();
+
+    userLocation.getUserCurrentLocation().then((value) async {
+      // marker added for hotels location
+
+      _markers.add(Marker(
+          markerId: const MarkerId("3"),
+          position: LatLng(widget.item!.latitude, widget.item!.longitude),
+          infoWindow: const InfoWindow(title: "Hotel's Locations")));
+
+      double miny = (value.latitude <= widget.item!.latitude)
+          ? value.latitude
+          : widget.item!.latitude;
+      double minx = (value.longitude <= widget.item!.longitude)
+          ? value.longitude
+          : widget.item!.longitude;
+      double maxy = (value.latitude <= widget.item!.latitude)
+          ? widget.item!.latitude
+          : value.latitude;
+      double maxx = (value.longitude <= widget.item!.longitude)
+          ? widget.item!.longitude
+          : value.longitude;
+
+      double southWestLatitude = miny;
+      double southWestLongitude = minx;
+
+      double northEastLatitude = maxy;
+      double northEastLongitude = maxx;
+      setState(() {});
+      // specified current users location
+      CameraPosition cameraPosition = CameraPosition(
+        target: LatLng(value.latitude, value.longitude),
+        zoom: 14,
+      );
+
+      final GoogleMapController controller = await _controller.future;
+
+      @override
+      void dispose() {
+        controller.dispose();
+        // ignore: avoid_print
+        super.dispose();
+      }
+
+      Timer(const Duration(milliseconds: 1000), () async {
+        controller.animateCamera(
+          CameraUpdate.newLatLngBounds(
+              LatLngBounds(
+                northeast: LatLng(northEastLatitude, northEastLongitude),
+                southwest: LatLng(southWestLatitude, southWestLongitude),
+              ),
+              30),
+        );
+      });
+      setState(() {});
+    });
+  }
+
   List<reviewModel> reviewsList1 = [
     reviewModel(
         id: 1,
@@ -172,26 +257,41 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
                     ),
                     Padding(
                       padding: const EdgeInsets.only(right: 20.0),
-                      child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(15),
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(
-                                    blurRadius: 4,
-                                    spreadRadius: 1,
-                                    offset: const Offset(2, 3),
-                                    color: Colors.grey.withOpacity(0.6))
-                              ]),
-                          child: Transform.rotate(
-                            angle: 45,
-                            child: const Icon(
-                              Icons.navigation_outlined,
-                              color: Color.fromARGB(255, 104, 104, 172),
-                            ),
-                          )),
+                      child: GestureDetector(
+                        onTap: () async {
+                          final availableMaps =
+                              await mapp.MapLauncher.installedMaps;
+
+                          await availableMaps.first.showDirections(
+                              destination: mapp.Coords(
+                                  widget.item.latitude, widget.item.longitude));
+
+                          /*                          await availableMaps.first.showMarker(
+                            coords: map.Coords(widget.model.hotelLocaton!.latitude, widget.model.hotelLocaton!.longitude),
+                            title: widget.model.name,
+                          );*/
+                        },
+                        child: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                color: Colors.white,
+                                boxShadow: [
+                                  BoxShadow(
+                                      blurRadius: 4,
+                                      spreadRadius: 1,
+                                      offset: const Offset(2, 3),
+                                      color: Colors.grey.withOpacity(0.6))
+                                ]),
+                            child: Transform.rotate(
+                              angle: 45,
+                              child: const Icon(
+                                Icons.navigation_outlined,
+                                color: Color.fromARGB(255, 104, 104, 172),
+                              ),
+                            )),
+                      ),
                     )
                   ],
                 ),
@@ -426,7 +526,68 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
   }
 
   map(BuildContext context) {
-    return Container();
+    return ShowUp(
+      delay: 600,
+      child: GestureDetector(
+        onTap: () async {
+          final availableMaps = await mapp.MapLauncher.installedMaps;
+
+          await availableMaps.first.showDirections(
+              destination:
+                  mapp.Coords(widget.item.latitude, widget.item.longitude));
+
+          /*                          await availableMaps.first.showMarker(
+                            coords: map.Coords(widget.model.hotelLocaton!.latitude, widget.model.hotelLocaton!.longitude),
+                            title: widget.model.name,
+                          );*/
+        },
+        child: Container(
+          margin: const EdgeInsets.only(top: 5, left: 10, right: 10),
+          height: 350,
+          width: MediaQuery.of(context).size.width,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Stack(
+              children: [
+                GoogleMap(
+                  zoomControlsEnabled: false,
+                  // on below line setting camera position
+                  initialCameraPosition: _kGoogle,
+                  // on below line we are setting markers on the map
+                  markers: Set<Marker>.of(_markers),
+                  // on below line specifying map type.
+                  mapType: MapType.terrain,
+                  // on below line setting user location enabled.
+                  myLocationEnabled: true,
+                  // on below line setting compass enabled.
+                  //compassEnabled: true,
+                  // on below line specifying controller on map complete.
+                  onMapCreated: (GoogleMapController controller) {
+                    _controller.complete(controller);
+                  },
+                ),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    width: double.infinity,
+                    height: 20,
+                    decoration:
+                        BoxDecoration(color: Colors.grey.withOpacity(0.7)),
+                    child: Text(
+                      "Click to open direction in Google Map",
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.montserrat(
+                          color:
+                              color.isDarkMode ? Colors.white : Colors.black),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   review(BuildContext context) {

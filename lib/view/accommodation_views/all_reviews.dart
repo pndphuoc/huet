@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/animation/show_right.dart';
-import '../colors.dart' as colors;
-import '../model/reviewModel.dart';
+import '../../colors.dart' as colors;
+import '../../model/accommodation/reviewModel.dart';
 
 class AllReviews extends StatefulWidget {
   const AllReviews({Key? key, required this.hotelId}) : super(key: key);

@@ -8,7 +8,7 @@ import 'package:html_unescape/html_unescape.dart';
 import 'package:hue_t/model/event/event.dart';
 
 String formatHtmlString(String string) {
-  var unescape = new HtmlUnescape();
+  var unescape = HtmlUnescape();
   var text = unescape.convert(string);
   return text;
 }
@@ -136,7 +136,7 @@ class _EventDetailState extends State<EventDetail> {
               children: [
                 const Icon(Icons.timer_outlined),
                 Text(
-                  " Begin: ${widget.item.begin}",
+                  " Begin: ${widget.item.begin.toString().split("T")[0]}",
                   style: GoogleFonts.readexPro(
                       fontSize: 15,
                       fontWeight: FontWeight.w400,
@@ -151,7 +151,7 @@ class _EventDetailState extends State<EventDetail> {
               children: [
                 const Icon(Icons.timer_off_outlined),
                 Text(
-                  " End: ${widget.item.end}",
+                  " End: ${widget.item.end.toString().split("T")[0]}",
                   style: GoogleFonts.readexPro(
                       fontSize: 15,
                       fontWeight: FontWeight.w400,
@@ -192,8 +192,9 @@ class _EventDetailState extends State<EventDetail> {
               data: formatHtmlString(widget.item.description.toString()),
               style: {
                 "body": Style(
+                    textAlign: TextAlign.justify,
                     fontSize: FontSize(15.0),
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w400,
                     fontFamily: 'readexPro')
               },
             ),

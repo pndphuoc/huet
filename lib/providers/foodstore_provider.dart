@@ -8,6 +8,7 @@ import '../model/foodstore/restaurant.dart';
 import 'package:hue_t/constants/host_url.dart' as url;
 
 class FoodstoreProvider extends ChangeNotifier {
+  bool isloading = true;
   List<Restaurant> list = [];
   List<Restaurant> listfull = [];
   List<Restaurant> listSearch = [];
