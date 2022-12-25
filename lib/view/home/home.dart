@@ -137,11 +137,13 @@ class _HomePageState extends State<HomePage> {
                 child: user_constants.user == null
                     ? GestureDetector(
                         onTap: () {
-                          Navigator.push(
+                          Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => AuthService()
-                                      .handleAuthState(const HueT())));
+                                      .handleAuthState(
+                                          const HueT(), const SignInPage())),
+                              (route) => false);
                         },
                         child: Container(
                           alignment: Alignment.centerRight,
@@ -486,10 +488,7 @@ class _HomePageState extends State<HomePage> {
               GestureDetector(
                 onTap: () => Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => const HueT(
-                              index: 6,
-                            )),
+                    MaterialPageRoute(builder: (context) => const Events()),
                     (route) => false),
                 child: Text("Xem tất cả",
                     style: GoogleFonts.readexPro(

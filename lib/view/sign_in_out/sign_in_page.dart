@@ -1,11 +1,16 @@
+import 'dart:async';
 import 'dart:ui';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart';
 import 'package:hue_t/providers/user_provider.dart';
+import 'package:hue_t/view/profileuser/edit_profile.dart';
 import 'package:hue_t/view/sign_in_out/register_user.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:rive/rive.dart';
 import '../../conponents/AnimatedBtn.dart';
@@ -20,9 +25,18 @@ class SignInPage extends StatefulWidget {
   State<SignInPage> createState() => _SignInPageState();
 }
 
-class _SignInPageState extends State<SignInPage> {
-  late RiveAnimationController _btnAnimationController;
+class _SignInPageState extends State<SignInPage>
+    with SingleTickerProviderStateMixin {
   bool isShowSignInDialog = false;
+  late RiveAnimationController _btnAnimationController;
+
+  bool isLoading = false;
+
+  List<ColorTween> tweenAnimations = [];
+  int tweenIndex = 0;
+  late AnimationController controller;
+  List<Animation<Color?>> colorAnimations = [];
+
   final _formkey = GlobalKey<FormState>();
   String? email;
   String? password;
@@ -34,52 +48,96 @@ class _SignInPageState extends State<SignInPage> {
       autoplay: false,
     );
     super.initState();
+    // controller = AnimationController(
+    //   vsync: this,
+    //   duration: duration,
+    // );
+    // for (int i = 0; i < colors.length - 1; i++) {
+    //   tweenAnimations.add(ColorTween(begin: colors[i], end: colors[i + 1]));
+    // }
+    // tweenAnimations
+    //     .add(ColorTween(begin: colors[colors.length - 1], end: colors[0]));
+    // for (int i = 0; i < colors.length; i++) {
+    //   Animation<Color?> animation = tweenAnimations[i].animate(CurvedAnimation(
+    //       parent: controller,
+    //       curve: Interval((1 / colors.length) * (i + 1) - 0.05,
+    //           (1 / colors.length) * (i + 1),
+    //           curve: Curves.linear)));
+    //
+    //   colorAnimations.add(animation);
+    // }
+    // if (kDebugMode) {
+    //   print(colorAnimations.length);
+    // }
+    // tweenIndex = 0;
+    // timer = Timer.periodic(duration, (Timer t) {
+    //   setState(() {
+    //     tweenIndex = (tweenIndex + 1) % colors.length;
+    //   });
+    // });
+    // controller.forward();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: primaryColor,
-      resizeToAvoidBottomInset: true,
-      body: Form(
-        key: _formkey,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Stack(children: [
-            Positioned(
-              width: MediaQuery.of(context).size.width * 1.7,
-              left: 100,
-              bottom: 100,
-              child: Image.asset(
-                "assets/Backgrounds/Spline.png",
+    return isLoading
+        ? Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+                child: LoadingAnimationWidget.discreteCircle(
+              size: 50,
+              color: primaryColor,
+            )),
+          )
+        : Scaffold(
+            backgroundColor: primaryColor,
+            resizeToAvoidBottomInset: true,
+            body: Form(
+              key: _formkey,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Stack(children: [
+                  Positioned(
+                    width: MediaQuery.of(context).size.width * 1.7,
+                    left: 100,
+                    bottom: 100,
+                    child: Image.asset(
+                      "assets/Backgrounds/Spline.png",
+                    ),
+                  ),
+                  Positioned.fill(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                      child: const SizedBox(),
+                    ),
+                  ),
+                  const RiveAnimation.asset(
+                    "assets/RiveAssets/shapes.riv",
+                  ),
+                  Positioned.fill(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                      child: const SizedBox(),
+                    ),
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width,
+                    child: contentBlock(context),
+                  ),
+                  backButton(context),
+                ]),
               ),
             ),
-            Positioned.fill(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                child: const SizedBox(),
-              ),
-            ),
-            const RiveAnimation.asset(
-              "assets/RiveAssets/shapes.riv",
-            ),
-            Positioned.fill(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-                child: const SizedBox(),
-              ),
-            ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-              child: contentBlock(context),
-            ),
-            backButton(context),
-          ]),
-        ),
-      ),
-    );
+          );
   }
+
+  @override
+  // void dispose() {
+  //   timer.cancel();
+  //   controller.dispose();
+  //   super.dispose();
+  // }
 
   contentBlock(BuildContext context) {
     return SingleChildScrollView(
@@ -262,7 +320,7 @@ class _SignInPageState extends State<SignInPage> {
                             context,
                             MaterialPageRoute(
                                 builder: ((context) => HueT(
-                                      index: 2,
+                                      index: 1,
                                     ))),
                             (route) => false);
                       } else {
@@ -289,35 +347,52 @@ class _SignInPageState extends State<SignInPage> {
         Container(
           margin: const EdgeInsets.only(left: 30, right: 30),
           height: 60,
-          child: ElevatedButton(
-            onPressed: () {
-              AuthService().signInWithGoogle();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
+          child: Consumer<UserProvider>(
+            builder: (context, value, child) => ElevatedButton(
+              onPressed: () async {
+                setState(() {
+                  isLoading = true;
+                });
+                await AuthService().signInWithGoogle();
+                await value
+                    .checkEmail(FirebaseAuth.instance.currentUser!.email!);
+                setState(() {
+                  isLoading = false;
+                });
+
+                // Navigator.push(
+                //     context,
+                //     MaterialPageRoute(
+                //         builder: (context) => const HueT(
+                //               index: 1,
+                //             )));
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(40),
+                ),
               ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Image.asset(
-                  'assets/images/profileuser/google_logo.png',
-                  width: 30,
-                  height: 30,
-                ),
-                Text(
-                  'Continue with Google',
-                  style: GoogleFonts.readexPro(
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black,
-                      fontSize: 17),
-                ),
-                const SizedBox(
-                  width: 30,
-                )
-              ],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Image.asset(
+                    'assets/images/profileuser/google_logo.png',
+                    width: 30,
+                    height: 30,
+                  ),
+                  Text(
+                    'Continue with Google',
+                    style: GoogleFonts.readexPro(
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black,
+                        fontSize: 17),
+                  ),
+                  const SizedBox(
+                    width: 30,
+                  )
+                ],
+              ),
             ),
           ),
         ),
@@ -326,8 +401,11 @@ class _SignInPageState extends State<SignInPage> {
         ),
         GestureDetector(
           onTap: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const RegisterUser()));
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => AuthService()
+                        .handleAuthState(const HueT(), const RegisterUser())));
           },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,

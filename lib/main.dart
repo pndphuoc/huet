@@ -95,11 +95,13 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     if (FirebaseAuth.instance.currentUser != null) {
       userConstant.user = userModel.User(
-          name: FirebaseAuth.instance.currentUser!.displayName!,
-          mail: FirebaseAuth.instance.currentUser!.email!,
-          photoURL: FirebaseAuth.instance.currentUser!.photoURL!,
-          uid: FirebaseAuth.instance.currentUser!.uid,
-          phoneNumber: FirebaseAuth.instance.currentUser!.phoneNumber);
+        name: FirebaseAuth.instance.currentUser!.displayName!,
+        mail: FirebaseAuth.instance.currentUser!.email!,
+        photoURL: FirebaseAuth.instance.currentUser!.photoURL!,
+        uid: FirebaseAuth.instance.currentUser!.uid,
+        phoneNumber: FirebaseAuth.instance.currentUser!.phoneNumber,
+        isGoogle: true,
+      );
     }
     Future.delayed(const Duration(seconds: 4)).then((value) =>
         Navigator.of(context).pushReplacement(
