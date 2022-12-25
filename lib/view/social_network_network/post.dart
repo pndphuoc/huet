@@ -22,15 +22,22 @@ import 'dart:io';
 import 'constants.dart' as constants;
 
 class Post extends StatefulWidget {
-  const Post({Key? key, required this.post, required this.isInView, required this.callback}) : super(key: key);
+  const Post(
+      {Key? key,
+      required this.post,
+      required this.isInView,
+      required this.callback})
+      : super(key: key);
   final PostModel post;
   final bool isInView;
   final DeleteCallback callback;
+
   @override
   State<Post> createState() => _PostState();
 }
 
 typedef void DeleteCallback(String val);
+
 late String documentSnapshotID;
 late PostModel post;
 
@@ -39,6 +46,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
     duration: const Duration(milliseconds: 500),
     vsync: this,
   );
+
   //CachedVideoPlayerController? _controller;
   int currentPos = 0;
   bool isLiked = false;
@@ -47,6 +55,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
   bool isMark = false;
   String? selectedValue;
   late int likeCount;
+
   @override
   void dispose() {
     _heartController.dispose();
@@ -54,7 +63,11 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
   }
 
   _likeStatus() async {
-    await FirebaseFirestore.instance.collection('post').doc(widget.post.postID).get().then((doc) {
+    await FirebaseFirestore.instance
+        .collection('post')
+        .doc(widget.post.postID)
+        .get()
+        .then((doc) {
       if (doc.data()!["likedUsers"].contains(user_info.user!.uid)) {
         setState(() {
           isLiked = true;
@@ -64,13 +77,17 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
   }
 
   Future<void> _likeAndUnlikePost() async {
-    final docPost = FirebaseFirestore.instance.collection('post').doc(widget.post.postID);
-    if(!isLiked) {
-      docPost.update({'likedUsers': FieldValue.arrayUnion([user_info.user!.uid])});
+    final docPost =
+        FirebaseFirestore.instance.collection('post').doc(widget.post.postID);
+    if (!isLiked) {
+      docPost.update({
+        'likedUsers': FieldValue.arrayUnion([user_info.user!.uid])
+      });
       likeCount += 1;
-    }
-    else {
-      docPost.update({'likedUsers': FieldValue.arrayRemove([user_info.user!.uid])});
+    } else {
+      docPost.update({
+        'likedUsers': FieldValue.arrayRemove([user_info.user!.uid])
+      });
       likeCount -= 1;
     }
     setState(() {});
@@ -138,16 +155,14 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
           )*/
           DropdownButtonHideUnderline(
             child: DropdownButton2(
-              customButton:  const Icon(Icons.more_vert_outlined),
-
+              customButton: const Icon(Icons.more_vert_outlined),
               items: [
-              ...MenuItems.itemsList.map((e) => DropdownMenuItem(
-                  value: e,
-                  child: MenuItems.buildItem(e)))
+                ...MenuItems.itemsList.map((e) =>
+                    DropdownMenuItem(value: e, child: MenuItems.buildItem(e)))
               ],
               onChanged: (value) {
                 MenuItem selected = value as MenuItem;
-                if(selected.text == 'Delete') {
+                if (selected.text == 'Delete') {
                   widget.callback(widget.post.postID.toString());
                 }
                 MenuItems.onChanged(context, value as MenuItem);
@@ -175,7 +190,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
       width: double.infinity,
       child: GestureDetector(
         onDoubleTap: () {
-          if(!isLiked) {
+          if (!isLiked) {
             _likeAndUnlikePost();
           }
           setState(() {
@@ -219,17 +234,16 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                             const Icon(Icons.error),
                       );
                     } else {
-                      if(widget.isInView!) {
+                      if (widget.isInView!) {
                         return VideoWidget(url: e.url, play: true);
-                      }
-                      else {
+                      } else {
                         return VideoWidget(url: e.url, play: false);
                       }
-                      
-                           Center(
-                              child: LoadingAnimationWidget.discreteCircle(
-                                  color: colors.primaryColor, size: 30),
-                            );
+
+                      Center(
+                        child: LoadingAnimationWidget.discreteCircle(
+                            color: colors.primaryColor, size: 30),
+                      );
                     }
                   });
                 }).toList(),
@@ -297,51 +311,49 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              HeartAnimation(
-                isAnimating: isHeartButtonAnimating || isHeartAnimating, ////
-                child: IconButton(
-                  constraints: const BoxConstraints(),
-                  onPressed: () {
-                    _likeAndUnlikePost();
-                    setState(() {
-                      isLiked = !isLiked;
-                      isHeartButtonAnimating = !isHeartButtonAnimating;
-                      _heartController.forward();
-                    });
-                  },
-                  icon: isLiked
-                      ? const Icon(
-                          Icons.favorite_rounded,
-                          color: Colors.red,
-                          size: 30,
-                        )
-                      : const Icon(
-                          Icons.favorite_outline_rounded,
-                          size: 30,
-                        ),
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent,
-                  hoverColor: Colors.transparent,
-                  padding: EdgeInsets.zero,
+              GestureDetector(
+                onTap: () {
+                  _likeAndUnlikePost();
+                  setState(() {
+                    isLiked = !isLiked;
+                    isHeartButtonAnimating = !isHeartButtonAnimating;
+                    _heartController.forward();
+                  });
+                },
+                child: Row(
+                  children: [
+                    HeartAnimation(
+                      isAnimating: isHeartButtonAnimating || isHeartAnimating, ////
+                      child: isLiked
+                          ? const Icon(
+                        Icons.favorite_rounded,
+                        color: Colors.red,
+                        size: 30,
+                      )
+                          : const Icon(
+                        Icons.favorite_outline_rounded,
+                        size: 30,
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      likeCount.toString(),
+                      style: GoogleFonts.readexPro(
+                        color: colors.SN_postTextColor,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ],
                 ),
               ),
+
               const SizedBox(
                 width: 10,
               ),
-              Text(
-                likeCount.toString(),
-                style: GoogleFonts.readexPro(
-                  color: colors.SN_postTextColor,
-                  fontSize: 15,
-                ),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-              IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                onPressed: () {
+              GestureDetector(
+                onTap: () {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -350,24 +362,27 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                               )));
                   FocusManager.instance.primaryFocus?.unfocus();
                 },
-                icon: const Icon(
-                  Icons.mode_comment_outlined,
-                  size: 30,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.mode_comment_outlined,
+                      size: 30,
+                    ),
+                    const SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      widget.post.commentsCount.toString(),
+                      style: GoogleFonts.readexPro(
+                        color: colors.SN_postTextColor,
+                        fontSize: 15,
+                      ),
+                    )
+                  ],
                 ),
-                splashColor: Colors.transparent,
-                highlightColor: Colors.transparent,
-                hoverColor: Colors.transparent,
               ),
-              const SizedBox(
-                width: 10,
-              ),
-              Text(
-                widget.post.commentsCount.toString(),
-                style: GoogleFonts.readexPro(
-                  color: colors.SN_postTextColor,
-                  fontSize: 15,
-                ),
-              )
+
             ],
           ),
           IconButton(
@@ -539,10 +554,12 @@ class MenuItem {
 
 class MenuItems {
   static const List<MenuItem> itemsList = [delete, edit];
+
   //static const List<MenuItem> secondItems = [logout];
 
   static const delete = MenuItem(text: 'Delete');
   static const edit = MenuItem(text: 'Edit');
+
 /*  static const share = MenuItem(text: 'Share', icon: Icons.share);
   static const settings = MenuItem(text: 'Settings', icon: Icons.settings);
   static const logout = MenuItem(text: 'Log Out', icon: Icons.logout);*/
@@ -573,7 +590,7 @@ class MenuItems {
       //Do something
         break;
       case MenuItems.logout:*/
-      //Do something
+        //Do something
         break;
     }
   }

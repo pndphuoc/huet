@@ -141,7 +141,8 @@ class _HomePageState extends State<HomePage> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => AuthService()
-                                      .handleAuthState(const HueT(), const SignInPage())));
+                                      .handleAuthState(
+                                          const HueT(), const SignInPage())));
                         },
                         child: Container(
                           alignment: Alignment.centerRight,
@@ -334,9 +335,7 @@ class _HomePageState extends State<HomePage> {
               context,
               "https://cdn-icons-png.flaticon.com/512/2972/2972857.png",
               "Đi đâu ?",
-              const TouristAttraction(
-
-              )),
+              const TouristAttraction()),
           buttonLink(
               context,
               "https://cdn-icons-png.flaticon.com/512/4612/4612366.png",

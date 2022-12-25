@@ -10,9 +10,10 @@ class PostModel {
   List<Media> medias;
   List<String> likedUsers;
   List<Comment>? comments;
-  int? commentsCount;
+  int commentsCount;
   DateTime createDate;
   bool isDeleted;
+  int likesCount;
 
   PostModel(
       {required this.postID,
@@ -24,7 +25,9 @@ class PostModel {
        this.comments,
       required this.createDate,
       required this.isDeleted,
-      this.commentsCount});
+      required this.commentsCount,
+      required this.likesCount
+      });
 
   Map<String, dynamic> toJson() {
     var mediaJson = [];
@@ -39,7 +42,9 @@ class PostModel {
       'medias': mediaJson,
       'likedUsers': likedUsers,
       'createDate': createDate,
-      'isDeleted': false
+      'isDeleted': false,
+      'likesCount': 0,
+      'commentsCount': 0
     };
   }
 
@@ -48,13 +53,8 @@ class PostModel {
     for (var e in List.from(json['medias'])) {
       medias.add(Media.fromJson(e));
     }
-    /*List<Comment> comments = [];
-    comments = await getAllComment(json['postID']);*/
-/*    for(var e in json['comments']){
-      comments.add(Comment.fromJson(e));
-    }*/
     return PostModel(
-        commentsCount: await getCommentsCount(json['postID']),
+        commentsCount: json['commentsCount'],
         postID: json['postID'],
         userID: json['userID'],
         caption: json['caption'],
@@ -63,7 +63,9 @@ class PostModel {
         likedUsers: List<String>.from(json['likedUsers']),
         //comments: comments,
         createDate: json['createDate'].toDate(),
-        isDeleted: json['isDeleted']);
+        isDeleted: json['isDeleted'],
+        likesCount: json['likesCount'],
+    );
   }
 
 /*  static PostModel fromJson(Map<String, dynamic> json) {

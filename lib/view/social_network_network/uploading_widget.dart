@@ -13,7 +13,7 @@ import '../../model/social_network/media_model.dart';
 import 'constants.dart' as constants;
 import 'image_item_widget.dart';
 
-typedef void ResultCallback(bool val);
+typedef void ResultCallback(String val);
 
 class UploadingWidget extends StatefulWidget {
   const UploadingWidget({Key? key, required this.list, this.caption, required this.attractionId, required this.callback}) : super(key: key);
@@ -90,7 +90,7 @@ class _UploadingWidgetState extends State<UploadingWidget> {
     return mediaList;
   }
 
-  Future<void> uploadPostContent(List<Media> mediaList) async {
+  Future<String> uploadPostContent(List<Media> mediaList) async {
 /*    List<Object> mediaJson = [];
     for (int i=0 ; i<mediaList.length; i++) {
       mediaJson.add(mediaList[i].toJson());
@@ -106,17 +106,22 @@ class _UploadingWidgetState extends State<UploadingWidget> {
       comments: [],
       medias: mediaList,
       postID: docPost.id,
-      createDate: DateTime.now()
+      createDate: DateTime.now(),
+      likesCount: 0,
+      commentsCount: 0
     );
 
     final json = post.toJson();
     docPost.set(json);
-
+    return post.postID;
   }
 
   Future<void> createPost() async {
-    await uploadPostContent(await uploadMedia());
+    print("bat dau uploaddddd");
+    String postId= await uploadPostContent(await uploadMedia());
     constants.isUploading = false;
+    print("ket thuc uploaddddd");
+    widget.callback(postId);
     constants.postInfomation = null;
   }
 
@@ -143,7 +148,7 @@ class _UploadingWidgetState extends State<UploadingWidget> {
     super.initState();
     createPost();
 
-    widget.callback(true);
+
   }
 
   Widget buildUploadingProgress(BuildContext context, double progress) {

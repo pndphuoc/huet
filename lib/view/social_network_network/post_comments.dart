@@ -43,10 +43,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
   bool isLoading = true;
   bool isPostingComment = false;
   bool isPostingReplyComment = false;
-  bool isSelectingItem = false;
-  bool isSelectingItemIsReplyComment = false;
   bool isLoadingReplyComments = false;
-  late String parentCommentID;
   Comment? selectedItem;
   late List<Comment> commentList;
   bool isReplying = false;
@@ -59,11 +56,21 @@ class _PostCommentsPageState extends State<PostCommentsPage>
   bool _moreCommentsAvailable = true;
   static const int commentLimit = 10;
   bool isRefreshing = false;
-
+  bool isLoadingPostContent = true;
+  //send comment mode = 0 khi gửi comment, =1 khi reply 1 comment, =2 khi reply 1 reply của comment
+  int sendCommentMode = 0;
+  String? replyCommentIsBeingReplied;
+  bool isGettingMoreComments = false;
   _getPostContent() async {
     //post = await displayUsersCommentFirst(widget.postID);
     post = await getPostContent(widget.postID, commentLimit);
-    commentList = post.comments!;
+    setState(() {
+      isLoadingPostContent = false;
+    });
+  }
+
+  _getComments() async {
+    commentList = await getPostComments(widget.postID, commentLimit);
 
     List<Comment> myComments = [];
     commentList.toList().forEach((element) async {
@@ -101,6 +108,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
             Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
         axis: Axis.vertical);
     _getPostContent();
+    _getComments();
   }
 
   @override
@@ -110,6 +118,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
   }
 
   void _onRefresh() async {
+    print("bat dau refresh");
     commentList.clear();
     setState(() {
       isRefreshing = true;
@@ -117,12 +126,13 @@ class _PostCommentsPageState extends State<PostCommentsPage>
     });
 
     // monitor network fetch
-    await _getPostContent();
+    await _getComments();
     // if failed,use refreshFailed()
     setState(() {
       isRefreshing = false;
+      _refreshController.refreshCompleted();
     });
-    _refreshController.refreshCompleted();
+
   }
 
   _getMoreComments() async {
@@ -130,6 +140,10 @@ class _PostCommentsPageState extends State<PostCommentsPage>
       _refreshController.loadComplete();
       return;
     }
+    print("bat dau get more");
+   setState(() {
+     isGettingMoreComments = true;
+   });
     List<Comment> moreCommentsList = [];
     if (!isPostingComment && !isPostingReplyComment) {
       moreCommentsList = await getMoreComments(widget.postID, commentLimit);
@@ -139,7 +153,6 @@ class _PostCommentsPageState extends State<PostCommentsPage>
     }
 
     for (var e in moreCommentsList) {
-      e.replyCount = await getReplyCommentCount(widget.postID, e.id);
       e.replyComments = await getAllReplyCommentOfUser(
           user_info.user!.uid, widget.postID, e.id);
       e.replyComments!.sort(
@@ -150,6 +163,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
     commentList.addAll(moreCommentsList);
     setState(() {});
     _refreshController.loadComplete();
+    isGettingMoreComments = false;
   }
 
   @override
@@ -161,161 +175,107 @@ class _PostCommentsPageState extends State<PostCommentsPage>
       child: Scaffold(
         appBar: appBar(context),
         backgroundColor: colors.backgroundColor,
-        body: isLoading
-            ? Center(
-                child: LoadingAnimationWidget.discreteCircle(
-                    color: colors.primaryColor, size: 30),
-              )
-            : /*SingleChildScrollView(
-                controller: _commentScrollController,
-                child: Column(
-                  children: [
-                    contentBlock(context),
-                    isPostingComment
-                        ? postingCommentBlock(context, commentContent)
-                        : Container(),
-                    ...commentList.map((e) {
-                      ++index;
-                      return AutoScrollTag(
-                        key: ValueKey(index),
-                        controller: _commentScrollController,
-                        index: index,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            buildCommentBlock(context, e),
-                            if (e.replyCount! > 0)
-                              if (isLoadingReplyComments &&
-                                  commentIsLoadingReply != null &&
-                                  commentIsLoadingReply == e)
-                                Center(
-                                  child: LoadingAnimationWidget.fallingDot(
-                                      color: colors.primaryColor, size: 15),
-                                )
-                              else
-                                buildReadReplyCommentButton(
-                                    context, widget.postID, e),
-                            //Hiển thị widget posting của reply comment
-                            isPostingReplyComment
-                                ? postingReplyCommentBlock(
-                                    context, commentContent)
-                                : Container(),
-
-                            //Hiển thị các reply comment của user hiện tại
-                            if (e.replyComments!.isNotEmpty &&
-                                !showReplyCommentList.contains(e) &&
-                                isShowingCommentsOfCurrentUser)
-                              ...e.replyComments!.map(
-                                  (replyCommentOfCurrentUser) =>
-                                      buildReplyCommentBlock(context,
-                                          replyCommentOfCurrentUser, e.id)),
-
-                            //Hiển thị các reply comment
-                            if (showReplyCommentList.contains(e) &&
-                                e.replyComments != null)
-                              ...e.replyComments!.map((reply) =>
-                                  buildReplyCommentBlock(context, reply, e.id))
-                          ],
-                        ),
-                      );
-                    }),
-                  ],
-                ),
-              ),*/
-            Column(
-                children: [
-                  contentBlock(context),
-                  isPostingComment
-                      ? postingCommentBlock(context, commentContent)
-                      : Container(),
-                  Expanded(
-                    child: SmartRefresher(
-                        controller: _refreshController,
-                        enablePullDown: true,
-                        enablePullUp: true,
-                        header: WaterDropMaterialHeader(
-                          backgroundColor: colors.backgroundColor,
-                          color: colors.primaryColor,
-                        ),
-                        onRefresh: _onRefresh,
-                        onLoading: !isLoading && !isRefreshing
-                            ? _getMoreComments
-                            : () {},
-                        child: ListView.builder(
-                            itemCount: commentList.length,
-                            itemBuilder: (context, index) {
-                              return Column(
-                                children: [
-                                  AutoScrollTag(
-                                    key: ValueKey(index),
-                                    controller: _commentScrollController,
-                                    index: index,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        buildCommentBlock(
-                                            context, commentList[index]),
-                                        if (commentList[index].replyCount! > 0)
-                                          if (isLoadingReplyComments &&
-                                              commentIsLoadingReply != null &&
-                                              commentIsLoadingReply ==
-                                                  commentList[index])
-                                            Center(
-                                              child: LoadingAnimationWidget
-                                                  .fallingDot(
-                                                      color:
-                                                          colors.primaryColor,
-                                                      size: 15),
-                                            )
-                                          else
-                                            buildReadReplyCommentButton(
-                                                context,
-                                                widget.postID,
-                                                commentList[index]),
-
-                                        //Hiển thị các reply comment của user hiện tại
-                                        if (commentList[index]
-                                                .replyComments!
-                                                .isNotEmpty &&
-                                            !showReplyCommentList
-                                                .contains(commentList[index]) &&
-                                            isShowingCommentsOfCurrentUser)
-                                          ...commentList[index]
-                                              .replyComments!
-                                              .map((replyCommentOfCurrentUser) =>
-                                                  buildReplyCommentBlock(
-                                                      context,
-                                                      replyCommentOfCurrentUser,
-                                                      commentList[index].id)),
-//Hiển thị widget posting của reply comment
-                                        isPostingReplyComment &&
-                                                commentAreBeingReplied! ==
-                                                    commentList[index]
-                                            ? postingReplyCommentBlock(
-                                                context, commentContent)
-                                            : Container(),
-                                        //Hiển thị các reply comment
-                                        if (showReplyCommentList
-                                                .contains(commentList[index]) &&
-                                            commentList[index].replyComments !=
-                                                null)
-                                          ...commentList[index]
-                                              .replyComments!
-                                              .map((reply) =>
-                                                  buildReplyCommentBlock(
-                                                      context,
-                                                      reply,
-                                                      commentList[index].id))
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              );
-                            })),
+        body: Column(
+          children: [
+            isLoadingPostContent
+                ? Center(
+                    child: LoadingAnimationWidget.staggeredDotsWave(
+                        color: colors.primaryColor, size: 30),
                   )
-                ],
-              ),
+                : contentBlock(context),
+            isPostingComment
+                ? postingCommentBlock(context, commentContent)
+                : Container(),
+            Expanded(
+              child: isLoading
+                  ? Center(
+                      child: LoadingAnimationWidget.discreteCircle(
+                          color: colors.primaryColor, size: 30),
+                    )
+                  : SmartRefresher(
+                      controller: _refreshController,
+                      enablePullDown: !isGettingMoreComments? true : false,
+                      enablePullUp: isLoading == false && isRefreshing == false ? true : false,
+                      header: WaterDropMaterialHeader(
+                        backgroundColor: colors.backgroundColor,
+                        color: colors.primaryColor,
+                      ),
+                      onRefresh: _onRefresh,
+                      onLoading: _getMoreComments,
+                      child: ListView.builder(
+                          itemCount: commentList.length,
+                          itemBuilder: (context, index) {
+                            return Column(
+                              children: [
+                                AutoScrollTag(
+                                  key: ValueKey(index),
+                                  controller: _commentScrollController,
+                                  index: index,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      buildCommentBlock(
+                                          context, commentList[index]),
+                                      if (commentList[index].replyCount! > 0)
+                                        if (isLoadingReplyComments &&
+                                            commentIsLoadingReply != null &&
+                                            commentIsLoadingReply ==
+                                                commentList[index])
+                                          Center(
+                                            child: LoadingAnimationWidget
+                                                .fallingDot(
+                                                    color: colors.primaryColor,
+                                                    size: 15),
+                                          )
+                                        else if(commentList[index].replyCount! > commentList[index].replyComments!.where((element) => element.userID == user_info.user!.uid).length)
+                                          buildReadReplyCommentButton(
+                                              context,
+                                              widget.postID,
+                                              commentList[index]),
+
+                                      //Hiển thị các reply comment của user hiện tại
+                                      if (commentList[index]
+                                              .replyComments!
+                                              .isNotEmpty &&
+                                          !showReplyCommentList
+                                              .contains(commentList[index]) &&
+                                          isShowingCommentsOfCurrentUser)
+                                        ...commentList[index]
+                                            .replyComments!
+                                            .map((replyCommentOfCurrentUser) =>
+                                                buildReplyCommentBlock(
+                                                    context,
+                                                    replyCommentOfCurrentUser,
+                                                    commentList[index])),
+                                    //Hiển thị widget posting của reply comment
+                                      isPostingReplyComment &&
+                                              commentAreBeingReplied ==
+                                                  commentList[index]
+                                          ? postingReplyCommentBlock(
+                                              context, commentContent)
+                                          : Container(),
+                                      //Hiển thị các reply comment
+                                      if (showReplyCommentList
+                                              .contains(commentList[index]) &&
+                                          commentList[index].replyComments !=
+                                              null)
+                                        ...commentList[index]
+                                            .replyComments!
+                                            .map((reply) =>
+                                                buildReplyCommentBlock(
+                                                    context,
+                                                    reply,
+                                                    commentList[index]))
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            );
+                          })),
+            )
+          ],
+        ),
         bottomNavigationBar: buildWritingCommentBlock(context),
       ),
     );
@@ -416,6 +376,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                           padding: const EdgeInsets.only(right: 20),
                           child: IconButton(
                               onPressed: () {
+                                sendCommentMode = 0;
                                 commentController.clear();
                                 setState(() {
                                   isReplying = false;
@@ -479,39 +440,9 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                     onPressed: () async {
                       //Nếu text không rỗng
                       if (commentController.value.text.isNotEmpty) {
-                        //Kiểm tra có phải là reply 1 comment hay không
-                        if (commentAreBeingReplied != null) {
-                          FocusScope.of(context).requestFocus(FocusNode());
-                          commentContent = commentController.text;
-                          isReplying = false;
-                          setState(() {
-                            isPostingReplyComment = true;
-                          });
-                          commentController.clear();
-                          final justPostReplyComment = await getReplyComment(
-                              widget.postID,
-                              commentAreBeingReplied!.id,
-                              await postReplyComment(
-                                  commentContent,
-                                  user_info.user!.uid,
-                                  widget.postID,
-                                  commentAreBeingReplied!.id));
-                          final temp = commentList[
-                              commentList.indexOf(commentAreBeingReplied!)];
-                          temp.replyComments!.add(justPostReplyComment);
-                          temp.replyCount = 0;
-                          commentList[commentList
-                              .indexOf(commentAreBeingReplied!)] = temp;
-                          //await _getPostContent();
-                          setState(() {
-                            isPostingReplyComment = false;
-                            commentAreBeingReplied = null;
-                          });
-                        } else {
-                          // Nếu không thì là đang comment
-                          //_scrollUp();
+                        if(sendCommentMode == 0) {
                           _commentScrollController.animateTo(0,
-                              duration: Duration(milliseconds: 500),
+                              duration: const Duration(milliseconds: 500),
                               curve: Curves.fastOutSlowIn);
                           FocusScope.of(context).requestFocus(FocusNode());
                           commentContent = commentController.text;
@@ -529,7 +460,63 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                           isPostingComment = false;
                           setState(() {});
                         }
+                        else if(sendCommentMode == 1) {
+                          FocusScope.of(context).requestFocus(FocusNode());
+                          commentContent = commentController.text;
+                          isReplying = false;
+                          setState(() {
+                            isPostingReplyComment = true;
+                          });
+                          commentController.clear();
+                          final justPostReplyComment = await getReplyComment(
+                              widget.postID,
+                              commentAreBeingReplied!.id,
+                              await postReplyComment(
+                                  commentContent,
+                                  user_info.user!.uid,
+                                  widget.postID,
+                                  commentAreBeingReplied!.id));
+                          final temp = commentList[commentList.indexOf(commentAreBeingReplied!)];
+                          temp.replyComments!.add(justPostReplyComment);
+                          temp.replyCount = await getReplyCommentCount(widget.postID, temp.id);
+                          commentList[commentList
+                              .indexOf(commentAreBeingReplied!)] = temp;
+                          //await _getPostContent();
+                          setState(() {
+                            //isShowingCommentsOfCurrentUser = true;
+                            isPostingReplyComment = false;
+                            commentAreBeingReplied = null;
+                          });
+                        } else {
+                          FocusScope.of(context).requestFocus(FocusNode());
+                          commentContent = commentController.text;
+                          isReplying = false;
+                          setState(() {
+                            isPostingReplyComment = true;
+                          });
+                          commentController.clear();
+                          final justPostReplyComment = await getReplyComment(
+                              widget.postID,
+                              commentAreBeingReplied!.id,
+                              await postReplyComment(
+                                  commentContent,
+                                  user_info.user!.uid,
+                                  widget.postID,
+                                  commentAreBeingReplied!.id));
+                          final temp = commentList[
+                          commentList.indexOf(commentAreBeingReplied!)];
+                          temp.replyComments!.add(justPostReplyComment);
+                          temp.replyCount = await getReplyCommentCount(widget.postID, temp.id);
+                          commentList[commentList
+                              .indexOf(commentAreBeingReplied!)] = temp;
+                          //await _getPostContent();
+                          setState(() {
+                            isPostingReplyComment = false;
+                            commentAreBeingReplied = null;
+                          });
+                        }
                       }
+                      sendCommentMode = 0;
                     },
                     icon: Icon(
                       Icons.send_rounded,
@@ -585,6 +572,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
       margin: const EdgeInsets.only(left: 45),
       child: TextButton(
           onPressed: () {
+            sendCommentMode = 1;
             commentAreBeingReplied = cmt;
             isReplying = true;
             focusNode.requestFocus();
@@ -620,91 +608,105 @@ class _PostCommentsPageState extends State<PostCommentsPage>
           children: <Widget>[
             TextButton(
                 onPressed: () {},
-                child: RichText(
-                  text: TextSpan(children: [
-                    const WidgetSpan(
-                        child: Icon(
-                      Icons.report_outlined,
-                      color: Colors.black,
-                    )),
-                    const WidgetSpan(
-                      child: SizedBox(
-                        width: 10,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: RichText(
+                    text: TextSpan(children: [
+                      const WidgetSpan(
+                          child: Icon(
+                        Icons.report_outlined,
+                        color: Colors.black,
+                      )),
+                      const WidgetSpan(
+                        child: SizedBox(
+                          width: 10,
+                        ),
                       ),
-                    ),
-                    TextSpan(
-                        text: "Report",
-                        style: GoogleFonts.readexPro(
-                            fontSize: 20, color: Colors.black))
-                  ]),
+                      TextSpan(
+                          text: "Report",
+                          style: GoogleFonts.readexPro(
+                              fontSize: 20, color: Colors.black))
+                    ]),
+                  ),
                 )),
             TextButton(
                 onPressed: () {},
-                child: RichText(
-                  text: TextSpan(children: [
-                    const WidgetSpan(
-                        child: Icon(
-                      Icons.reply_outlined,
-                      color: Colors.black,
-                    )),
-                    const WidgetSpan(
-                      child: SizedBox(
-                        width: 10,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: RichText(
+                    text: TextSpan(children: [
+                      const WidgetSpan(
+                          child: Icon(
+                        Icons.reply_outlined,
+                        color: Colors.black,
+                      )),
+                      const WidgetSpan(
+                        child: SizedBox(
+                          width: 10,
+                        ),
                       ),
-                    ),
-                    TextSpan(
-                        text: "Reply",
-                        style: GoogleFonts.readexPro(
-                            fontSize: 20, color: Colors.black))
-                  ]),
+                      TextSpan(
+                          text: "Reply",
+                          style: GoogleFonts.readexPro(
+                              fontSize: 20, color: Colors.black))
+                    ]),
+                  ),
                 )),
             TextButton(
                 onPressed: () {},
-                child: RichText(
-                  text: TextSpan(children: [
-                    const WidgetSpan(
-                        child: Icon(
-                      Icons.copy_outlined,
-                      color: Colors.black,
-                    )),
-                    const WidgetSpan(
-                      child: SizedBox(
-                        width: 10,
+                child: SizedBox(
+                  width: double.infinity,
+                  child: RichText(
+                    text: TextSpan(children: [
+                      const WidgetSpan(
+                          child: Icon(
+                        Icons.copy_outlined,
+                        color: Colors.black,
+                      )),
+                      const WidgetSpan(
+                        child: SizedBox(
+                          width: 10,
+                        ),
                       ),
-                    ),
-                    TextSpan(
-                        text: "Copy to clipboard",
-                        style: GoogleFonts.readexPro(
-                            fontSize: 20, color: Colors.black))
-                  ]),
+                      TextSpan(
+                          text: "Copy to clipboard",
+                          style: GoogleFonts.readexPro(
+                              fontSize: 20, color: Colors.black))
+                    ]),
+                  ),
                 )),
             selectedItem!.userID == user_info.user!.uid
                 ? TextButton(
                     onPressed: () {},
-                    child: RichText(
-                      text: TextSpan(children: [
-                        const WidgetSpan(
-                            child: Icon(
-                          Icons.mode_edit_outline,
-                          color: Colors.black,
-                        )),
-                        const WidgetSpan(
-                          child: SizedBox(
-                            width: 10,
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: RichText(
+                        text: TextSpan(children: [
+                          const WidgetSpan(
+                              child: Icon(
+                            Icons.mode_edit_outline,
+                            color: Colors.black,
+                          )),
+                          const WidgetSpan(
+                            child: SizedBox(
+                              width: 10,
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                            text: "Edit",
-                            style: GoogleFonts.readexPro(
-                                fontSize: 20, color: Colors.black))
-                      ]),
+                          TextSpan(
+                              text: "Edit",
+                              style: GoogleFonts.readexPro(
+                                  fontSize: 20, color: Colors.black))
+                        ]),
+                      ),
                     ))
                 : Container(),
             selectedItem!.userID == user_info.user!.uid
                 ? TextButton(
-                    onPressed: () async {
+                    onPressed: () {
                       if (parentCmtId.isEmpty) {
-                        await deleteComment(selectedItem!.id, widget.postID);
+                        (() async {
+                          await deleteComment(selectedItem!.id, widget.postID);
+                        })();
                         commentList.remove(selectedItem!);
                         Navigator.pop(context);
                         Fluttertoast.showToast(
@@ -716,10 +718,13 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                             fontSize: 16.0);
                         setState(() {});
                       } else {
-                        await deleteReplyComment(
-                            selectedItem!.id, widget.postID, parentCmtId);
-                        commentList[commentList.lastIndexWhere(
-                                (element) => element.id == parentCmtId)]
+                        (() async {
+                          await deleteReplyComment(
+                              selectedItem!.id, widget.postID, parentCmtId);
+                        })();
+                        final index = commentList.lastIndexWhere(
+                                (element) => element.id == parentCmtId);
+                        commentList[index]
                             .replyComments!
                             .remove(selectedItem!);
                         Navigator.pop(context);
@@ -733,25 +738,28 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                         setState(() {});
                       }
                     },
-                    child: RichText(
-                      text: TextSpan(children: [
-                        const WidgetSpan(
-                            child: Icon(
-                          Icons.delete_outline,
-                          color: Colors.red,
-                        )),
-                        const WidgetSpan(
-                          child: SizedBox(
-                            width: 10,
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: RichText(
+                        text: TextSpan(children: [
+                          const WidgetSpan(
+                              child: Icon(
+                            Icons.delete_outline,
+                            color: Colors.red,
+                          )),
+                          const WidgetSpan(
+                            child: SizedBox(
+                              width: 10,
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                            text: "Delete",
-                            style: GoogleFonts.readexPro(
-                                fontSize: 20,
-                                color: Colors.red,
-                                fontWeight: FontWeight.bold))
-                      ]),
+                          TextSpan(
+                              text: "Delete",
+                              style: GoogleFonts.readexPro(
+                                  fontSize: 20,
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold))
+                        ]),
+                      ),
                     ))
                 : Container(),
           ],
@@ -761,7 +769,6 @@ class _PostCommentsPageState extends State<PostCommentsPage>
   }
 
   Widget buildCommentBlock(BuildContext context, Comment cmt) {
-    bool isSelectingItem = false;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -929,7 +936,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
             ),
             child: !showReplyCommentList.contains(cmt)
                 ? Text(
-                    "----- Read ${cmt.replyCount} reply comments",
+                    "----- Read ${isShowingCommentsOfCurrentUser ? cmt.replyCount! -  commentList[index].replyComments!.where((element) => element.userID == user_info.user!.uid).length : cmt.replyCount!} reply comments",
                     style: GoogleFonts.readexPro(color: Colors.grey),
                   )
                 : Text(
@@ -939,7 +946,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
   }
 
   Widget buildReplyCommentBlock(
-      BuildContext context, Comment cmt, String parentCmtID) {
+      BuildContext context, Comment cmt, Comment parentCmt) {
     return Container(
       decoration: BoxDecoration(
           color: selectedItem == cmt ? Colors.black12 : colors.backgroundColor),
@@ -973,7 +980,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                     await showModalBottomSheet<void>(
                       context: context,
                       builder: (BuildContext context) {
-                        return buildModalBottom(context, parentCmtID);
+                        return buildModalBottom(context, parentCmt.id);
                       },
                     );
                     selectedItem = null;
@@ -1021,7 +1028,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                       child: IconButton(
                         onPressed: () async {
                           await likeAndUnlikeReplyComment(
-                              cmt, widget.postID, parentCmtID);
+                              cmt, widget.postID, parentCmt.id);
                           cmt.isLiked = !cmt.isLiked!;
                           if (cmt.isLiked!) {
                             cmt.likeCount = cmt.likeCount! + 1;
@@ -1061,9 +1068,37 @@ class _PostCommentsPageState extends State<PostCommentsPage>
               ),
             ],
           ),
-          buildReplyButton(context, cmt),
+          Container(
+            width: 60,
+            margin: const EdgeInsets.only(left: 45),
+            child: TextButton(
+                onPressed: () {
+                  sendCommentMode = 2;
+                  replyCommentIsBeingReplied = cmt.id;
+                  commentAreBeingReplied = parentCmt;
+                  isReplying = true;
+                  focusNode.requestFocus();
+                  commentController.text = "@${commentAreBeingReplied!.id} ";
+                  commentController.selection = TextSelection.collapsed(
+                      offset: commentController.text.length);
+                  setState(() {});
+                },
+                style: TextButton.styleFrom(
+                    minimumSize: const Size(50, 30),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    splashFactory: NoSplash.splashFactory,
+                    alignment: Alignment.center),
+                child: Text(
+                  "Reply",
+                  style: GoogleFonts.readexPro(
+                      color: Colors.grey,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600),
+                )),
+          )
         ],
       ),
     );
   }
 }
+

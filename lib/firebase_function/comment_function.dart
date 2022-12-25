@@ -14,12 +14,16 @@ Future<String> postComment(String content, String userID, String postID) async {
       .collection('comments')
       .doc();
   Comment cmt = Comment(
+    replyCount: 0,
       id: doc.id,
       userID: userID,
       content: content,
       likedUsers: [],
       createDate: DateTime.now());
   doc.set(cmt.toJson());
+  FirebaseFirestore.instance
+      .collection('post')
+      .doc(postID).update({'commentsCount': await getCommentsCount(postID)});
   return cmt.id;
 }
 
@@ -52,7 +56,6 @@ Future<int> getReplyCommentCount(String postID, String cmtID) async {
       .collection('replyComments')
       .count()
       .get();
-  print("reply count $cmtID ${doc.count}");
   return doc.count;
 }
 
@@ -64,15 +67,13 @@ Future<List<Comment>> getTopComment(String postID, int commentLimit) async {
       .limit(commentLimit)
       .get();
   final listDocComment = doc.docs;
-  if(doc.docs.isEmpty) {
+  if (doc.docs.isEmpty) {
     return [];
   }
   lastComment = listDocComment.last;
   List<Comment> commentList = [];
   for (var e in listDocComment) {
     commentList.add(Comment.fromJson(e.data()));
-    //final docsLen = await FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').doc(e.id).collection('replyComments').get();
-    commentList.last.replyCount = await getReplyCommentCount(postID, e.id);
   }
   return commentList;
 }
@@ -101,8 +102,11 @@ Future<PostModel> getPostContent(String postID, int commentLimit) async {
   final doc = FirebaseFirestore.instance.collection('post').doc(postID);
   final post = await doc.get();
   PostModel postContent = await PostModel.fromJson(post.data()!);
-  postContent.comments = await getTopComment(postContent.postID, commentLimit);
   return postContent;
+}
+
+Future<List<Comment>> getPostComments(String postID, int commentLimit) async {
+  return await getTopComment(postID, commentLimit);
 }
 
 Future<PostModel> displayUsersCommentFirst(
@@ -129,17 +133,24 @@ Future<void> deleteComment(String cmtID, String postID) async {
       .collection('comments')
       .doc(cmtID);
   await docPost.delete();
+  FirebaseFirestore.instance
+      .collection('post')
+      .doc(postID).update({'commentsCount': await getCommentsCount(postID)});
 }
 
-Future<void> deleteReplyComment(String cmtID, String postID, String parentCmtID) async {
+Future<void> deleteReplyComment(
+    String cmtID, String postID, String parentCmtID) async {
   final docPost = FirebaseFirestore.instance
       .collection('post')
       .doc(postID)
       .collection('comments')
-      .doc(parentCmtID).collection('replyComments').doc(cmtID);
+      .doc(parentCmtID)
+      .collection('replyComments')
+      .doc(cmtID);
   await docPost.delete();
+  FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').doc(parentCmtID).update(
+      {'replyCount': await getReplyCommentCount(postID, parentCmtID)});
 }
-
 
 Future<String> postReplyComment(
     String content, String userID, String postID, String cmtID) async {
@@ -155,18 +166,25 @@ Future<String> postReplyComment(
       userID: userID,
       content: content,
       likedUsers: [],
-      createDate: DateTime.now());
+      createDate: DateTime.now(),
+      replyCount: 0
+  );
   doc.set(cmt.toJson());
+  FirebaseFirestore.instance.collection('post').doc(postID).collection('comments').doc(cmtID).update(
+      {'replyCount': await getReplyCommentCount(postID, cmtID)});
   return cmt.id;
 }
 
-Future<Comment> getReplyComment(String postID, String cmtID, String replyCmtID) async {
+Future<Comment> getReplyComment(
+    String postID, String cmtID, String replyCmtID) async {
   final doc = await FirebaseFirestore.instance
       .collection('post')
       .doc(postID)
       .collection('comments')
       .doc(cmtID)
-      .collection('replyComments').doc(replyCmtID).get();
+      .collection('replyComments')
+      .doc(replyCmtID)
+      .get();
   return Comment.fromJson(doc.data() as Map<String, dynamic>);
 }
 

@@ -32,7 +32,9 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
 
   late RefreshController _refreshController =
       RefreshController(initialRefresh: false);
-
+  bool isLoading = true;
+  int indexGetPost = 0;
+  int indexGetMore = 0;
   static const int postsLimit = 5;
 
   void _onRefresh() async {
@@ -63,8 +65,11 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
   DocumentSnapshot? _lastDocument;
   bool _morePostsAvailable = true;
   List<PostModel> postList = [];
+  String? IDOfThePostJustPosted;
 
   _getPosts() async {
+    postList.clear();
+    _posts.clear();
     Query q = _firestore
         .collection('post')
         .where('isDeleted', isEqualTo: false)
@@ -79,7 +84,23 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
     for(var e in _posts) {
       postList.add(await PostModel.fromJson(e.data() as Map<String, dynamic>));
     }
-    setState(() {});
+
+    if(IDOfThePostJustPosted != null) {
+      late var temp;
+      for(var e in postList) {
+        if(e.postID == IDOfThePostJustPosted) {
+          temp = e;
+          postList.remove(e);
+          break;
+        }
+      }
+      postList.indexOf(temp, 0);
+    }
+
+    setState(() {
+      IDOfThePostJustPosted = null;
+      isLoading = false;
+    });
   }
 
   _getMorePosts() async {
@@ -118,7 +139,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return isLoading ? Center(child: LoadingAnimationWidget.discreteCircle(color: colors.primaryColor, size: 30),) : Scaffold(
       backgroundColor: colors.backgroundColor,
       resizeToAvoidBottomInset: true,
       appBar: PreferredSize(
@@ -131,8 +152,9 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
         children: [
           constants.isUploading
               ? UploadingWidget(
-                  callback: (val) {
-                    _getPosts();
+                  callback: (val) async {
+                    IDOfThePostJustPosted = val;
+                    await _getPosts();
                   },
                   list: constants.postInfomation['medias'],
                   caption: constants.postInfomation['caption'],

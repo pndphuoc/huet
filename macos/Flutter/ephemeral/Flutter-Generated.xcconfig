@@ -1,11 +1,6 @@
 // This is a generated file; do not edit or check into version control.
-<<<<<<< HEAD
-FLUTTER_ROOT=C:\flutter
-FLUTTER_APPLICATION_PATH=P:\hue_t
-=======
-FLUTTER_ROOT=C:\Users\phamd\OneDrive\Documents\Flutter\Flutter_SDK\flutter
-FLUTTER_APPLICATION_PATH=C:\Users\phamd\Documents\huet
->>>>>>> bcb71f7b74ee50f4556d0801b88b3238dc255c80
+FLUTTER_ROOT=E:\flutter
+FLUTTER_APPLICATION_PATH=C:\Users\phamn\StudioProjects\hue_t
 COCOAPODS_PARALLEL_CODE_SIGN=true
 FLUTTER_BUILD_DIR=build
 FLUTTER_BUILD_NAME=1.0.0
