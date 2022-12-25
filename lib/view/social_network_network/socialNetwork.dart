@@ -30,11 +30,20 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
     await Permission.storage.request();
   }
 
+  List<String> _fakeDate = ["Đại nội Huế", "Lăng Minh Mạng", "Lăng Đình Trường", "Lăng Khải Định", "Cung An Định", "Ngọ Môn", "Nhà Duy Phước"];
+
   late RefreshController _refreshController =
       RefreshController(initialRefresh: false);
+  ScrollController _scrollController = ScrollController();
+  final _searchController = TextEditingController();
+  var focusNode = FocusNode();
+  List<String> _searchResults = [];
+  double _containerHeight = 0.0;
+  String _selectedAttraction = "Đại nội Huế";
   bool isLoading = true;
   int indexGetPost = 0;
   int indexGetMore = 0;
+  bool _showTextField = false;
   static const int postsLimit = 5;
 
   void _onRefresh() async {
@@ -77,18 +86,18 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
     QuerySnapshot querySnapshot = await q.get();
     _posts = querySnapshot.docs;
 
-    if(querySnapshot.docs.isNotEmpty) {
+    if (querySnapshot.docs.isNotEmpty) {
       _lastDocument = querySnapshot.docs[querySnapshot.docs.length - 1];
     }
 
-    for(var e in _posts) {
+    for (var e in _posts) {
       postList.add(await PostModel.fromJson(e.data() as Map<String, dynamic>));
     }
 
-    if(IDOfThePostJustPosted != null) {
+    if (IDOfThePostJustPosted != null) {
       late var temp;
-      for(var e in postList) {
-        if(e.postID == IDOfThePostJustPosted) {
+      for (var e in postList) {
+        if (e.postID == IDOfThePostJustPosted) {
           temp = e;
           postList.remove(e);
           break;
@@ -122,7 +131,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
     if (querySnapshot.docs.length < postsLimit) {
       _morePostsAvailable = false;
     }
-    for(var e in querySnapshot.docs) {
+    for (var e in querySnapshot.docs) {
       postList.add(await PostModel.fromJson(e.data() as Map<String, dynamic>));
     }
     _posts.addAll(querySnapshot.docs);
@@ -139,144 +148,220 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
 
   @override
   Widget build(BuildContext context) {
-    return isLoading ? Center(child: LoadingAnimationWidget.discreteCircle(color: colors.primaryColor, size: 30),) : Scaffold(
-      backgroundColor: colors.backgroundColor,
-      resizeToAvoidBottomInset: true,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(100.0),
-        child: SafeArea(
-          child: appBarBlock(context),
-        ),
-      ),
-      body: Column(
-        children: [
-          constants.isUploading
-              ? UploadingWidget(
-                  callback: (val) async {
-                    IDOfThePostJustPosted = val;
-                    await _getPosts();
-                  },
-                  list: constants.postInfomation['medias'],
-                  caption: constants.postInfomation['caption'],
-                  attractionId:
-                      constants.postInfomation['attractionID'].toString(),
-                )
-              : Container(),
-          Expanded(
-              child: InViewNotifierCustomScrollView(
-            isInViewPortCondition:
-                (double deltaTop, double deltaBottom, double vpHeight) {
-              return deltaTop < (0.5 * vpHeight) &&
-                  deltaBottom > (0.5 * vpHeight);
-            },
-            slivers: [
-              SliverFillRemaining(
-                child: SmartRefresher(
-                  enablePullDown: true,
-                  enablePullUp: true,
-                  header: WaterDropMaterialHeader(
-                    backgroundColor: colors.backgroundColor,
-                    color: colors.primaryColor,
-                  ),
-                  controller: _refreshController,
-                  onRefresh: _onRefresh,
-                  onLoading: _morePostsAvailable
-                      ? _getMorePosts
-                      : () {
-                          _refreshController.loadComplete();
-                        },
-                  child: ListView.builder(
-                      itemCount: postList.length,
-                      itemBuilder: (context, index) {
-                        return InViewNotifierWidget(
-                          id: '$index',
-                          builder: (BuildContext context, bool isInView,
-                              Widget? child) {
-                            return isInView
-                                ? Post(
-                                    post: postList[index],
-                                    isInView: true,
-                                    callback: (val) async {
-                                       bool deletePost = await showDialog(
-                                           context: context,
-                                           builder: (BuildContext context) {
-                                             return AlertDialog(
-                                               shape: RoundedRectangleBorder(
-                                                 borderRadius: BorderRadius.circular(20)
-                                               ),
-                                               title: Text("Delete this post?", style: GoogleFonts.readexPro(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 25), textAlign: TextAlign.center,),
-                                               content: Text("You can restore this post within 30 days. After that, it will be permanently deleted", style: GoogleFonts.readexPro(color: Colors.grey,), textAlign: TextAlign.center,),
-                                               actionsAlignment: MainAxisAlignment.center,
-                                               actions: [
-                                                 ElevatedButton(onPressed: (){
-                                                   Navigator.of(context).pop(false);
-                                                 },
-                                                   style: ElevatedButton.styleFrom(
-                                                     elevation: 0,
-                                                       padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
-                                                       backgroundColor: Colors.white,
-                                                       shape: RoundedRectangleBorder(
-                                                           borderRadius: BorderRadius.circular(20)
-                                                       )
-                                                   ), child: Text("Cancel", style: GoogleFonts.readexPro(color: Colors.grey),),
-                                                 ),
-                                                 ElevatedButton(onPressed: (){
-                                                   Navigator.of(context).pop(true);
-                                                 },
-                                                   style: ElevatedButton.styleFrom(
-                                                     padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
-                                                     backgroundColor: Colors.red,
-                                                     shape: RoundedRectangleBorder(
-                                                       borderRadius: BorderRadius.circular(20)
-                                                     )
-                                                   ), child: const Text("Delete"),
-                                                 ),
-                                               ],
-                                             );
-                                           }
-                                       );
-                                       if(deletePost) {
-                                         FirebaseFirestore.instance.collection('post').doc(val).update(
-                                             {"isDeleted": true});
-                                         postList.removeAt(index);
-                                       }
-                                       setState(() {
-                                         //_getPosts();
-                                       });
-                                    },
-                                  )
-                                : Post(
-                                    post: postList[index],
-                                    isInView: false,
-                              callback: (val) async {
-                                bool deletePost = await showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return buildDeleteAlertDialog(context);
-                                    }
-                                );
-                                if(deletePost) {
-                                  FirebaseFirestore.instance.collection('post').doc(val).update(
-                                      {"isDeleted": true});
-                                }
-                                setState(() {
-                                  _getPosts();
-                                });
-                              },
-                                  );
-                          },
-                        );
-                      }),
-                ),
-              )
-            ],
-          )),
-          const SizedBox(
-            height: 70,
+    return isLoading
+        ? Center(
+            child: LoadingAnimationWidget.discreteCircle(
+                color: colors.primaryColor, size: 30),
           )
-        ],
-      ),
-    );
+        : Scaffold(
+            backgroundColor: colors.backgroundColor,
+            resizeToAvoidBottomInset: true,
+            appBar: PreferredSize(
+              preferredSize: const Size.fromHeight(100.0),
+              child: SafeArea(
+                child: appBarBlock(context),
+              ),
+            ),
+            body: Column(
+              children: [
+                constants.isUploading
+                    ? UploadingWidget(
+                        callback: (val) async {
+                          IDOfThePostJustPosted = val;
+                          await _getPosts();
+                        },
+                        list: constants.postInfomation['medias'],
+                        caption: constants.postInfomation['caption'],
+                        attractionId:
+                            constants.postInfomation['attractionID'].toString(),
+                      )
+                    : Container(),
+                attractionSelector(context),
+                Expanded(
+                    child: GestureDetector(
+                      onVerticalDragDown: (details) {
+                        if (details.localPosition.dy > 0) {
+                          FocusScope.of(context).unfocus();
+                          setState(() {
+                            _containerHeight = 0;
+                            _showTextField = false;
+                          });
+                        }
+                      },
+                      child: InViewNotifierCustomScrollView(
+                  isInViewPortCondition:
+                        (double deltaTop, double deltaBottom, double vpHeight) {
+                      return deltaTop < (0.5 * vpHeight) &&
+                          deltaBottom > (0.5 * vpHeight);
+                  },
+                  slivers: [
+                      SliverFillRemaining(
+                        child: SmartRefresher(
+                          enablePullDown: true,
+                          enablePullUp: true,
+                          header: WaterDropMaterialHeader(
+                            backgroundColor: colors.backgroundColor,
+                            color: colors.primaryColor,
+                          ),
+                          controller: _refreshController,
+                          onRefresh: _onRefresh,
+                          onLoading: _morePostsAvailable
+                              ? _getMorePosts
+                              : () {
+                                  _refreshController.loadComplete();
+                                },
+                          child: ListView.builder(
+                              itemCount: postList.length,
+                              itemBuilder: (context, index) {
+                                return InViewNotifierWidget(
+                                  id: '$index',
+                                  builder: (BuildContext context, bool isInView,
+                                      Widget? child) {
+                                    return isInView
+                                        ? Post(
+                                            post: postList[index],
+                                            isInView: true,
+                                            callback: (val) async {
+                                              bool deletePost = await showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return AlertDialog(
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          20)),
+                                                      title: Text(
+                                                        "Delete this post?",
+                                                        style:
+                                                            GoogleFonts.readexPro(
+                                                                color:
+                                                                    Colors.black,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontSize: 25),
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                      ),
+                                                      content: Text(
+                                                        "You can restore this post within 30 days. After that, it will be permanently deleted",
+                                                        style:
+                                                            GoogleFonts.readexPro(
+                                                          color: Colors.grey,
+                                                        ),
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                      ),
+                                                      actionsAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      actions: [
+                                                        ElevatedButton(
+                                                          onPressed: () {
+                                                            Navigator.of(context)
+                                                                .pop(false);
+                                                          },
+                                                          style: ElevatedButton.styleFrom(
+                                                              elevation: 0,
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                          .only(
+                                                                      left: 40,
+                                                                      right: 40,
+                                                                      top: 15,
+                                                                      bottom: 15),
+                                                              backgroundColor:
+                                                                  Colors.white,
+                                                              shape: RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              20))),
+                                                          child: Text(
+                                                            "Cancel",
+                                                            style: GoogleFonts
+                                                                .readexPro(
+                                                                    color: Colors
+                                                                        .grey),
+                                                          ),
+                                                        ),
+                                                        ElevatedButton(
+                                                          onPressed: () {
+                                                            Navigator.of(context)
+                                                                .pop(true);
+                                                          },
+                                                          style: ElevatedButton.styleFrom(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                          .only(
+                                                                      left: 40,
+                                                                      right: 40,
+                                                                      top: 15,
+                                                                      bottom: 15),
+                                                              backgroundColor:
+                                                                  Colors.red,
+                                                              shape: RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              20))),
+                                                          child: const Text(
+                                                              "Delete"),
+                                                        ),
+                                                      ],
+                                                    );
+                                                  });
+                                              if (deletePost) {
+                                                FirebaseFirestore.instance
+                                                    .collection('post')
+                                                    .doc(val)
+                                                    .update({"isDeleted": true});
+                                                postList.removeAt(index);
+                                              }
+                                              setState(() {
+                                                //_getPosts();
+                                              });
+                                            },
+                                          )
+                                        : Post(
+                                            post: postList[index],
+                                            isInView: false,
+                                            callback: (val) async {
+                                              bool deletePost = await showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return buildDeleteAlertDialog(
+                                                        context);
+                                                  });
+                                              if (deletePost) {
+                                                FirebaseFirestore.instance
+                                                    .collection('post')
+                                                    .doc(val)
+                                                    .update({"isDeleted": true});
+                                              }
+                                              setState(() {
+                                                _getPosts();
+                                              });
+                                            },
+                                          );
+                                  },
+                                );
+                              }),
+                        ),
+                      )
+                  ],
+                ),
+                    )),
+/*                AnimatedOpacity(opacity: _showTextField ? 0 : 1, duration: const Duration(milliseconds: 400) , child: const SizedBox(
+                  height: 70,
+                ),)*/
+              ],
+            ),
+          );
   }
 
   appBarBlock(BuildContext context) {
@@ -339,37 +424,221 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
 
   Widget buildDeleteAlertDialog(BuildContext context) {
     return AlertDialog(
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20)
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      title: Text(
+        "Delete this post?",
+        style: GoogleFonts.readexPro(
+            color: Colors.black, fontWeight: FontWeight.bold, fontSize: 25),
+        textAlign: TextAlign.center,
       ),
-      title: Text("Delete this post?", style: GoogleFonts.readexPro(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 25), textAlign: TextAlign.center,),
-      content: Text("You can restore this post within 30 days. After that, it will be permanently deleted", style: GoogleFonts.readexPro(color: Colors.grey,), textAlign: TextAlign.center,),
+      content: Text(
+        "You can restore this post within 30 days. After that, it will be permanently deleted",
+        style: GoogleFonts.readexPro(
+          color: Colors.grey,
+        ),
+        textAlign: TextAlign.center,
+      ),
       actionsAlignment: MainAxisAlignment.center,
       actions: [
-        ElevatedButton(onPressed: (){
-          Navigator.of(context).pop(false);
-        },
+        ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pop(false);
+          },
           style: ElevatedButton.styleFrom(
               elevation: 0,
-              padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
+              padding: const EdgeInsets.only(
+                  left: 40, right: 40, top: 15, bottom: 15),
               backgroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)
-              )
-          ), child: Text("Cancel", style: GoogleFonts.readexPro(color: Colors.grey),),
+                  borderRadius: BorderRadius.circular(20))),
+          child: Text(
+            "Cancel",
+            style: GoogleFonts.readexPro(color: Colors.grey),
+          ),
         ),
-        ElevatedButton(onPressed: (){
-          Navigator.of(context).pop(true);
-        },
+        ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pop(true);
+          },
           style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
+              padding: const EdgeInsets.only(
+                  left: 40, right: 40, top: 15, bottom: 15),
               backgroundColor: Colors.red,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)
-              )
-          ), child: const Text("Delete"),
+                  borderRadius: BorderRadius.circular(20))),
+          child: const Text("Delete"),
         ),
       ],
     );
+  }
+
+  Widget attractionSelector(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.only(top: 10, right: 20, left: 20, bottom: 10),
+          width: MediaQuery.of(context).size.width,
+          height: 60,
+          decoration: BoxDecoration(
+              color: colors.SN_postBackgroundColor,
+              borderRadius: BorderRadius.circular(15)),
+          child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+              return Stack(children: [
+                Positioned(
+                  top: 0,
+                  bottom: 0,
+                  child: Row(
+                    children: [
+                      const SizedBox(
+                        width: 20,
+                      ),
+                      AnimatedOpacity(
+                          duration: const Duration(milliseconds: 400),
+                          opacity: _showTextField ? 0 : 1,
+                          child: const Icon(
+                            Icons.place_outlined,
+                            size: 30,
+                          )),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      AnimatedOpacity(
+                        duration: const Duration(milliseconds: 200),
+                        opacity: _showTextField ? 0 : 1,
+                        child: GestureDetector(
+                          child: Text(
+                            _selectedAttraction,
+                            style:
+                            GoogleFonts.readexPro(fontSize: 15, color: Colors.black),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 20,
+                      )
+                    ],
+                  ),
+                ),
+                AnimatedPositioned(duration: const Duration(milliseconds: 300),
+                    top: 0,
+                    bottom: 0,
+                    left: _showTextField ? 0 : constraints.maxWidth - 60,
+                    child: SizedBox(
+                      height: 60,
+                      width: 60,
+                      child: ElevatedButton(onPressed: (){
+                        setState(() {
+                          _showTextField = !_showTextField;
+                          _showTextField ? _containerHeight = 200 : _containerHeight = 0;
+                          _searchResults = _fakeDate;
+                          _showTextField ? focusNode.requestFocus() : focusNode.unfocus();
+                        });
+                      },
+                          style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15)
+                              ),
+                              backgroundColor: colors.primaryColor,
+                              elevation: 0,
+                              padding: EdgeInsets.zero
+                          ),
+
+                          child: const Icon(Icons.search)
+                      ),
+                    )),
+                Positioned(
+                  right: 0,
+                  child: AnimatedContainer(width: _showTextField ? constraints.maxWidth - 70 : 0, duration: const Duration(milliseconds: 300),
+                    //padding: const EdgeInsets.only(right: 20),
+                    child: SizedBox(
+                      width: constraints.maxWidth - 70,
+                      child: TextField(
+                        focusNode: focusNode,
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.only(top: 20, bottom: 20),
+                          hintText: "Search for tourist attractions",
+                          border: const UnderlineInputBorder(borderSide: BorderSide.none),
+                          suffixIcon: _showTextField ? GestureDetector(
+                            onTap: (){
+                              setState(() {
+                                _searchResults = [];
+                                _containerHeight = 0;
+                                _searchController.clear();
+                              });
+                            },
+                            child: const Icon(Icons.close),
+                          ) : Container()
+                        ),
+                        onChanged: (value){
+                          setState(() {
+                            _searchResults = _searchAttraction(value);
+                             _containerHeight = _calculateContainerHeight(_searchResults.length);
+                          });
+                        },
+                        //enabled: _showTextField ? true : false,
+                      ),
+                    ),
+                  ),
+                ),
+              ]);
+            }
+          ),
+        ),
+        LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return AnimatedContainer(
+              margin: const EdgeInsets.only(left: 20, right: 20),
+              decoration: BoxDecoration(
+                color: colors.SN_postBackgroundColor,
+                borderRadius: BorderRadius.circular(20)
+              ),
+              duration: const Duration(milliseconds: 200),
+              height: _containerHeight,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: ListView.builder(
+                  itemExtent: 40,
+                  itemCount: _searchResults.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return TextButton(
+                      onPressed: (){
+                        setState(() {
+                          _searchController.clear();
+                          _selectedAttraction = _searchResults[index];
+                          _showTextField = false;
+                          _containerHeight = 0;
+                          FocusScope.of(context).unfocus();
+                        });
+                      },
+                      child: SizedBox(
+                        height: 30,
+                        width: double.infinity,
+                        child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(_searchResults[index], style: GoogleFonts.readexPro(color: Colors.grey, fontWeight: FontWeight.w500, fontSize: 15), overflow: TextOverflow.ellipsis,)),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  List<String> _searchAttraction(String value) {
+    return _fakeDate.where((element) => element.toLowerCase().contains(value.toLowerCase())).toList();
+  }
+  double _calculateContainerHeight(int resultCount) {
+    // Calculate the height of the container based on the number of search results
+    if (resultCount > 5) {
+      resultCount = 5;
+    }
+    return resultCount * 40.0;
   }
 }

@@ -12,6 +12,7 @@ import 'package:hue_t/animation/heart_animation.dart';
 import 'package:hue_t/colors.dart' as colors;
 import 'package:hue_t/model/social_network/post_model.dart';
 import 'package:hue_t/view/social_network_network/post_comments.dart';
+import 'package:hue_t/view/social_network_network/socialNetwork.dart';
 import 'package:hue_t/view/social_network_network/video_widget.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:intl/intl.dart';
@@ -42,6 +43,8 @@ late String documentSnapshotID;
 late PostModel post;
 
 class _PostState extends State<Post> with TickerProviderStateMixin {
+  SocialNetWorkPage? socialNetworkPage;
+
   late final AnimationController _heartController = AnimationController(
     duration: const Duration(milliseconds: 500),
     vsync: this,
@@ -49,19 +52,18 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
 
   //CachedVideoPlayerController? _controller;
   int currentPos = 0;
-  bool isLiked = false;
   bool isHeartAnimating = false;
   bool isHeartButtonAnimating = false;
   bool isMark = false;
   String? selectedValue;
   late int likeCount;
 
-  @override
+/*  @override
   void dispose() {
     _heartController.dispose();
     super.dispose();
-  }
-
+  }*/
+/*
   _likeStatus() async {
     await FirebaseFirestore.instance
         .collection('post')
@@ -74,12 +76,12 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
         });
       }
     });
-  }
+  }*/
 
   Future<void> _likeAndUnlikePost() async {
     final docPost =
         FirebaseFirestore.instance.collection('post').doc(widget.post.postID);
-    if (!isLiked) {
+    if (!widget.post.isLiked!) {
       docPost.update({
         'likedUsers': FieldValue.arrayUnion([user_info.user!.uid])
       });
@@ -98,7 +100,6 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
     super.initState();
     //documentSnapshotID = widget.documentSnapshot.id;
     post = widget.post;
-    _likeStatus();
     likeCount = post.likedUsers.length;
   }
 
@@ -190,11 +191,11 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
       width: double.infinity,
       child: GestureDetector(
         onDoubleTap: () {
-          if (!isLiked) {
+          if (!widget.post.isLiked!) {
             _likeAndUnlikePost();
           }
           setState(() {
-            isLiked = true;
+            widget.post.isLiked = true;
             isHeartAnimating = true;
             isHeartButtonAnimating = true;
           });
@@ -315,7 +316,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                 onTap: () {
                   _likeAndUnlikePost();
                   setState(() {
-                    isLiked = !isLiked;
+                    widget.post.isLiked = !widget.post.isLiked!;
                     isHeartButtonAnimating = !isHeartButtonAnimating;
                     _heartController.forward();
                   });
@@ -324,7 +325,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                   children: [
                     HeartAnimation(
                       isAnimating: isHeartButtonAnimating || isHeartAnimating, ////
-                      child: isLiked
+                      child: widget.post.isLiked!
                           ? const Icon(
                         Icons.favorite_rounded,
                         color: Colors.red,

@@ -1,6 +1,7 @@
 import 'package:hue_t/model/social_network/comment_model.dart';
 import 'media_model.dart';
 import '../../firebase_function/comment_function.dart';
+import 'package:hue_t/constants/user_info.dart';
 
 class PostModel {
   String postID;
@@ -14,6 +15,7 @@ class PostModel {
   DateTime createDate;
   bool isDeleted;
   int likesCount;
+  bool? isLiked;
 
   PostModel(
       {required this.postID,
@@ -26,7 +28,8 @@ class PostModel {
       required this.createDate,
       required this.isDeleted,
       required this.commentsCount,
-      required this.likesCount
+      required this.likesCount,
+        this.isLiked
       });
 
   Map<String, dynamic> toJson() {
@@ -65,6 +68,7 @@ class PostModel {
         createDate: json['createDate'].toDate(),
         isDeleted: json['isDeleted'],
         likesCount: json['likesCount'],
+        isLiked: user == null ? false : likeStatus(List<String>.from(json['likedUsers']), user!.uid)
     );
   }
 
