@@ -216,14 +216,38 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
                       if (videoController != null) {
                         videoController!.dispose();
                       }
-                      Navigator.push(
+/*                      Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => CompleteUploadPage(
                                 medias: isMultiSelect
                                     ? selectedList
                                     : [selectedMedia!]),
-                          ));
+                          ));*/
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          transitionDuration: const Duration(milliseconds: 300),
+                          transitionsBuilder: (BuildContext context, Animation<double> animation,
+                              Animation<double> secondaryAnimation, Widget child) {
+                            // Use a custom transition animation
+                            return SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(1.0, 0.0),
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: child,
+                            );
+                          },
+                          pageBuilder: (BuildContext context, Animation<double> animation,
+                              Animation<double> secondaryAnimation) {
+                            return CompleteUploadPage(
+                                medias: isMultiSelect
+                                    ? selectedList
+                                    : [selectedMedia!]);
+                          },
+                        ),
+                      );
                     },
                     icon: Icon(
                       Icons.arrow_forward,

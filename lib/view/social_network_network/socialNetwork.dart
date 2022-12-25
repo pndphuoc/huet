@@ -34,7 +34,9 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
 
   late RefreshController _refreshController =
       RefreshController(initialRefresh: false);
+
   ScrollController _scrollController = ScrollController();
+
   final _searchController = TextEditingController();
   var focusNode = FocusNode();
   List<String> _searchResults = [];
@@ -74,7 +76,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
   DocumentSnapshot? _lastDocument;
   bool _morePostsAvailable = true;
   List<PostModel> postList = [];
-  String? IDOfThePostJustPosted;
+  String? idOfThePostJustPosted;
 
   _getPosts() async {
     postList.clear();
@@ -94,10 +96,10 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
       postList.add(await PostModel.fromJson(e.data() as Map<String, dynamic>));
     }
 
-    if (IDOfThePostJustPosted != null) {
+    if (idOfThePostJustPosted != null) {
       late var temp;
       for (var e in postList) {
-        if (e.postID == IDOfThePostJustPosted) {
+        if (e.postID == idOfThePostJustPosted) {
           temp = e;
           postList.remove(e);
           break;
@@ -107,7 +109,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
     }
 
     setState(() {
-      IDOfThePostJustPosted = null;
+      idOfThePostJustPosted = null;
       isLoading = false;
     });
   }
@@ -167,7 +169,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                 constants.isUploading
                     ? UploadingWidget(
                         callback: (val) async {
-                          IDOfThePostJustPosted = val;
+                          idOfThePostJustPosted = val;
                           await _getPosts();
                         },
                         list: constants.postInfomation['medias'],
@@ -189,6 +191,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                         }
                       },
                       child: InViewNotifierCustomScrollView(
+                        controller: _scrollController,
                   isInViewPortCondition:
                         (double deltaTop, double deltaBottom, double vpHeight) {
                       return deltaTop < (0.5 * vpHeight) &&
@@ -398,10 +401,31 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
+/*                    Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const CreatePost()));
+                            builder: (context) => const CreatePost()));*/
+                    Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                        transitionDuration: const Duration(milliseconds: 300),
+                        transitionsBuilder: (BuildContext context, Animation<double> animation,
+                            Animation<double> secondaryAnimation, Widget child) {
+                          // Use a custom transition animation
+                          return SlideTransition(
+                            position: Tween<Offset>(
+                              begin: const Offset(1.0, 0.0),
+                              end: Offset.zero,
+                            ).animate(animation),
+                            child: child,
+                          );
+                        },
+                        pageBuilder: (BuildContext context, Animation<double> animation,
+                            Animation<double> secondaryAnimation) {
+                          return CreatePost();
+                        },
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                       shape: const CircleBorder(),

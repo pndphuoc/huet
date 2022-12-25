@@ -137,12 +137,36 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
                   'caption': captionController.text,
                   'attractionID': selectedAttraction!.id
                 };
-                Navigator.of(context).pushAndRemoveUntil(
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  PageRouteBuilder(
+                    transitionDuration: const Duration(milliseconds: 300),
+                    transitionsBuilder: (BuildContext context, Animation<double> animation,
+                        Animation<double> secondaryAnimation, Widget child) {
+                      // Use a custom transition animation
+                      return SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(1.0, 0.0),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
+                      );
+                    },
+                    pageBuilder: (BuildContext context, Animation<double> animation,
+                        Animation<double> secondaryAnimation) {
+                      return const HueT(
+                        index: 0,
+                      );
+                    },
+                  ), (route) => false
+                );
+
+/*                Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(
                         builder: (context) => const HueT(
                               index: 0,
                             )),
-                    (route) => false);
+                    (route) => false);*/
               }
             },
             icon: Icon(
