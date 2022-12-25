@@ -269,8 +269,8 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
   }
 
   accommodationItemHorizonal(BuildContext context, int index, list) {
-    return ElasticInUp(
-      from: 100,
+    return BounceInUp(
+      from: 60,
       delay: const Duration(milliseconds: 500),
       duration: Duration(milliseconds: 1500 + index * 300),
       child: Container(
