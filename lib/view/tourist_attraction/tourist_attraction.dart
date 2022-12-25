@@ -120,15 +120,37 @@ class _TouristAttractionState extends State<TouristAttraction> {
       child: Column(
         children: [
           Container(
+            margin: const EdgeInsets.only(top: 10),
             width: MediaQuery.of(context).size.width,
             height: 60,
             decoration: const BoxDecoration(),
-            child: Center(
-                child: Text(
-              "HUE TOURIST ATTRACTION",
-              style: GoogleFonts.readexPro(
-                  fontSize: 20, fontWeight: FontWeight.bold),
-            )),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    width: 45,
+                    height: 45,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.grey.withOpacity(0.4)),
+                    child: const Center(child: Icon(Icons.arrow_back)),
+                  ),
+                ),
+                Text(
+                  "HUE TOURISTATTRACTION",
+                  style: GoogleFonts.readexPro(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(
+                  width: 10,
+                  height: 10,
+                )
+              ],
+            ),
           ),
           TextField(
             onSubmitted: (value) {

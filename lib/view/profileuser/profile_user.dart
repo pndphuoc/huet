@@ -27,33 +27,28 @@ class _ProfileUserState extends State<ProfileUser> {
   bool status = false;
   double sideLength = 50;
   bool isLoading = false;
-  var isUserLoginWithGoogle = FirebaseAuth.instance.currentUser;
-  bool isUserGG = false;
-  @override
-  void initState() {
-    super.initState();
-    if(isUserLoginWithGoogle != null) {
-      isUserGG = true;
-    }
-  }
+
   @override
   Widget build(BuildContext context) {
-    return isLoading? Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-          child: LoadingAnimationWidget.discreteCircle(
-            size: 50, color: primaryColor,
-          )),
-    ):Scaffold(
-      body: ListView(
-        children: [
-          header(context),
-          content(context),
-          preferences(context),
-          //_buttonItem('Food', Icons.abc, () {}),
-        ],
-      ),
-    );
+    return isLoading
+        ? Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+                child: LoadingAnimationWidget.discreteCircle(
+              size: 50,
+              color: primaryColor,
+            )),
+          )
+        : Scaffold(
+            body: ListView(
+              children: [
+                header(context),
+                content(context),
+                preferences(context),
+                //_buttonItem('Food', Icons.abc, () {}),
+              ],
+            ),
+          );
   }
 
   Widget _buttonItem(
@@ -126,7 +121,10 @@ class _ProfileUserState extends State<ProfileUser> {
                       height: 50,
                       child: ElevatedButton(
                         onPressed: () {
-                          accountNavigator(context,  AuthService().handleAuthState(const HueT(), const SignInPage()));
+                          accountNavigator(
+                              context,
+                              AuthService().handleAuthState(
+                                  const HueT(), const SignInPage()));
                         },
                         style: ElevatedButton.styleFrom(
                           elevation: 0,
@@ -150,7 +148,10 @@ class _ProfileUserState extends State<ProfileUser> {
                       height: 50,
                       child: ElevatedButton(
                         onPressed: () {
-                          accountNavigator(context, AuthService().handleAuthState(const HueT(), const RegisterUser()));
+                          accountNavigator(
+                              context,
+                              AuthService().handleAuthState(
+                                  const HueT(), const RegisterUser()));
                         },
                         style: ElevatedButton.styleFrom(
                           elevation: 0,
@@ -197,13 +198,15 @@ class _ProfileUserState extends State<ProfileUser> {
                       ]),
                   child: ClipRRect(
                       borderRadius: BorderRadius.circular(150),
-                      child:isUserGG? Image.network(
+                      child: Image.network(
                         user_constants.user!.photoURL.toString(),
                         width: 150,
                         height: 150,
                         fit: BoxFit.cover,
-                      ):Image.asset('assets/images/socialNetwork/avatar.png')
-                  ),
+                      )
+                      //  Image.asset(
+                      //     'assets/images/socialNetwork/avatar.png')
+                      ),
                 ),
                 const SizedBox(height: 5),
                 Text(
@@ -475,34 +478,36 @@ class _ProfileUserState extends State<ProfileUser> {
               user_constants.user == null
                   ? Container()
                   : TextButton(
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.only(top: 10, bottom: 10),
-                      splashFactory: NoSplash.splashFactory
+                      style: TextButton.styleFrom(
+                          padding: const EdgeInsets.only(top: 10, bottom: 10),
+                          splashFactory: NoSplash.splashFactory),
+                      onPressed: () async {
+                        bool isLogout = await showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              //TOTO:BUG
+                              return _buildLogOutAlertDialog(context);
+                            });
+                      },
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.logout_outlined,
+                            color: Colors.black54,
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            'Log Out',
+                            style: GoogleFonts.readexPro(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.black54),
+                          ),
+                        ],
+                      ),
                     ),
-                    onPressed: () async {
-                      bool isLogout = await showDialog(context: context,
-                          builder: (BuildContext context) {//TOTO:BUG
-                            return _buildLogOutAlertDialog(context);
-                          }
-                      );
-                    },
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.logout_outlined,
-                          color: Colors.black54,
-                        ),
-                        const SizedBox(width: 10,),
-                        Text(
-                          'Log Out',
-                          style: GoogleFonts.readexPro(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.black54),
-                        ),
-                      ],
-                    ),
-                  ),
             ],
           ),
         ),
@@ -510,53 +515,81 @@ class _ProfileUserState extends State<ProfileUser> {
     );
   }
 
-
   Widget _buildLogOutAlertDialog(BuildContext context) {
     return Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           FadeInUp(
-            duration: const Duration(milliseconds:200 ),
-          child: AlertDialog(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20)
+            duration: const Duration(milliseconds: 200),
+            child: AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
+              title: Text(
+                "Log Out?",
+                style: GoogleFonts.readexPro(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 25),
+                textAlign: TextAlign.center,
+              ),
+              content: Text(
+                "Are you sure want to log out",
+                style: GoogleFonts.readexPro(
+                  color: Colors.grey,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              actionsAlignment: MainAxisAlignment.center,
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  },
+                  style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      padding: const EdgeInsets.only(
+                          left: 40, right: 40, top: 15, bottom: 15),
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20))),
+                  child: Text(
+                    "No",
+                    style: GoogleFonts.readexPro(color: Colors.grey),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    setState(() {
+                      isLoading = true;
+                    });
+                    if (FirebaseAuth.instance.currentUser != null) {
+                      await AuthService().signOut(context);
+                    } else {
+                      user_constants.user = null;
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (BuildContext context) => const HueT(),
+                        ),
+                        (Route<dynamic> route) => false,
+                      );
+                    }
+                    setState(() {
+                      isLoading = false;
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.only(
+                          left: 40, right: 40, top: 15, bottom: 15),
+                      backgroundColor: primaryColor,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20))),
+                  child: const Text("Yes"),
+                ),
+              ],
             ),
-            title: Text("Log Out?", style: GoogleFonts.readexPro(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 25), textAlign: TextAlign.center,),
-            content: Text("Are you sure want to log out", style: GoogleFonts.readexPro(color: Colors.grey,), textAlign: TextAlign.center,),
-            actionsAlignment: MainAxisAlignment.center,
-            actions: [
-              ElevatedButton(onPressed: (){
-                Navigator.of(context).pop(false);
-              },
-                style: ElevatedButton.styleFrom(
-                    elevation: 0,
-                    padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
-                    backgroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20)
-                    )
-                ), child: Text("No", style: GoogleFonts.readexPro(color: Colors.grey),),
-              ),
-              ElevatedButton(onPressed: () async {
-                setState(() {
-                  isLoading = true;
-                });
-                await AuthService().signOut(context);
-                setState(() {
-                  isLoading = false;
-                });
-              },
-                style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.only(left: 40, right: 40, top: 15, bottom: 15),
-                    backgroundColor: primaryColor,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20)
-                    )
-                ), child: const Text("Yes"),
-              ),
-            ],
-          ),)
+          )
         ],
       ),
     );

@@ -137,11 +137,13 @@ class _HomePageState extends State<HomePage> {
                 child: user_constants.user == null
                     ? GestureDetector(
                         onTap: () {
-                          Navigator.push(
+                          Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => AuthService()
-                                      .handleAuthState(const HueT(), const SignInPage())));
+                                      .handleAuthState(
+                                          const HueT(), const SignInPage())),
+                              (route) => false);
                         },
                         child: Container(
                           alignment: Alignment.centerRight,
@@ -334,9 +336,7 @@ class _HomePageState extends State<HomePage> {
               context,
               "https://cdn-icons-png.flaticon.com/512/2972/2972857.png",
               "Đi đâu ?",
-              const TouristAttraction(
-
-              )),
+              const TouristAttraction()),
           buttonLink(
               context,
               "https://cdn-icons-png.flaticon.com/512/4612/4612366.png",
@@ -488,10 +488,7 @@ class _HomePageState extends State<HomePage> {
               GestureDetector(
                 onTap: () => Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => const HueT(
-                              index: 6,
-                            )),
+                    MaterialPageRoute(builder: (context) => const Events()),
                     (route) => false),
                 child: Text("Xem tất cả",
                     style: GoogleFonts.readexPro(
@@ -515,13 +512,8 @@ class _HomePageState extends State<HomePage> {
             items: listSlider.map((e) {
               return Builder(builder: (BuildContext context) {
                 return GestureDetector(
-                  onTap: () => Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const HueT(
-                                index: 6,
-                              )),
-                      (route) => false),
+                  onTap: () => Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => const Events())),
                   child: Container(
                     width: MediaQuery.of(context).size.width,
                     margin: const EdgeInsets.only(right: 8),
