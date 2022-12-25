@@ -356,11 +356,28 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
               GestureDetector(
                 onTap: () {
                   Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => PostCommentsPage(
-                                postID: widget.post.postID,
-                              )));
+                    context,
+                    PageRouteBuilder(
+                      transitionDuration: const Duration(milliseconds: 300),
+                      transitionsBuilder: (BuildContext context, Animation<double> animation,
+                          Animation<double> secondaryAnimation, Widget child) {
+                        // Use a custom transition animation
+                        return SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(1.0, 0.0),
+                            end: Offset.zero,
+                          ).animate(animation),
+                          child: child,
+                        );
+                      },
+                      pageBuilder: (BuildContext context, Animation<double> animation,
+                          Animation<double> secondaryAnimation) {
+                        return PostCommentsPage(
+                          postID: widget.post.postID,
+                        );
+                      },
+                    ),
+                  );
                   FocusManager.instance.primaryFocus?.unfocus();
                 },
                 child: Row(

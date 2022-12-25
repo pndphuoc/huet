@@ -61,15 +61,37 @@ class _EventsState extends State<Events> {
       child: Column(
         children: [
           Container(
+            margin: const EdgeInsets.only(top: 10),
             width: MediaQuery.of(context).size.width,
             height: 60,
             decoration: const BoxDecoration(),
-            child: Center(
-                child: Text(
-              "HUE EVENTS",
-              style: GoogleFonts.readexPro(
-                  fontSize: 22, fontWeight: FontWeight.bold),
-            )),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    width: 45,
+                    height: 45,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.grey.withOpacity(0.4)),
+                    child: const Center(child: Icon(Icons.arrow_back)),
+                  ),
+                ),
+                Text(
+                  "HUE EVENTS",
+                  style: GoogleFonts.readexPro(
+                      fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(
+                  width: 45,
+                  height: 45,
+                )
+              ],
+            ),
           ),
           TextField(
             onChanged: (value) {

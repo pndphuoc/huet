@@ -265,8 +265,8 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
   }
 
   accommodationItemHorizonal(BuildContext context, int index, list) {
-    return ElasticInUp(
-      from: 100,
+    return BounceInUp(
+      from: 60,
       delay: const Duration(milliseconds: 500),
       duration: Duration(milliseconds: 1500 + index * 300),
       child: Container(
@@ -313,19 +313,40 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
 
   searchBlock(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.only(left: 20.0, right: 20, top: 15),
       child: Column(
         children: [
           Container(
             width: MediaQuery.of(context).size.width,
             height: 60,
             decoration: const BoxDecoration(),
-            child: Center(
-                child: Text(
-              "HUE ACCOMMODATION",
-              style: GoogleFonts.readexPro(
-                  fontSize: 20, fontWeight: FontWeight.bold),
-            )),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    width: 45,
+                    height: 45,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.grey.withOpacity(0.4)),
+                    child: const Center(child: Icon(Icons.arrow_back)),
+                  ),
+                ),
+                Text(
+                  "HUE ACCOMMODATION",
+                  style: GoogleFonts.readexPro(
+                      fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(
+                  width: 20,
+                  height: 45,
+                )
+              ],
+            ),
           ),
           TextField(
             onChanged: (value) {
