@@ -61,7 +61,7 @@ class PostModel {
         postID: json['postID'],
         userID: json['userID'],
         caption: json['caption'],
-        attractionID: int.parse(json["attractionID"]),
+        attractionID: json["attractionID"],
         medias: medias,
         likedUsers: List<String>.from(json['likedUsers']),
         //comments: comments,

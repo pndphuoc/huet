@@ -78,8 +78,15 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
   @override
   void initState() {
     super.initState();
-    requestStoragePermission();
-    _getPosts();
+
+    (()async {
+      requestStoragePermission();
+      var attractionProvider = Provider.of<TouristAttractionProvider>(context, listen: false);
+      if(attractionProvider.list.isEmpty) {
+        await attractionProvider.getAll();
+      }
+      _getPosts();
+    })();
   }
 
   @override
@@ -137,6 +144,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
     for (var e in _posts) {
       postList.add(await PostModel.fromJson(e.data() as Map<String, dynamic>));
       userList.add(await getUser((e.data() as Map<String, dynamic>)["userID"]));
+      print(userList.first.name);
     }
 
     if (idOfThePostJustPosted != null) {
@@ -153,6 +161,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
 
     setState(() {
       idOfThePostJustPosted = null;
+      isLoading = false;
     });
   }
 
@@ -191,19 +200,6 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
 
   @override
   Widget build(BuildContext context) {
-    var attractionProvider = Provider.of<TouristAttractionProvider>(context);
-    if(attractionProvider.list.isEmpty)  {
-      (()async {
-        await attractionProvider.getAll();
-        setState(() {
-          isLoading = false;
-        });
-      })();
-    } else {
-      setState(() {
-        isLoading = false;
-      });
-    }
     return isLoading
         ? Center(
             child: LoadingAnimationWidget.discreteCircle(

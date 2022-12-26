@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:hue_t/constants/host_url.dart' as url;
@@ -11,6 +12,8 @@ class UserProvider extends ChangeNotifier {
   bool isLogin = true;
   bool isGoogle = false;
   bool isUpdate = false;
+  User? user;
+  bool isCompared = false;
 
   Future<bool> createUser(String name, String email, String password,
       String image, String phone, bool isGoogle) async {
@@ -34,15 +37,17 @@ class UserProvider extends ChangeNotifier {
       // then parse the JSON.
       var jsonObject = jsonDecode(response.body);
       userConstant.user = User(
-          name: jsonObject[0]['name'],
-          mail: jsonObject[0]['email'],
-          photoURL: jsonObject[0]['image'],
-          uid: jsonObject[0]['_id'],
-          password: jsonObject[0]['password'],
-          phoneNumber: jsonObject[0]['phone'],
-          isGoogle: jsonObject[0]['isGoogle']);
+          name: jsonObject['name'],
+          mail: jsonObject['email'],
+          photoURL: jsonObject['image'],
+          uid: jsonObject['_id'],
+          password: jsonObject['password'],
+          phoneNumber: jsonObject['phone'],
+          isGoogle: jsonObject['isGoogle']);
 
       isRegister = true;
+      isCompared = true;
+      notifyListeners();
       return true;
     } else {
       // If the server did not return a 201 CREATED response,
@@ -156,9 +161,18 @@ class UserProvider extends ChangeNotifier {
     } else if (response.statusCode == 403) {
       // If the server did not return a 201 CREATED response,
       // then throw an exception.
+
+      await createUser(
+          firebase_auth.FirebaseAuth.instance.currentUser!.displayName!,
+          firebase_auth.FirebaseAuth.instance.currentUser!.email!,
+          "",
+          firebase_auth.FirebaseAuth.instance.currentUser!.photoURL!,
+          firebase_auth.FirebaseAuth.instance.currentUser!.phoneNumber.toString(),
+          true);
       isGoogle = false;
       notifyListeners();
-    } else {}
+
+    }
     return false;
   }
 

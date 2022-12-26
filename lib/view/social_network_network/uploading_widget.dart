@@ -92,14 +92,10 @@ class _UploadingWidgetState extends State<UploadingWidget> {
   }
 
   Future<String> uploadPostContent(List<Media> mediaList) async {
-/*    List<Object> mediaJson = [];
-    for (int i=0 ; i<mediaList.length; i++) {
-      mediaJson.add(mediaList[i].toJson());
-    }*/
-
+    print("tai man hinh upload: ${user!.uid}");
     final docPost = FirebaseFirestore.instance.collection('post').doc();
     final post = PostModel(
-      attractionID: widget.attractionId as int,
+      attractionID: int.parse(widget.attractionId),
       userID: user!.uid,
       caption: widget.caption!,
       isDeleted: false,
