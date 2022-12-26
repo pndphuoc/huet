@@ -5,6 +5,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
+import 'package:hue_t/constants/user_info.dart';
+import 'package:hue_t/model/attraction/tourist_attraction.dart';
 import 'package:hue_t/model/social_network/post_model.dart';
 import 'package:hue_t/view/social_network_network/post.dart';
 import 'package:hue_t/view/social_network_network/uploading_widget.dart';
@@ -17,6 +19,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:swipeable_page_route/swipeable_page_route.dart';
+import 'package:tiengviet/tiengviet.dart';
 import '../../constants/host_url.dart' as url;
 import '../../model/user/user.dart';
 import '../../providers/tourist_provider.dart';
@@ -38,16 +41,6 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
     await Permission.storage.request();
   }
 
-  List<String> _fakeDate = [
-    "Đại nội Huế",
-    "Lăng Minh Mạng",
-    "Lăng Đình Trường",
-    "Lăng Khải Định",
-    "Cung An Định",
-    "Ngọ Môn",
-    "Nhà Duy Phước"
-  ];
-
   late RefreshController _refreshController =
       RefreshController(initialRefresh: false);
 
@@ -55,9 +48,10 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
 
   final _searchController = TextEditingController();
   var focusNode = FocusNode();
-  List<String> _searchResults = [];
+  List<TouristAttraction> _searchResults = [];
   double _containerHeight = 0.0;
-  String _selectedAttraction = "Đại nội Huế";
+  String _selectedAttractionTitle = "All";
+  TouristAttraction? _selectedAttraction;
   bool isLoading = true;
   int indexGetPost = 0;
   int indexGetMore = 0;
@@ -66,6 +60,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
 
   void _onRefresh() async {
     postList.clear();
+    userList.clear();
     _posts.clear();
     setState(() {
       _morePostsAvailable = true;
@@ -79,12 +74,14 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
   void initState() {
     super.initState();
 
-    (()async {
+    (() async {
       requestStoragePermission();
-      var attractionProvider = Provider.of<TouristAttractionProvider>(context, listen: false);
-      if(attractionProvider.list.isEmpty) {
+      var attractionProvider =
+          Provider.of<TouristAttractionProvider>(context, listen: false);
+      if (attractionProvider.list.isEmpty) {
         await attractionProvider.getAll();
       }
+      print("DIA DIEM DU LICH: ${attractionProvider.list.length}");
       _getPosts();
     })();
   }
@@ -130,10 +127,18 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
   _getPosts() async {
     postList.clear();
     _posts.clear();
-    Query q = _firestore
+    Query q;
+    if(_selectedAttraction == null) {
+      q = _firestore
         .collection('post')
         .where('isDeleted', isEqualTo: false)
         .limit(postsLimit);
+    } else {
+      q = _firestore
+          .collection('post')
+          .where('isDeleted', isEqualTo: false).where('attractionID', isEqualTo: _selectedAttraction!.id)
+          .limit(postsLimit);
+    }
     QuerySnapshot querySnapshot = await q.get();
     _posts = querySnapshot.docs;
 
@@ -143,6 +148,8 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
 
     for (var e in _posts) {
       postList.add(await PostModel.fromJson(e.data() as Map<String, dynamic>));
+      print(
+          "userid cua post ${postList.last.caption}  ${(e.data() as Map<String, dynamic>)["userID"]}");
       userList.add(await getUser((e.data() as Map<String, dynamic>)["userID"]));
       print(userList.first.name);
     }
@@ -170,11 +177,20 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
       _refreshController.loadComplete();
       return;
     }
-    Query q = _firestore
+    Query q;
+    if(_selectedAttraction == null) {
+      q = _firestore
         .collection('post')
         .where('isDeleted', isEqualTo: false)
         .startAfterDocument(_posts.last)
         .limit(postsLimit);
+    } else {
+      q = _firestore
+          .collection('post')
+          .where('isDeleted', isEqualTo: false).where('attractionID', isEqualTo: _selectedAttraction!.id)
+          .startAfterDocument(_posts.last)
+          .limit(postsLimit);
+    }
     QuerySnapshot querySnapshot = await q.get();
     if (querySnapshot.docs.isEmpty) {
       _morePostsAvailable = false;
@@ -184,6 +200,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
       _morePostsAvailable = false;
     }
     for (var e in querySnapshot.docs) {
+      userList.add(await getUser((e.data() as Map<String, dynamic>)["userID"]));
       postList.add(await PostModel.fromJson(e.data() as Map<String, dynamic>));
     }
     _posts.addAll(querySnapshot.docs);
@@ -262,11 +279,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                                 ),
                                 controller: _refreshController,
                                 onRefresh: _onRefresh,
-                                onLoading: _morePostsAvailable
-                                    ? _getMorePosts
-                                    : () {
-                                        _refreshController.loadComplete();
-                                      },
+                                onLoading: _getMorePosts,
                                 child: ListView.builder(
                                     itemCount: postList.length,
                                     itemBuilder: (context, index) {
@@ -422,7 +435,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                                                       _getPosts();
                                                     });
                                                   },
-                                            user: userList[index],
+                                                  user: userList[index],
                                                 );
                                         },
                                       );
@@ -507,16 +520,6 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                       ),
                     );*/
                     Navigator.of(context).push(SwipeablePageRoute(
-                        transitionDuration: const Duration(milliseconds: 300),
-                        transitionBuilder: (context, animation,
-                                secondaryAnimation, isSwipeGesture, child) =>
-                            SlideTransition(
-                              position: Tween<Offset>(
-                                begin: const Offset(1.0, 0.0),
-                                end: Offset.zero,
-                              ).animate(animation),
-                              child: child,
-                            ),
                         builder: (BuildContext context) => const CreatePost()));
                   },
                   style: ElevatedButton.styleFrom(
@@ -589,124 +592,131 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
   }
 
   Widget attractionSelector(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(top: 10, right: 20, left: 20, bottom: 10),
-      width: MediaQuery.of(context).size.width,
-      height: 60,
-      decoration: BoxDecoration(
-          color: colors.SN_postBackgroundColor,
-          borderRadius: BorderRadius.circular(15)),
-      child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-        return Stack(children: [
-          Positioned(
-            top: 0,
-            bottom: 0,
-            child: Row(
-              children: [
-                const SizedBox(
-                  width: 20,
-                ),
-                AnimatedOpacity(
-                    duration: const Duration(milliseconds: 400),
-                    opacity: _showTextField ? 0 : 1,
-                    child: const Icon(
-                      Icons.place_outlined,
-                      size: 30,
-                    )),
-                const SizedBox(
-                  width: 10,
-                ),
-                AnimatedOpacity(
-                  duration: const Duration(milliseconds: 200),
-                  opacity: _showTextField ? 0 : 1,
-                  child: GestureDetector(
-                    child: Text(
-                      _selectedAttraction,
-                      style: GoogleFonts.readexPro(
-                          fontSize: 15, color: Colors.black),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  width: 20,
-                )
-              ],
-            ),
-          ),
-          AnimatedPositioned(
-              duration: const Duration(milliseconds: 300),
+    return Consumer<TouristAttractionProvider>(
+      builder: (context, value, child) => Container(
+        margin: const EdgeInsets.only(top: 10, right: 20, left: 20, bottom: 10),
+        width: MediaQuery.of(context).size.width,
+        height: 60,
+        decoration: BoxDecoration(
+            color: colors.SN_postBackgroundColor,
+            borderRadius: BorderRadius.circular(15)),
+        child: LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints constraints) {
+          return Stack(children: [
+            Positioned(
               top: 0,
               bottom: 0,
-              left: _showTextField ? 0 : constraints.maxWidth - 60,
-              child: SizedBox(
-                height: 60,
-                width: 60,
-                child: ElevatedButton(
-                    onPressed: () {
+              child: Row(
+                children: [
+                  const SizedBox(
+                    width: 20,
+                  ),
+                  AnimatedOpacity(
+                      duration: const Duration(milliseconds: 400),
+                      opacity: _showTextField ? 0 : 1,
+                      child: const Icon(
+                        Icons.place_outlined,
+                        size: 30,
+                      )),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  AnimatedOpacity(
+                    duration: const Duration(milliseconds: 200),
+                    opacity: _showTextField ? 0 : 1,
+                    child: GestureDetector(
+                      child: Text(
+                        _selectedAttractionTitle,
+                        style: GoogleFonts.readexPro(
+                            fontSize: 15, color: Colors.black),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 20,
+                  )
+                ],
+              ),
+            ),
+            AnimatedPositioned(
+                duration: const Duration(milliseconds: 300),
+                top: 0,
+                bottom: 0,
+                left: _showTextField ? 0 : constraints.maxWidth - 60,
+                child: SizedBox(
+                  height: 60,
+                  width: 60,
+                  child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _showTextField = !_showTextField;
+                          _showTextField
+                              ? _containerHeight = 200
+                              : _containerHeight = 0;
+                          _searchResults = value.list;
+                          _showTextField
+                              ? focusNode.requestFocus()
+                              : focusNode.unfocus();
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15)),
+                          backgroundColor: colors.primaryColor,
+                          elevation: 0,
+                          padding: EdgeInsets.zero),
+                      child: const Icon(Icons.search)),
+                )),
+            Positioned(
+              right: 0,
+              child: AnimatedContainer(
+                width: _showTextField ? constraints.maxWidth - 70 : 0,
+                duration: const Duration(milliseconds: 300),
+                //padding: const EdgeInsets.only(right: 20),
+                child: SizedBox(
+                  width: constraints.maxWidth - 70,
+                  child: TextField(
+                    focusNode: focusNode,
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                        contentPadding:
+                            const EdgeInsets.only(top: 20, bottom: 20),
+                        hintText: "Search for tourist attractions",
+                        border: const UnderlineInputBorder(
+                            borderSide: BorderSide.none),
+                        suffixIcon: _showTextField
+                            ? GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _searchResults = [];
+                                    _containerHeight = 0;
+                                    _searchController.clear();
+                                  });
+                                },
+                                child: const Icon(Icons.close),
+                              )
+                            : Container()),
+                    onChanged: (searchText) {
                       setState(() {
-                        _showTextField = !_showTextField;
-                        _showTextField
-                            ? _containerHeight = 200
-                            : _containerHeight = 0;
-                        _searchResults = _fakeDate;
-                        _showTextField
-                            ? focusNode.requestFocus()
-                            : focusNode.unfocus();
+                        _searchResults = value.list
+                            .where((element) => TiengViet.parse(
+                                    element.title.toLowerCase())
+                                .contains(
+                                    TiengViet.parse(searchText.toLowerCase())))
+                            .toList();
+                        _containerHeight =
+                            _calculateContainerHeight(_searchResults.length);
                       });
                     },
-                    style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15)),
-                        backgroundColor: colors.primaryColor,
-                        elevation: 0,
-                        padding: EdgeInsets.zero),
-                    child: const Icon(Icons.search)),
-              )),
-          Positioned(
-            right: 0,
-            child: AnimatedContainer(
-              width: _showTextField ? constraints.maxWidth - 70 : 0,
-              duration: const Duration(milliseconds: 300),
-              //padding: const EdgeInsets.only(right: 20),
-              child: SizedBox(
-                width: constraints.maxWidth - 70,
-                child: TextField(
-                  focusNode: focusNode,
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                      contentPadding:
-                          const EdgeInsets.only(top: 20, bottom: 20),
-                      hintText: "Search for tourist attractions",
-                      border: const UnderlineInputBorder(
-                          borderSide: BorderSide.none),
-                      suffixIcon: _showTextField
-                          ? GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _searchResults = [];
-                                  _containerHeight = 0;
-                                  _searchController.clear();
-                                });
-                              },
-                              child: const Icon(Icons.close),
-                            )
-                          : Container()),
-                  onChanged: (value) {
-                    setState(() {
-                      _searchResults = _searchAttraction(value);
-                      _containerHeight =
-                          _calculateContainerHeight(_searchResults.length);
-                    });
-                  },
-                  //enabled: _showTextField ? true : false,
+                    //enabled: _showTextField ? true : false,
+                  ),
                 ),
               ),
             ),
-          ),
-        ]);
-      }),
+          ]);
+        }),
+      ),
     );
   }
 
@@ -738,7 +748,9 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                   onPressed: () {
                     setState(() {
                       _searchController.clear();
-                      _selectedAttraction = _searchResults[index];
+                      _selectedAttractionTitle = _searchResults[index].title;
+                      _selectedAttraction =  _searchResults[index];
+                      _getPosts();
                       _showTextField = false;
                       _containerHeight = 0;
                       FocusScope.of(context).unfocus();
@@ -750,7 +762,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                     child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          _searchResults[index],
+                          _searchResults[index].title,
                           style: GoogleFonts.readexPro(
                               color: Colors.grey,
                               fontWeight: FontWeight.w500,
@@ -765,12 +777,6 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
         );
       },
     );
-  }
-
-  List<String> _searchAttraction(String value) {
-    return _fakeDate
-        .where((element) => element.toLowerCase().contains(value.toLowerCase()))
-        .toList();
   }
 
   double _calculateContainerHeight(int resultCount) {
