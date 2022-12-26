@@ -1,1 +1,1 @@
-const url = "http://192.168.1.95:8888";
+const url = "https://hue-t-api.onrender.com";

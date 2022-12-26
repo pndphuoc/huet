@@ -110,9 +110,12 @@ class _SignInPageState extends State<SignInPage>
                       child: const SizedBox(),
                     ),
                   ),
-                  const RiveAnimation.asset(
-                    "assets/RiveAssets/shapes.riv",
-                  ),
+                   SizedBox(
+                     width: MediaQuery.of(context).size.width,
+                     child: const RiveAnimation.asset(
+                      "assets/RiveAssets/shapes.riv",
+                    ),
+                   ),
                   Positioned.fill(
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),

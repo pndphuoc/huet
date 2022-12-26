@@ -62,9 +62,13 @@ class _RegisterUserState extends State<RegisterUser> {
                       child: const SizedBox(),
                     ),
                   ),
-                  const RiveAnimation.asset(
+                SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height,
+                  child: const RiveAnimation.asset(
                     "assets/RiveAssets/shapes.riv",
                   ),
+                ),
                   Positioned.fill(
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
