@@ -137,13 +137,12 @@ class _HomePageState extends State<HomePage> {
                 child: user_constants.user == null
                     ? GestureDetector(
                         onTap: () {
-                          Navigator.pushAndRemoveUntil(
+                          Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => AuthService()
                                       .handleAuthState(
-                                          const HueT(), const SignInPage())),
-                              (route) => false);
+                                          const HueT(), const SignInPage())));
                         },
                         child: Container(
                           alignment: Alignment.centerRight,

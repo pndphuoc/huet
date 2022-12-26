@@ -33,7 +33,13 @@ class AuthService {
                     FirebaseAuth.instance.currentUser!.phoneNumber.toString(),
                     true);
               }
-
+              userConstant.user = userModel.User(
+                  name: FirebaseAuth.instance.currentUser!.displayName!,
+                  mail: FirebaseAuth.instance.currentUser!.email!,
+                  photoURL: FirebaseAuth.instance.currentUser!.photoURL!,
+                  uid: FirebaseAuth.instance.currentUser!.uid,
+                  phoneNumber: FirebaseAuth.instance.currentUser!.phoneNumber,
+                  isGoogle: true);
               return value.isGoogle ? page : const EditProfile();
             } else {
               return targetWidget;
