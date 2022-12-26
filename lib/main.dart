@@ -93,19 +93,20 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    if (FirebaseAuth.instance.currentUser != null) {
-      userConstant.user = userModel.User(
-        name: FirebaseAuth.instance.currentUser!.displayName!,
-        mail: FirebaseAuth.instance.currentUser!.email!,
-        photoURL: FirebaseAuth.instance.currentUser!.photoURL!,
-        uid: FirebaseAuth.instance.currentUser!.uid,
-        phoneNumber: FirebaseAuth.instance.currentUser!.phoneNumber,
-        isGoogle: true,
-      );
-    }
-    Future.delayed(const Duration(seconds: 4)).then((value) =>
-        Navigator.of(context).pushReplacement(
-            CupertinoPageRoute(builder: (ctx) => const HueT())));
+
+
+    (()async {
+      var userProvider = Provider.of<UserProvider>(context, listen: false);
+      if (FirebaseAuth.instance.currentUser != null) {
+        await userProvider.checkEmail(FirebaseAuth.instance.currentUser!.email!);
+
+      }
+/*      Navigator.of(context).pushReplacement(
+          CupertinoPageRoute(builder: (ctx) => const HueT()));*/
+      Future.delayed(const Duration(seconds: 4)).then((value) =>
+          Navigator.of(context).pushReplacement(
+              CupertinoPageRoute(builder: (ctx) => const HueT())));
+    })();
   }
 
   @override
