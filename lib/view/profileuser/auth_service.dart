@@ -33,7 +33,6 @@ class AuthService {
                     FirebaseAuth.instance.currentUser!.phoneNumber.toString(),
                     true);
               }
-
               return value.isGoogle ? page : const EditProfile();
             } else {
               return targetWidget;

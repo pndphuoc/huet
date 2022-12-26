@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hue_t/constants/user_info.dart';
 
 class PostingCommentWidget extends StatefulWidget {
   const PostingCommentWidget({Key? key, required this.content})
@@ -28,15 +30,13 @@ class _PostingCommentWidgetState extends State<PostingCommentWidget>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(
+          SizedBox(
             height: 45,
             width: 45,
             child: CircleAvatar(
-              backgroundImage: AssetImage(
-                "assets/images/socialNetwork/lisaAvatar.png",
+              backgroundImage: CachedNetworkImageProvider(user!.photoURL),
               ),
             ),
-          ),
           const SizedBox(
             width: 10,
           ),
@@ -48,7 +48,7 @@ class _PostingCommentWidgetState extends State<PostingCommentWidget>
                 Row(
                   children: [
                     Text(
-                      "lalalalisa_m",
+                      user!.name,
                       style: GoogleFonts.readexPro(
                           color: Colors.black, fontSize: 15),
                     ),

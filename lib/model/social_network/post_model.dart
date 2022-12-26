@@ -6,8 +6,8 @@ import 'package:hue_t/constants/user_info.dart';
 class PostModel {
   String postID;
   String? caption;
-  int userID;
-  String attractionID;
+  String userID;
+  int attractionID;
   List<Media> medias;
   List<String> likedUsers;
   List<Comment>? comments;
@@ -61,7 +61,7 @@ class PostModel {
         postID: json['postID'],
         userID: json['userID'],
         caption: json['caption'],
-        attractionID: json['attractionID'],
+        attractionID: int.parse(json["attractionID"]),
         medias: medias,
         likedUsers: List<String>.from(json['likedUsers']),
         //comments: comments,

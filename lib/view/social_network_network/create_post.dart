@@ -9,9 +9,11 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:hue_t/colors.dart' as colors;
 import 'package:photo_manager/photo_manager.dart';
+import 'package:provider/provider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:video_player/video_player.dart';
+import '../../providers/tourist_provider.dart';
 import 'image_item_widget.dart';
 
 class CreatePost extends StatefulWidget {
@@ -199,6 +201,10 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    var attractionProvider = Provider.of<TouristAttractionProvider>(context);
+    if(attractionProvider.list.isEmpty)  {
+      attractionProvider.getAll();
+    }
     return _isLoading
         ? Container()
         : Scaffold(

@@ -32,6 +32,15 @@ class UserProvider extends ChangeNotifier {
     if (response.statusCode == 200) {
       // If the server did return a 201 CREATED response,
       // then parse the JSON.
+      var jsonObject = jsonDecode(response.body);
+      userConstant.user = User(
+          name: jsonObject[0]['name'],
+          mail: jsonObject[0]['email'],
+          photoURL: jsonObject[0]['image'],
+          uid: jsonObject[0]['_id'],
+          password: jsonObject[0]['password'],
+          phoneNumber: jsonObject[0]['phone'],
+          isGoogle: jsonObject[0]['isGoogle']);
 
       isRegister = true;
       return true;
@@ -151,5 +160,30 @@ class UserProvider extends ChangeNotifier {
       notifyListeners();
     } else {}
     return false;
+  }
+
+  Future<User> getUser(String userID) async {
+    final response = await http.get(
+      Uri.parse('${url.url}/api/user/$userID'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      // If the server did return a 201 CREATED response,
+      // then parse the JSON.
+      var jsonObject = jsonDecode(response.body);
+      return User(
+          name: jsonObject['name'],
+          mail: jsonObject['email'],
+          photoURL: jsonObject['image'],
+          uid: jsonObject['_id'],
+          password: jsonObject['password'],
+          phoneNumber: jsonObject['phone'],
+          isGoogle: jsonObject['isGoogle']);
+    } else {
+      throw Exception("User invalid");
+    }
   }
 }

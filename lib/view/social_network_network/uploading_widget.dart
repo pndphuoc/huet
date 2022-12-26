@@ -12,6 +12,7 @@ import 'package:video_compress/video_compress.dart';
 import '../../model/social_network/media_model.dart';
 import 'constants.dart' as constants;
 import 'image_item_widget.dart';
+import 'package:hue_t/constants/user_info.dart';
 
 typedef void ResultCallback(String val);
 
@@ -98,8 +99,8 @@ class _UploadingWidgetState extends State<UploadingWidget> {
 
     final docPost = FirebaseFirestore.instance.collection('post').doc();
     final post = PostModel(
-      attractionID: widget.attractionId,
-      userID: 1,
+      attractionID: widget.attractionId as int,
+      userID: user!.uid,
       caption: widget.caption!,
       isDeleted: false,
       likedUsers: [],
@@ -117,10 +118,8 @@ class _UploadingWidgetState extends State<UploadingWidget> {
   }
 
   Future<void> createPost() async {
-    print("bat dau uploaddddd");
     String postId= await uploadPostContent(await uploadMedia());
     constants.isUploading = false;
-    print("ket thuc uploaddddd");
     widget.callback(postId);
     constants.postInfomation = null;
   }

@@ -1,23 +1,32 @@
+import 'dart:convert';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
 import 'package:hue_t/model/social_network/comment_model.dart';
 import 'package:hue_t/model/social_network/post_model.dart';
+import 'package:hue_t/model/user/user.dart';
+import 'package:hue_t/providers/user_provider.dart';
 import 'package:hue_t/view/social_network_network/posting_comment_widget.dart';
 import 'package:hue_t/view/social_network_network/posting_reply_comment_widget.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:provider/provider.dart';
 import '../../animation/heart_animation.dart';
 import '../../firebase_function/comment_function.dart';
 import '../../constants/user_info.dart' as user_info;
+import 'package:hue_t/constants/host_url.dart' as url;
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../firebase_function/common_function.dart';
+import 'package:http/http.dart' as http;
+import '../../providers/tourist_provider.dart';
 
 class PostCommentsPage extends StatefulWidget {
-  const PostCommentsPage({Key? key, required this.postID}) : super(key: key);
+  const PostCommentsPage({Key? key, required this.postID, required this.user}) : super(key: key);
   final String postID;
-
+  final User user;
   @override
   State<PostCommentsPage> createState() => _PostCommentsPageState();
 }
@@ -61,6 +70,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
   int sendCommentMode = 0;
   String? replyCommentIsBeingReplied;
   bool isGettingMoreComments = false;
+
   _getPostContent() async {
     //post = await displayUsersCommentFirst(widget.postID);
     post = await getPostContent(widget.postID, commentLimit);
@@ -69,12 +79,38 @@ class _PostCommentsPageState extends State<PostCommentsPage>
     });
   }
 
+  Future<User> getUser(String userID) async {
+    final response = await http.get(
+      Uri.parse('${url.url}/api/user/$userID'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      // If the server did return a 201 CREATED response,
+      // then parse the JSON.
+      var jsonObject = jsonDecode(response.body);
+      return User(
+          name: jsonObject['name'],
+          mail: jsonObject['email'],
+          photoURL: jsonObject['image'],
+          uid: jsonObject['_id'],
+          password: jsonObject['password'],
+          phoneNumber: jsonObject['phone'],
+          isGoogle: jsonObject['isGoogle']);
+    } else {
+      throw Exception("User invalid");
+    }
+  }
+
   _getComments() async {
     commentList = await getPostComments(widget.postID, commentLimit);
-
     List<Comment> myComments = [];
     commentList.toList().forEach((element) async {
       //replyCommentsOfUser.addAll( await getAllReplyCommentOfUser(user_info.user!.uid, widget.postID, element.id));
+      element.user = await getUser(element.userID);
+      print(element.user!.name);
       if (element.userID == user_info.user!.uid) {
         myComments.add(element);
         commentList.remove(element);
@@ -103,12 +139,14 @@ class _PostCommentsPageState extends State<PostCommentsPage>
   @override
   void initState() {
     super.initState();
+    print(user_info.user!.uid);
     _commentScrollController = AutoScrollController(
         viewportBoundaryGetter: () =>
             Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
         axis: Axis.vertical);
     _getPostContent();
     _getComments();
+
   }
 
   @override
@@ -213,7 +251,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                                   index: index,
                                   child: Column(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    CrossAxisAlignment.start,
                                     children: [
                                       buildCommentBlock(
                                           context, commentList[index]),
@@ -225,8 +263,8 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                                           Center(
                                             child: LoadingAnimationWidget
                                                 .fallingDot(
-                                                    color: colors.primaryColor,
-                                                    size: 15),
+                                                color: colors.primaryColor,
+                                                size: 15),
                                           )
                                         else if(commentList[index].replyCount! > commentList[index].replyComments!.where((element) => element.userID == user_info.user!.uid).length)
                                           buildReadReplyCommentButton(
@@ -236,37 +274,37 @@ class _PostCommentsPageState extends State<PostCommentsPage>
 
                                       //Hiển thị các reply comment của user hiện tại
                                       if (commentList[index]
-                                              .replyComments!
-                                              .isNotEmpty &&
+                                          .replyComments!
+                                          .isNotEmpty &&
                                           !showReplyCommentList
                                               .contains(commentList[index]) &&
                                           isShowingCommentsOfCurrentUser)
                                         ...commentList[index]
                                             .replyComments!
                                             .map((replyCommentOfCurrentUser) =>
-                                                buildReplyCommentBlock(
-                                                    context,
-                                                    replyCommentOfCurrentUser,
-                                                    commentList[index])),
-                                    //Hiển thị widget posting của reply comment
+                                            buildReplyCommentBlock(
+                                                context,
+                                                replyCommentOfCurrentUser,
+                                                commentList[index])),
+                                      //Hiển thị widget posting của reply comment
                                       isPostingReplyComment &&
-                                              commentAreBeingReplied ==
-                                                  commentList[index]
+                                          commentAreBeingReplied ==
+                                              commentList[index]
                                           ? postingReplyCommentBlock(
-                                              context, commentContent)
+                                          context, commentContent)
                                           : Container(),
                                       //Hiển thị các reply comment
                                       if (showReplyCommentList
-                                              .contains(commentList[index]) &&
+                                          .contains(commentList[index]) &&
                                           commentList[index].replyComments !=
                                               null)
                                         ...commentList[index]
                                             .replyComments!
                                             .map((reply) =>
-                                                buildReplyCommentBlock(
-                                                    context,
-                                                    reply,
-                                                    commentList[index]))
+                                            buildReplyCommentBlock(
+                                                context,
+                                                reply,
+                                                commentList[index]))
                                     ],
                                   ),
                                 ),
@@ -296,15 +334,13 @@ class _PostCommentsPageState extends State<PostCommentsPage>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(
+          SizedBox(
             height: 45,
             width: 45,
             child: CircleAvatar(
-              backgroundImage: AssetImage(
-                "assets/images/socialNetwork/jennieAvatar.png",
+              backgroundImage: CachedNetworkImageProvider(widget.user.photoURL),
               ),
             ),
-          ),
           const SizedBox(
             width: 10,
           ),
@@ -315,7 +351,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
               Row(
                 children: [
                   Text(
-                    "jennierubyjane",
+                    widget.user.name,
                     style: GoogleFonts.readexPro(
                         color: Colors.black, fontSize: 15),
                   ),
@@ -803,9 +839,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                       height: 45,
                       width: 45,
                       child: CircleAvatar(
-                        backgroundImage: NetworkImage(
-                          user_info.user!.photoURL,
-                        ),
+                        backgroundImage: CachedNetworkImageProvider(cmt.user!.photoURL),
                       ),
                     ),
                     const SizedBox(
@@ -819,7 +853,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                           Row(
                             children: [
                               Text(
-                                user_info.user!.name,
+                                cmt.user!.name,
                                 style: GoogleFonts.readexPro(
                                     color: Colors.black, fontSize: 15),
                               ),

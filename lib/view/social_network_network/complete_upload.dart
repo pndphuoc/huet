@@ -6,14 +6,16 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
 import 'package:hue_t/main.dart';
 import 'package:hue_t/model/attraction/tourist_attraction.dart';
+import 'package:hue_t/providers/tourist_provider.dart';
 import 'package:hue_t/view/social_network_network/search_tourist_attractions.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:io';
 import 'image_item_widget.dart';
 import 'constants.dart' as constants;
-import 'package:hue_t/fake_data.dart'as faker;
+import 'package:swipeable_page_route/swipeable_page_route.dart';
 
 class CompleteUploadPage extends StatefulWidget {
   const CompleteUploadPage({Key? key, required this.medias}) : super(key: key);
@@ -138,28 +140,31 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
                   'attractionID': selectedAttraction!.id
                 };
                 Navigator.pushAndRemoveUntil(
-                  context,
-                  PageRouteBuilder(
-                    transitionDuration: const Duration(milliseconds: 300),
-                    transitionsBuilder: (BuildContext context, Animation<double> animation,
-                        Animation<double> secondaryAnimation, Widget child) {
-                      // Use a custom transition animation
-                      return SlideTransition(
-                        position: Tween<Offset>(
-                          begin: const Offset(1.0, 0.0),
-                          end: Offset.zero,
-                        ).animate(animation),
-                        child: child,
-                      );
-                    },
-                    pageBuilder: (BuildContext context, Animation<double> animation,
-                        Animation<double> secondaryAnimation) {
-                      return const HueT(
-                        index: 0,
-                      );
-                    },
-                  ), (route) => false
-                );
+                    context,
+                    PageRouteBuilder(
+                      transitionDuration: const Duration(milliseconds: 300),
+                      transitionsBuilder: (BuildContext context,
+                          Animation<double> animation,
+                          Animation<double> secondaryAnimation,
+                          Widget child) {
+                        // Use a custom transition animation
+                        return SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(1.0, 0.0),
+                            end: Offset.zero,
+                          ).animate(animation),
+                          child: child,
+                        );
+                      },
+                      pageBuilder: (BuildContext context,
+                          Animation<double> animation,
+                          Animation<double> secondaryAnimation) {
+                        return const HueT(
+                          index: 0,
+                        );
+                      },
+                    ),
+                    (route) => false);
 
 /*                Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(
@@ -383,19 +388,45 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
                 ))),
         SizedBox(
           height: 40,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              const SizedBox(
-                width: 20,
-              ),
-              ...faker.listAttraction.map((e) {
-                return placeBlock(context, e);
-              }),
-              const SizedBox(
-                width: 10,
-              ),
-            ],
+          child: Consumer<TouristAttractionProvider>(
+            builder: (context, value, child) => ListView(
+              scrollDirection: Axis.horizontal,
+              children: [
+                const SizedBox(
+                  width: 20,
+                ),
+                for (int i = 0; i < 5; i++) placeBlock(context, value.list[i]),
+                Container(
+                  margin: const EdgeInsets.only(right: 10),
+                  decoration: BoxDecoration(
+                      color: colors.SN_postBackgroundColor,
+                      border: Border.all(width: 1, color: Colors.black),
+                      borderRadius: BorderRadius.circular(10)),
+                  child: TextButton(
+                      style: TextButton.styleFrom(
+                          splashFactory: NoSplash.splashFactory,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10))),
+                      onPressed: () {
+                        setState(() {
+                          Navigator.of(context).push(SwipeablePageRoute(
+                            builder: (BuildContext context) =>
+                                SearchTouristAttractionPage(
+                              callback: (val) => setState(() {
+                                selectedAttraction = val;
+                              }),
+                            ),
+                          ));
+                        });
+                      },
+                      child: Text(
+                        "More...",
+                        style: GoogleFonts.readexPro(
+                            color: Colors.black, fontSize: 13),
+                      )),
+                )
+              ],
+            ),
           ),
         )
       ],
@@ -415,31 +446,31 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Align(
-                alignment: Alignment.centerLeft,
-                child: RichText(
-                  text: TextSpan(children: [
-                    WidgetSpan(
-                        child: Icon(
-                      Icons.location_on_rounded,
-                      color: colors.primaryColor,
-                      size: 20,
-                    )),
-                    const WidgetSpan(
-                        child: SizedBox(
-                      width: 10,
-                    )),
-                    WidgetSpan(
-                      child: Text(att.title,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.readexPro(
-                              fontSize: 20,
-                              color: colors.primaryColor,
-                              fontWeight: FontWeight.bold)),
-                    )
-                  ]),
-                )),
-            IconButton(
+            Expanded(
+              flex: 9,
+              child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.location_on_rounded,
+                        color: colors.primaryColor,
+                        size: 20,
+                      ),
+                      Expanded(
+                        child: Text(att.title,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.readexPro(
+                                fontSize: 20,
+                                color: colors.primaryColor,
+                                fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  )),
+            ),
+            Expanded(
+                flex: 1,
+                child: IconButton(
                 onPressed: () {
                   setState(() {
                     selectedAttraction = null;
@@ -450,7 +481,7 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
                 hoverColor: Colors.transparent,
                 highlightColor: Colors.transparent,
                 constraints: const BoxConstraints(),
-                icon: const Icon(Icons.close))
+                icon: const Icon(Icons.close)))
           ],
         ));
   }

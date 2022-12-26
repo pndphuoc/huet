@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,11 +12,17 @@ import 'package:inview_notifier_list/inview_notifier_list.dart';
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
+import 'package:swipeable_page_route/swipeable_page_route.dart';
+import '../../constants/host_url.dart' as url;
+import '../../model/user/user.dart';
+import '../../providers/tourist_provider.dart';
 import 'constants.dart' as constants;
 import 'create_post.dart';
+import 'package:http/http.dart' as http;
 
 class SocialNetWorkPage extends StatefulWidget {
   const SocialNetWorkPage({Key? key}) : super(key: key);
@@ -84,7 +92,33 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
   DocumentSnapshot? _lastDocument;
   bool _morePostsAvailable = true;
   List<PostModel> postList = [];
+  List<User> userList = [];
   String? idOfThePostJustPosted;
+
+  Future<User> getUser(String userID) async {
+    final response = await http.get(
+      Uri.parse('${url.url}/api/user/$userID'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      // If the server did return a 201 CREATED response,
+      // then parse the JSON.
+      var jsonObject = jsonDecode(response.body);
+      return User(
+          name: jsonObject['name'],
+          mail: jsonObject['email'],
+          photoURL: jsonObject['image'],
+          uid: jsonObject['_id'],
+          password: jsonObject['password'],
+          phoneNumber: jsonObject['phone'],
+          isGoogle: jsonObject['isGoogle']);
+    } else {
+      throw Exception("User invalid");
+    }
+  }
 
   _getPosts() async {
     postList.clear();
@@ -102,6 +136,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
 
     for (var e in _posts) {
       postList.add(await PostModel.fromJson(e.data() as Map<String, dynamic>));
+      userList.add(await getUser((e.data() as Map<String, dynamic>)["userID"]));
     }
 
     if (idOfThePostJustPosted != null) {
@@ -118,7 +153,6 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
 
     setState(() {
       idOfThePostJustPosted = null;
-      isLoading = false;
     });
   }
 
@@ -137,7 +171,6 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
       _morePostsAvailable = false;
       _refreshController.loadComplete();
     }
-    print("aaaaaaa ${querySnapshot.docs.length}");
     if (querySnapshot.docs.length < postsLimit) {
       _morePostsAvailable = false;
     }
@@ -158,6 +191,19 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
 
   @override
   Widget build(BuildContext context) {
+    var attractionProvider = Provider.of<TouristAttractionProvider>(context);
+    if(attractionProvider.list.isEmpty)  {
+      (()async {
+        await attractionProvider.getAll();
+        setState(() {
+          isLoading = false;
+        });
+      })();
+    } else {
+      setState(() {
+        isLoading = false;
+      });
+    }
     return isLoading
         ? Center(
             child: LoadingAnimationWidget.discreteCircle(
@@ -240,14 +286,14 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                                                     bool deletePost =
                                                         await showDialog(
                                                             context: context,
-                                                            builder: (BuildContext
-                                                                context) {
+                                                            builder:
+                                                                (BuildContext
+                                                                    context) {
                                                               return AlertDialog(
                                                                 shape: RoundedRectangleBorder(
                                                                     borderRadius:
-                                                                        BorderRadius
-                                                                            .circular(
-                                                                                20)),
+                                                                        BorderRadius.circular(
+                                                                            20)),
                                                                 title: Text(
                                                                   "Delete this post?",
                                                                   style: GoogleFonts.readexPro(
@@ -288,8 +334,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                                                                     style: ElevatedButton.styleFrom(
                                                                         elevation:
                                                                             0,
-                                                                        padding: const EdgeInsets
-                                                                                .only(
+                                                                        padding: const EdgeInsets.only(
                                                                             left:
                                                                                 40,
                                                                             right:
@@ -306,10 +351,9 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                                                                                 BorderRadius.circular(20))),
                                                                     child: Text(
                                                                       "Cancel",
-                                                                      style: GoogleFonts
-                                                                          .readexPro(
-                                                                              color:
-                                                                                  Colors.grey),
+                                                                      style: GoogleFonts.readexPro(
+                                                                          color:
+                                                                              Colors.grey),
                                                                     ),
                                                                   ),
                                                                   ElevatedButton(
@@ -321,8 +365,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                                                                               true);
                                                                     },
                                                                     style: ElevatedButton.styleFrom(
-                                                                        padding: const EdgeInsets
-                                                                                .only(
+                                                                        padding: const EdgeInsets.only(
                                                                             left:
                                                                                 40,
                                                                             right:
@@ -356,6 +399,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                                                       //_getPosts();
                                                     });
                                                   },
+                                                  user: userList[index],
                                                 )
                                               : Post(
                                                   post: postList[index],
@@ -364,8 +408,9 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                                                     bool deletePost =
                                                         await showDialog(
                                                             context: context,
-                                                            builder: (BuildContext
-                                                                context) {
+                                                            builder:
+                                                                (BuildContext
+                                                                    context) {
                                                               return buildDeleteAlertDialog(
                                                                   context);
                                                             });
@@ -381,6 +426,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                                                       _getPosts();
                                                     });
                                                   },
+                                            user: userList[index],
                                                 );
                                         },
                                       );
@@ -440,7 +486,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => const CreatePost()));*/
-                    Navigator.push(
+                    /*Navigator.push(
                       context,
                       PageRouteBuilder(
                         transitionDuration: const Duration(milliseconds: 300),
@@ -463,7 +509,19 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                           return CreatePost();
                         },
                       ),
-                    );
+                    );*/
+                    Navigator.of(context).push(SwipeablePageRoute(
+                        transitionDuration: const Duration(milliseconds: 300),
+                        transitionBuilder: (context, animation,
+                                secondaryAnimation, isSwipeGesture, child) =>
+                            SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(1.0, 0.0),
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: child,
+                            ),
+                        builder: (BuildContext context) => const CreatePost()));
                   },
                   style: ElevatedButton.styleFrom(
                       shape: const CircleBorder(),
@@ -658,8 +716,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
 
   Widget searchSuggest(BuildContext context) {
     return LayoutBuilder(
-      builder:
-          (BuildContext context, BoxConstraints constraints) {
+      builder: (BuildContext context, BoxConstraints constraints) {
         return AnimatedContainer(
           decoration: BoxDecoration(
             color: colors.SN_postBackgroundColor,
@@ -685,8 +742,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                   onPressed: () {
                     setState(() {
                       _searchController.clear();
-                      _selectedAttraction =
-                      _searchResults[index];
+                      _selectedAttraction = _searchResults[index];
                       _showTextField = false;
                       _containerHeight = 0;
                       FocusScope.of(context).unfocus();
@@ -714,6 +770,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
       },
     );
   }
+
   List<String> _searchAttraction(String value) {
     return _fakeDate
         .where((element) => element.toLowerCase().contains(value.toLowerCase()))

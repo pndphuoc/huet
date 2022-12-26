@@ -353,9 +353,8 @@ class _SignInPageState extends State<SignInPage>
                 setState(() {
                   isLoading = true;
                 });
+
                 await AuthService().signInWithGoogle();
-                await value
-                    .checkEmail(FirebaseAuth.instance.currentUser!.email!);
                 setState(() {
                   isLoading = false;
                 });
