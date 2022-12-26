@@ -353,8 +353,17 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
             ),
           ),
           TextField(
-            onChanged: (value) {
-              setState(() {});
+            onSubmitted: (values) {
+              if (values != "") {
+                setState(() {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ResortsPage(
+                                value: values,
+                              )));
+                });
+              }
             },
             decoration: const InputDecoration(
                 filled: true,

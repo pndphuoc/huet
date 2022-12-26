@@ -10,6 +10,7 @@ class EventProvider extends ChangeNotifier {
   List<Event> list = [];
   List<Event> listThisMonth = [];
   List<Event> listNextMonth = [];
+  bool isloading = true;
 
   Future<void> getAll() async {
     String apiURL = "${url.url}/api/event";

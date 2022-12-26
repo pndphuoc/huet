@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as color;
@@ -69,18 +70,18 @@ class _TouristAttractionState extends State<TouristAttraction> {
   @override
   Widget build(BuildContext context) {
     var productProvider = Provider.of<TouristAttractionProvider>(context);
-    if (isloading) {
+    if (productProvider.isloading) {
       (() async {
         await productProvider.getAll();
 
         setState(() {
-          isloading = false;
+          productProvider.isloading = false;
         });
       })();
     }
     return Scaffold(
       backgroundColor: color.backgroundColor,
-      body: isloading
+      body: productProvider.isloading
           ? Center(
               child: LoadingAnimationWidget.staggeredDotsWave(
                   color: color.primaryColor, size: 50),
@@ -198,7 +199,7 @@ class _TouristAttractionState extends State<TouristAttraction> {
         return Consumer<TouristAttractionProvider>(
           builder: (context, value1, child) => Transform.rotate(
             angle: pi * value,
-            child: carouselCard(value1.list[index]),
+            child: FadeInUp(from: 50, child: carouselCard(value1.list[index])),
           ),
         );
       },
@@ -346,102 +347,104 @@ class _TouristAttractionState extends State<TouristAttraction> {
                       searchValue: "",
                     )));
       },
-      child: Container(
-        margin: const EdgeInsets.only(top: 20),
-        padding:
-            const EdgeInsets.only(top: 15, bottom: 15, left: 30, right: 30),
-        width: double.infinity,
-        height: 175,
-        decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(0),
-            boxShadow: const [
-              BoxShadow(
-                  offset: Offset(0, 4),
-                  blurRadius: 4,
-                  color: Color.fromARGB(66, 216, 214, 214))
-            ]),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.readexPro(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black87),
-                ),
-                const Icon(
-                  Icons.arrow_forward_ios_outlined,
-                  size: 20,
-                  color: Colors.black54,
-                )
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  width: 105,
-                  height: 105,
-                  decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.network(
-                        image1,
-                        width: 90,
-                        height: 90,
-                        fit: BoxFit.cover,
+      child: BounceInLeft(
+        child: Container(
+          margin: const EdgeInsets.only(top: 20),
+          padding:
+              const EdgeInsets.only(top: 15, bottom: 15, left: 30, right: 30),
+          width: double.infinity,
+          height: 175,
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(0),
+              boxShadow: const [
+                BoxShadow(
+                    offset: Offset(0, 4),
+                    blurRadius: 4,
+                    color: Color.fromARGB(66, 216, 214, 214))
+              ]),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.readexPro(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black87),
+                  ),
+                  const Icon(
+                    Icons.arrow_forward_ios_outlined,
+                    size: 20,
+                    color: Colors.black54,
+                  )
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: 105,
+                    height: 105,
+                    decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Center(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.network(
+                          image1,
+                          width: 90,
+                          height: 90,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Container(
-                  width: 105,
-                  height: 105,
-                  decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.network(
-                        image2,
-                        width: 90,
-                        height: 90,
-                        fit: BoxFit.cover,
+                  Container(
+                    width: 105,
+                    height: 105,
+                    decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Center(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.network(
+                          image2,
+                          width: 90,
+                          height: 90,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Container(
-                  width: 105,
-                  height: 105,
-                  decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.network(
-                        image3,
-                        width: 90,
-                        height: 90,
-                        fit: BoxFit.cover,
+                  Container(
+                    width: 105,
+                    height: 105,
+                    decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(10)),
+                    child: Center(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.network(
+                          image3,
+                          width: 90,
+                          height: 90,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
-                  ),
-                )
-              ],
-            ),
-          ],
+                  )
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
