@@ -2,12 +2,14 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:animate_do/animate_do.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart';
 import 'package:hue_t/providers/user_provider.dart';
+import 'package:hue_t/view/profileuser/edit_profile.dart';
 import 'package:hue_t/view/sign_in_out/register_user.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
@@ -322,7 +324,7 @@ class _SignInPageState extends State<SignInPage>
                             context,
                             MaterialPageRoute(
                                 builder: ((context) => HueT(
-                                      index: 2,
+                                      index: 1,
                                     ))),
                             (route) => false);
                       } else {
@@ -349,43 +351,52 @@ class _SignInPageState extends State<SignInPage>
         Container(
           margin: const EdgeInsets.only(left: 30, right: 30),
           height: 60,
-          child: ElevatedButton(
-            onPressed: () async {
-              setState(() {
-                isLoading = true;
-              });
-              await AuthService().signInWithGoogle();
-              setState(() {
-                isLoading = false;
-              });
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const HueT()));
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
+          child: Consumer<UserProvider>(
+            builder: (context, value, child) => ElevatedButton(
+              onPressed: () async {
+                setState(() {
+                  isLoading = true;
+                });
+                await AuthService().signInWithGoogle();
+                await value
+                    .checkEmail(FirebaseAuth.instance.currentUser!.email!);
+                setState(() {
+                  isLoading = false;
+                });
+
+                // Navigator.push(
+                //     context,
+                //     MaterialPageRoute(
+                //         builder: (context) => const HueT(
+                //               index: 1,
+                //             )));
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(40),
+                ),
               ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Image.asset(
-                  'assets/images/profileuser/google_logo.png',
-                  width: 30,
-                  height: 30,
-                ),
-                Text(
-                  'Continue with Google',
-                  style: GoogleFonts.readexPro(
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black,
-                      fontSize: 17),
-                ),
-                const SizedBox(
-                  width: 30,
-                )
-              ],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Image.asset(
+                    'assets/images/profileuser/google_logo.png',
+                    width: 30,
+                    height: 30,
+                  ),
+                  Text(
+                    'Continue with Google',
+                    style: GoogleFonts.readexPro(
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black,
+                        fontSize: 17),
+                  ),
+                  const SizedBox(
+                    width: 30,
+                  )
+                ],
+              ),
             ),
           ),
         ),
@@ -397,9 +408,8 @@ class _SignInPageState extends State<SignInPage>
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => SlideInRight(
-                        duration: const Duration(milliseconds: 700),
-                        child: const RegisterUser())));
+                    builder: (context) => AuthService()
+                        .handleAuthState(const HueT(), const RegisterUser())));
           },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,

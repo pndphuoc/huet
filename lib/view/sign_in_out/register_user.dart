@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:animate_do/animate_do.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,7 +20,6 @@ import '../profileuser/profile_user.dart';
 
 class RegisterUser extends StatefulWidget {
   const RegisterUser({Key? key}) : super(key: key);
-
   @override
   State<RegisterUser> createState() => _RegisterUserState();
 }
@@ -188,7 +188,8 @@ class _RegisterUserState extends State<RegisterUser> {
                 setState(() async {
                   value.isRegister = true;
 
-                  await value.createUser(name!, email!, password!);
+                  await value.createUser(
+                      name!, email!, password!, "", "", false);
                   if (value.isRegister) {
                     Navigator.push(
                         context,
@@ -252,6 +253,11 @@ class _RegisterUserState extends State<RegisterUser> {
                         builder: AuthService().handleAuthState(
                             const HueT(index: 1), const RegisterUser())),
                     (route) => false);
+                await value
+                    .checkEmail(FirebaseAuth.instance.currentUser!.email!);
+                setState(() {
+                  isLoading = false;
+                });
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,

@@ -19,6 +19,7 @@ import 'package:hue_t/providers/user_provider.dart';
 import 'package:hue_t/providers/weather_provider.dart';
 import 'package:hue_t/view/Foodstore/foodstore.dart';
 import 'package:hue_t/view/events/events.dart';
+import 'package:hue_t/view/foodstore/foodstore.dart';
 import 'package:hue_t/view/foodstore/foodstoredetail.dart';
 import 'package:hue_t/animation/show_up.dart';
 import 'package:hue_t/view/Foodstore/foodstore.dart';
@@ -94,14 +95,17 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     if (FirebaseAuth.instance.currentUser != null) {
       userConstant.user = userModel.User(
-          name: FirebaseAuth.instance.currentUser!.displayName!,
-          mail: FirebaseAuth.instance.currentUser!.email!,
-          photoURL: FirebaseAuth.instance.currentUser!.photoURL!,
-          uid: FirebaseAuth.instance.currentUser!.uid,
-          phoneNumber: FirebaseAuth.instance.currentUser!.phoneNumber);
+        name: FirebaseAuth.instance.currentUser!.displayName!,
+        mail: FirebaseAuth.instance.currentUser!.email!,
+        photoURL: FirebaseAuth.instance.currentUser!.photoURL!,
+        uid: FirebaseAuth.instance.currentUser!.uid,
+        phoneNumber: FirebaseAuth.instance.currentUser!.phoneNumber,
+        isGoogle: true,
+      );
     }
-    Future.delayed(const Duration(seconds: 4)).then((value) => Navigator.of(context)
-        .pushReplacement(CupertinoPageRoute(builder: (ctx) => const HueT())));
+    Future.delayed(const Duration(seconds: 4)).then((value) =>
+        Navigator.of(context).pushReplacement(
+            CupertinoPageRoute(builder: (ctx) => const HueT())));
   }
 
   @override
@@ -222,7 +226,7 @@ class _HueTState extends State<HueT> {
   final List<Widget> _children = [
     const SocialNetWorkPage(),
     const HomePage(),
-    const ProfileUser()
+    const ProfileUser(),
   ];
 
   bottomNavigationBar(BuildContext context) {

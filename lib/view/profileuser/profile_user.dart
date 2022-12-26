@@ -27,16 +27,6 @@ class _ProfileUserState extends State<ProfileUser> {
   bool status = false;
   double sideLength = 50;
   bool isLoading = false;
-  var isUserLoginWithGoogle = FirebaseAuth.instance.currentUser;
-  bool isUserGG = false;
-
-  @override
-  void initState() {
-    super.initState();
-    if (isUserLoginWithGoogle != null) {
-      isUserGG = true;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -215,15 +205,15 @@ class _ProfileUserState extends State<ProfileUser> {
                       ]),
                   child: ClipRRect(
                       borderRadius: BorderRadius.circular(150),
-                      child: isUserGG
-                          ? Image.network(
-                              user_constants.user!.photoURL.toString(),
-                              width: 150,
-                              height: 150,
-                              fit: BoxFit.cover,
-                            )
-                          : Image.asset(
-                              'assets/images/socialNetwork/avatar.png')),
+                      child: Image.network(
+                        user_constants.user!.photoURL.toString(),
+                        width: 150,
+                        height: 150,
+                        fit: BoxFit.cover,
+                      )
+                      //  Image.asset(
+                      //     'assets/images/socialNetwork/avatar.png')
+                      ),
                 ),
                 const SizedBox(height: 5),
                 Text(
@@ -532,36 +522,6 @@ class _ProfileUserState extends State<ProfileUser> {
     );
   }
 
-// Define the route to the next page
-  Widget signAnimationRoute(BuildContext context, Widget page) {
-    return Scaffold(body: Center(child: GestureDetector(onTap: () {
-      Navigator.of(context).push(
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) {
-            // This is the page that we want to show
-            return accountNavigator(
-                context, AuthService().handleAuthState(const HueT(), page));
-          },
-          transitionDuration: Duration(milliseconds: 500),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            // This is where we define the animation for the transition
-            var begin = Offset(0.0, 1.0);
-            var end = Offset.zero;
-            var curve = Curves.ease;
-
-            var tween =
-                Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-
-            return SlideTransition(
-              position: animation.drive(tween),
-              child: child,
-            );
-          },
-        ),
-      );
-    })));
-  }
-
   Widget _buildLogOutAlertDialog(BuildContext context) {
     return Center(
       child: Row(
@@ -610,7 +570,18 @@ class _ProfileUserState extends State<ProfileUser> {
                     setState(() {
                       isLoading = true;
                     });
-                    await AuthService().signOut(context);
+                    if (FirebaseAuth.instance.currentUser != null) {
+                      await AuthService().signOut(context);
+                    } else {
+                      user_constants.user = null;
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (BuildContext context) => const HueT(),
+                        ),
+                        (Route<dynamic> route) => false,
+                      );
+                    }
                     setState(() {
                       isLoading = false;
                     });
