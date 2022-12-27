@@ -85,6 +85,7 @@ class _AllReviewsState extends State<AllReviews> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
@@ -175,7 +176,7 @@ class _AllReviewsState extends State<AllReviews> with TickerProviderStateMixin {
                     children: [
                       Text(
                         "Incognito",
-                        style: GoogleFonts.montserrat(
+                        style: GoogleFonts.readexPro(
                             color: Colors.black,
                             fontSize: 15,
                             fontWeight: FontWeight.w600),
@@ -202,7 +203,7 @@ class _AllReviewsState extends State<AllReviews> with TickerProviderStateMixin {
                       const SizedBox(
                         height: 10,
                       ),
-                      Text(reviewsList[index].review!),
+                      Text(reviewsList[index].review!, style: GoogleFonts.readexPro(color: Colors.black),),
                       const SizedBox(
                         height: 10,
                       ),
@@ -228,7 +229,7 @@ class _AllReviewsState extends State<AllReviews> with TickerProviderStateMixin {
                       ),
                       Text(
                         reviewsList[index].reviewDate.toString(),
-                        style: GoogleFonts.montserrat(
+                        style: GoogleFonts.readexPro(
                             color: Colors.grey,
                             fontWeight: FontWeight.w300,
                             fontSize: 13),

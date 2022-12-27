@@ -9,6 +9,7 @@ import 'package:hue_t/view/accommodation_views/hotels_list.dart';
 import 'package:hue_t/view/accommodation_views/hotel_detail.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:swipeable_page_route/swipeable_page_route.dart';
 import '../../colors.dart' as colors;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -141,7 +142,7 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                           height: 15,
                         ),
                         ...accommodationProvider.list.map((e) =>
-                            popularAccommondationItem(context,
+                            popularAccommodationItem(context,
                                 accommodationProvider.list.indexOf(e))),
                         const SizedBox(
                           height: 60,
@@ -150,11 +151,32 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                     ),
                   ),
                 )),
+                Positioned(
+                    top: 50,
+                    left: 20,
+                    child: backButton())
               ]),
       ),
     );
   }
-
+  Widget backButton() {
+    return Container(
+      decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(15)),
+      child: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: const Icon(
+            Icons.arrow_back_outlined,
+            color: Colors.white,
+          ),
+          style: ButtonStyle(
+              shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15))))),
+    );
+  }
   accommodationBlock(BuildContext context, String name, List<hotelModel> list) {
     return Container(
       decoration: BoxDecoration(
@@ -196,8 +218,8 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                       "https://cdn4.tropicalsky.co.uk/images/1800x600/indochine-palace-main-image.jpg",
                 );
               }
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => direction));
+              Navigator.of(context).push(SwipeablePageRoute(
+                  builder: (BuildContext context) => direction));
             },
             child: Container(
               width: MediaQuery.of(context).size.width,
@@ -292,8 +314,9 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                       ),
                     ))),
             onTap: () {
-              Navigator.of(context, rootNavigator: true).push(MaterialPageRoute(
-                  builder: (context) => HotelDetail(model: list[index])));
+              Navigator.of(context, rootNavigator: true).push(
+                  SwipeablePageRoute(
+                      builder: (context) => HotelDetail(model: list[index])));
             }),
       ),
     );
@@ -309,30 +332,14 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
             height: 60,
             decoration: const BoxDecoration(),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                  child: Container(
-                    width: 45,
-                    height: 45,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.grey.withOpacity(0.4)),
-                    child: const Center(child: Icon(Icons.arrow_back)),
-                  ),
-                ),
+
                 Text(
                   "HUE ACCOMMODATION",
                   style: GoogleFonts.readexPro(
                       fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(
-                  width: 20,
-                  height: 45,
-                )
               ],
             ),
           ),
@@ -457,7 +464,7 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
     );
   }
 
-  popularAccommondationItem(BuildContext context, int index) {
+  popularAccommodationItem(BuildContext context, int index) {
     return Consumer<AccomodationProvider>(builder: (context, value, child) {
       return BounceInLeft(
         delay: const Duration(milliseconds: 500),
@@ -466,10 +473,10 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
           margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
           child: ElevatedButton(
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) {
-                // do something
-                return HotelDetail(model: value.list[index]);
-              }));
+              Navigator.of(context, rootNavigator: true).push(
+                  SwipeablePageRoute(
+                      builder: (context) =>
+                          HotelDetail(model: value.list[index])));
             },
             style: ElevatedButton.styleFrom(
                 elevation: 0.0,

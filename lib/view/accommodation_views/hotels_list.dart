@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/animation/show_up.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:swipeable_page_route/swipeable_page_route.dart';
 import '../../animation/show_right.dart';
 import '../../colors.dart' as colors;
 import '../../model/accommodation/accommodationModel.dart';
@@ -277,10 +278,8 @@ class _HotelsPageState extends State<HotelsPage> {
         margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
         child: ElevatedButton(
           onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) {
-              // do something
-              return HotelDetail(model: listHotel[index]);
-            }));
+            Navigator.of(context).push(SwipeablePageRoute(
+                builder: (BuildContext context) => HotelDetail(model: listHotel[index])));
           },
           style: ElevatedButton.styleFrom(
               elevation: 0.0,
