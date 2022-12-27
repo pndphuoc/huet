@@ -1,9 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:html/parser.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:hue_t/model/event/event.dart';
 
@@ -15,6 +13,7 @@ String formatHtmlString(String string) {
 
 class EventDetail extends StatefulWidget {
   Event item;
+
   EventDetail({super.key, required this.item});
 
   @override
@@ -44,7 +43,7 @@ class _EventDetailState extends State<EventDetail> {
   header(BuildContext context) {
     return Stack(
       children: [
-        Image.network(
+        CachedNetworkImage(imageUrl:
           widget.item.image.toString(),
           width: MediaQuery.of(context).size.width,
           height: 270,
@@ -140,7 +139,7 @@ class _EventDetailState extends State<EventDetail> {
                   style: GoogleFonts.readexPro(
                       fontSize: 15,
                       fontWeight: FontWeight.w400,
-                      color: Color.fromARGB(221, 31, 31, 31)),
+                      color: const Color.fromARGB(221, 31, 31, 31)),
                 ),
               ],
             ),
@@ -155,7 +154,7 @@ class _EventDetailState extends State<EventDetail> {
                   style: GoogleFonts.readexPro(
                       fontSize: 15,
                       fontWeight: FontWeight.w400,
-                      color: Color.fromARGB(221, 31, 31, 31)),
+                      color: const Color.fromARGB(221, 31, 31, 31)),
                 ),
               ],
             ),
@@ -173,7 +172,7 @@ class _EventDetailState extends State<EventDetail> {
                     style: GoogleFonts.readexPro(
                         fontSize: 15,
                         fontWeight: FontWeight.w400,
-                        color: Color.fromARGB(221, 31, 31, 31)),
+                        color: const Color.fromARGB(221, 31, 31, 31)),
                   ),
                 ),
               ],

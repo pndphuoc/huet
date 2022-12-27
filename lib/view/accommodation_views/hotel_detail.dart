@@ -1,7 +1,7 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_geocoder/geocoder.dart';
@@ -10,12 +10,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:hue_t/view/accommodation_views/all_reviews.dart';
 import 'package:hue_t/model/accommodation/accommodationModel.dart';
 import 'package:hue_t/animation/show_up.dart';
-import 'package:geolocator/geolocator.dart';
 import '../../animation/show_right.dart';
 import '../../colors.dart' as colors;
 import '../../model/accommodation/reviewModel.dart';
 import 'package:map_launcher/map_launcher.dart' as map;
-import '../../permission/get_user_location.dart' as userLocation;
+import '../../permission/get_user_location.dart' as user_location;
 
 class HotelDetail extends StatefulWidget {
   const HotelDetail({Key? key, required this.model}) : super(key: key);
@@ -53,8 +52,8 @@ class _HotelDetailState extends State<HotelDetail> {
     reviewModel(
         id: 1,
         userId: 1,
-        rating: 5,
-        review: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        rating: 3,
+        review: "Khách sạn có ma",
         images: [
           "https://www.gannett-cdn.com/-mm-/05b227ad5b8ad4e9dcb53af4f31d7fbdb7fa901b/c=0-64-2119-1259/local/-/media/USATODAY/USATODAY/2014/08/13/1407953244000-177513283.jpg"
         ],
@@ -77,7 +76,7 @@ class _HotelDetailState extends State<HotelDetail> {
   void initState() {
     super.initState();
 
-    userLocation.getUserCurrentLocation().then((value) async {
+    user_location.getUserCurrentLocation().then((value) async {
       // marker added for hotels location
       final coordinates = Coordinates(
           widget.model.accommodationLocation.latitude,
@@ -121,13 +120,6 @@ class _HotelDetailState extends State<HotelDetail> {
       );
 
       final GoogleMapController controller = await _controller.future;
-
-      @override
-      void dispose() {
-        controller.dispose();
-        // ignore: avoid_print
-        super.dispose();
-      }
 
       Timer(const Duration(milliseconds: 1000), () async {
         controller.animateCamera(
@@ -178,8 +170,8 @@ class _HotelDetailState extends State<HotelDetail> {
                                 borderRadius: BorderRadius.circular(25)),
                             child: Center(
                                 child: ClipRRect(
-                              child: Image.network(
-                                e ?? "",
+                              child: CachedNetworkImage(
+                                imageUrl: e ?? "",
                                 width: double.infinity,
                                 height:
                                     MediaQuery.of(context).size.height / 2.8,
@@ -339,13 +331,8 @@ class _HotelDetailState extends State<HotelDetail> {
 
                         await availableMaps.first.showDirections(
                             destination: map.Coords(
-                                widget.model.accommodationLocation!.latitude,
-                                widget.model.accommodationLocation!.longitude));
-
-/*                          await availableMaps.first.showMarker(
-                          coords: map.Coords(widget.model.hotelLocaton!.latitude, widget.model.hotelLocaton!.longitude),
-                          title: widget.model.name,
-                        );*/
+                                widget.model.accommodationLocation.latitude,
+                                widget.model.accommodationLocation.longitude));
                       },
                       child: Container(
                         margin: const EdgeInsets.only(top: 15),

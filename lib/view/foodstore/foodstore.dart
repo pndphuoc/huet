@@ -1,4 +1,5 @@
 import 'package:animate_do/animate_do.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 // ignore: import_of_legacy_library_into_null_safe
@@ -11,7 +12,7 @@ import 'package:hue_t/view/foodstore/search_foodstore.dart';
 import 'package:hue_t/colors.dart' as color;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
-import '../../permission/get_user_location.dart' as userLocation;
+import '../../permission/get_user_location.dart' as user_location;
 
 import '../../model/foodstore/restaurant.dart';
 
@@ -64,7 +65,7 @@ class _FoodstoreState extends State<Foodstore> {
   //
   //   });
   // }
-  Future<void> distanceCaculating(Position value, List<Restaurant> list) async {
+  Future<void> distanceCalculation(Position value, List<Restaurant> list) async {
     for (int i = 0; i < list.length; i++) {
       list[i].distance = GeolocatorPlatform.instance.distanceBetween(
             value.latitude,
@@ -85,13 +86,13 @@ class _FoodstoreState extends State<Foodstore> {
         await restaurantProvider.gettop();
 
         await restaurantProvider.sort();
-        await userLocation.getUserCurrentLocation().then((value) async {
+        await user_location.getUserCurrentLocation().then((value) async {
           final coordinates = Coordinates(value.latitude, value.longitude);
           var addresses =
               await Geocoder.local.findAddressesFromCoordinates(coordinates);
           address = addresses.first.addressLine.toString();
 
-          await distanceCaculating(value, restaurantProvider.list);
+          await distanceCalculation(value, restaurantProvider.list);
         });
         setState(() {
           restaurantProvider.isloading = false;
@@ -359,7 +360,7 @@ class _FoodstoreState extends State<Foodstore> {
                                       borderRadius: const BorderRadius.only(
                                           topLeft: Radius.circular(15),
                                           topRight: Radius.circular(15)),
-                                      child: Image.network(
+                                      child: CachedNetworkImage(imageUrl:
                                         e.image.toString(),
                                         width: double.infinity,
                                         height: 140,
@@ -545,7 +546,6 @@ class _FoodstoreState extends State<Foodstore> {
                     child: Container(
                       width: MediaQuery.of(context).size.width / 2,
                       height: 40,
-                      decoration: BoxDecoration(),
                       child: Center(
                         child: Text("Rating",
                             style: GoogleFonts.readexPro(
@@ -607,7 +607,7 @@ class _FoodstoreState extends State<Foodstore> {
                                     children: [
                                       ClipRRect(
                                         borderRadius: BorderRadius.circular(5),
-                                        child: Image.network(e.image.toString(),
+                                        child: CachedNetworkImage(imageUrl: e.image.toString(),
                                             height: double.infinity,
                                             width: 90,
                                             fit: BoxFit.cover),
@@ -776,7 +776,7 @@ class _FoodstoreState extends State<Foodstore> {
                                     children: [
                                       ClipRRect(
                                         borderRadius: BorderRadius.circular(5),
-                                        child: Image.network(e.image.toString(),
+                                        child: CachedNetworkImage(imageUrl: e.image.toString(),
                                             height: double.infinity,
                                             width: 90,
                                             fit: BoxFit.cover),
