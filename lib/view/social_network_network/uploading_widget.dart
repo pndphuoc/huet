@@ -132,9 +132,6 @@ class _UploadingWidgetState extends State<UploadingWidget> {
       file.absolute.path, outPath,
       quality: 75
     );
-
-    print(file.lengthSync());
-    print(result?.lengthSync());
     return result;
   }
 

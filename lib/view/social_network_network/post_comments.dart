@@ -169,7 +169,6 @@ class _PostCommentsPageState extends State<PostCommentsPage>
   }
 
   void _onRefresh() async {
-    print("bat dau refresh");
     commentList.clear();
     setState(() {
       isRefreshing = true;
@@ -191,7 +190,6 @@ class _PostCommentsPageState extends State<PostCommentsPage>
       _refreshController.loadComplete();
       return;
     }
-    print("bat dau get more");
    setState(() {
      isGettingMoreComments = true;
    });
@@ -417,7 +415,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                           child: Container(
                               padding: const EdgeInsets.only(left: 20),
                               child: Text(
-                                "Replying to ${commentAreBeingReplied!.id}",
+                                "Replying to ${commentAreBeingReplied!.user!.name}",
                                 style:
                                     GoogleFonts.readexPro(color: Colors.white),
                                 overflow: TextOverflow.ellipsis,
@@ -494,13 +492,13 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                   IconButton(
                     onPressed: () async {
                       //Nếu text không rỗng
-                      if (commentController.value.text.isNotEmpty) {
+                      if (commentController.value.text.trim().isNotEmpty) {
                         if(sendCommentMode == 0) {
                           _commentScrollController.animateTo(0,
                               duration: const Duration(milliseconds: 500),
                               curve: Curves.fastOutSlowIn);
                           FocusScope.of(context).requestFocus(FocusNode());
-                          commentContent = commentController.text;
+                          commentContent = commentController.text.trim();
                           isPostingComment = true;
                           setState(() {});
                           commentController.clear();
@@ -518,7 +516,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                         }
                         else if(sendCommentMode == 1) {
                           FocusScope.of(context).requestFocus(FocusNode());
-                          commentContent = commentController.text;
+                          commentContent = commentController.text.trim();
                           isReplying = false;
                           setState(() {
                             isPostingReplyComment = true;
@@ -545,7 +543,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                           });
                         } else {
                           FocusScope.of(context).requestFocus(FocusNode());
-                          commentContent = commentController.text;
+                          commentContent = commentController.text.trim();
                           isReplying = false;
                           setState(() {
                             isPostingReplyComment = true;
@@ -632,7 +630,7 @@ class _PostCommentsPageState extends State<PostCommentsPage>
             commentAreBeingReplied = cmt;
             isReplying = true;
             focusNode.requestFocus();
-            commentController.text = "@${commentAreBeingReplied!.id} ";
+            commentController.text = "@${commentAreBeingReplied!.user!.name} ";
             commentController.selection =
                 TextSelection.collapsed(offset: commentController.text.length);
             setState(() {});
@@ -907,41 +905,38 @@ class _PostCommentsPageState extends State<PostCommentsPage>
                     IntrinsicWidth(
                       child: Column(
                         children: [
-                          HeartAnimation(
-                            isAnimating: isHeartAnimating, ////
-                            child: IconButton(
-                              onPressed: () {
-                                likeAndUnlikeComment(cmt, widget.postID);
-                                cmt.isLiked = !cmt.isLiked!;
-                                if (cmt.isLiked!) {
-                                  cmt.likeCount = cmt.likeCount! + 1;
-                                } else {
-                                  cmt.likeCount = cmt.likeCount! - 1;
-                                }
-                                setState(() {
-                                  isHeartAnimating = !isHeartAnimating;
+                          IconButton(
+                            onPressed: () {
+                              likeAndUnlikeComment(cmt, widget.postID);
+                              cmt.isLiked = !cmt.isLiked!;
+                              if (cmt.isLiked!) {
+                                cmt.likeCount = cmt.likeCount! + 1;
+                              } else {
+                                cmt.likeCount = cmt.likeCount! - 1;
+                              }
+                              setState(() {
+                                isHeartAnimating = !isHeartAnimating;
 
-                                  _heartController.forward();
-                                });
-                              },
-                              icon: cmt.isLiked!
-                                  ? const Icon(
-                                      Icons.favorite_rounded,
-                                      color: Colors.red,
-                                      size: 15,
-                                    )
-                                  : const Icon(
-                                      Icons.favorite_outline_rounded,
-                                      size: 15,
-                                    ),
-                              splashColor: Colors.transparent,
-                              highlightColor: Colors.transparent,
-                              hoverColor: Colors.transparent,
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                            ),
+                                _heartController.forward();
+                              });
+                            },
+                            icon: cmt.isLiked!
+                                ? const Icon(
+                                    Icons.favorite_rounded,
+                                    color: Colors.red,
+                                    size: 20,
+                                  )
+                                : const Icon(
+                                    Icons.favorite_outline_rounded,
+                                    size: 20,
+                                  ),
+                            splashColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            hoverColor: Colors.transparent,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
                           ),
-                          Text(
+                          if(cmt.likeCount! > 0) Text(
                             cmt.likeCount.toString(),
                             style: GoogleFonts.readexPro(color: Colors.grey),
                           )

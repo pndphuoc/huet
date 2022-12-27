@@ -74,22 +74,28 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: colors.backgroundColor,
-      appBar: appBar(context),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              mediaListBlock(context),
-              captionBlock(context),
-              selectedAttraction != null
-                  ? selectedAttractionBlock(context, selectedAttraction!)
-                  : placeSelectorBlock(context),
-              const SizedBox(
-                height: 50,
-              ),
-            ],
+    return GestureDetector(
+      onTap: (){
+        FocusManager.instance.primaryFocus!.unfocus();
+      },
+      child: Scaffold(
+        backgroundColor: colors.backgroundColor,
+        resizeToAvoidBottomInset: true,
+        appBar: appBar(context),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                mediaListBlock(context),
+                captionBlock(context),
+                selectedAttraction != null
+                    ? selectedAttractionBlock(context, selectedAttraction!)
+                    : placeSelectorBlock(context),
+                const SizedBox(
+                  height: 50,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -136,7 +142,7 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
                 constants.isUploading = true;
                 constants.postInfomation = {
                   'medias': widget.medias,
-                  'caption': captionController.text,
+                  'caption': captionController.text.trim(),
                   'attractionID': selectedAttraction!.id
                 };
                 Navigator.pushAndRemoveUntil(
@@ -364,15 +370,14 @@ class _CompleteUploadPageState extends State<CompleteUploadPage> {
             margin: const EdgeInsets.only(left: 20, right: 20),
             child: TextButton(
                 onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SearchTouristAttractionPage(
+                  Navigator.of(context).push(SwipeablePageRoute(
+                    builder: (BuildContext context) =>
+                        SearchTouristAttractionPage(
                           callback: (val) => setState(() {
                             selectedAttraction = val;
                           }),
                         ),
-                      ));
+                  ));
                 },
                 style: ButtonStyle(
                   overlayColor: MaterialStateColor.resolveWith(
