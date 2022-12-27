@@ -94,12 +94,11 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
-
-    (()async {
+    (() async {
       var userProvider = Provider.of<UserProvider>(context, listen: false);
       if (FirebaseAuth.instance.currentUser != null) {
-        await userProvider.checkEmail(FirebaseAuth.instance.currentUser!.email!);
-
+        await userProvider
+            .checkEmail(FirebaseAuth.instance.currentUser!.email!);
       }
 /*      Navigator.of(context).pushReplacement(
           CupertinoPageRoute(builder: (ctx) => const HueT()));*/
@@ -179,7 +178,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
 class HueT extends StatefulWidget {
   const HueT({super.key, this.index});
+
   final int? index;
+
   @override
   State<HueT> createState() => _HueTState();
 }
@@ -256,6 +257,7 @@ class _HueTState extends State<HueT> {
       onTap: (index) {
         setState(() {
           _selectedItemPosition = index;
+          _pageController.animateToPage(_selectedItemPosition, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
         });
       },
       items: const [
@@ -285,6 +287,8 @@ class _HueTState extends State<HueT> {
     }
   }
 
+  final PageController _pageController = PageController(initialPage: 1);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -294,28 +298,31 @@ class _HueTState extends State<HueT> {
         primarySwatch: Colors.blue,
       ),
       home: Scaffold(
-        body: GestureDetector(
-          onTap: () {
-            FocusScope.of(context).requestFocus(FocusNode());
-          },
-          child: Stack(children: [
-            _children[_selectedItemPosition],
-            MediaQuery.of(context).viewInsets.bottom != 0.0
-                ? Container()
-                : Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: LayoutBuilder(
-                      builder:
-                          (BuildContext context, BoxConstraints constraints) {
-                        return ShowUp(
-                            child: bottomNavigationBar(context), delay: 0);
-                      },
-                    ),
-                  )
-          ]),
-        ),
+        body: Stack(children: [
+          PageView(
+            controller: _pageController,
+            children: _children,
+            onPageChanged: (index) {
+              setState(() {
+                _selectedItemPosition = index;
+              });
+            },
+          ),
+          MediaQuery.of(context).viewInsets.bottom != 0.0
+              ? Container()
+              : Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: LayoutBuilder(
+              builder:
+                  (BuildContext context, BoxConstraints constraints) {
+                return ShowUp(
+                    child: bottomNavigationBar(context), delay: 0);
+              },
+            ),
+          )
+        ]),
       ),
     );
   }

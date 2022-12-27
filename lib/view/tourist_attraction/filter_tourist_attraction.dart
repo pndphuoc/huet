@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/model/attraction/tourist_attraction.dart';
@@ -11,6 +12,7 @@ import 'package:provider/provider.dart';
 class FilterTourist extends StatefulWidget {
   int categoryId;
   String searchValue;
+
   FilterTourist(
       {super.key, required this.categoryId, required this.searchValue});
 
@@ -19,17 +21,18 @@ class FilterTourist extends StatefulWidget {
 }
 
 class _FilterTouristState extends State<FilterTourist> {
-  bool isloading = true;
-  bool isloading2 = true;
+  bool isLoading = true;
+  bool isLoading2 = true;
   int popular1 = 1;
   int? value;
   late String valueSearch;
-  List<TouristAttraction> listsearch = [];
+  List<TouristAttraction> listSearch = [];
+
   @override
   Widget build(BuildContext context) {
     var productProvider = Provider.of<TouristAttractionProvider>(context);
 
-    if (isloading && value != 0) {
+    if (isLoading && value != 0) {
       value = widget.categoryId;
       valueSearch = "";
 
@@ -37,29 +40,29 @@ class _FilterTouristState extends State<FilterTourist> {
         await productProvider.filter(widget.categoryId);
 
         setState(() {
-          isloading = false;
-          isloading2 = false;
+          isLoading = false;
+          isLoading2 = false;
         });
       })();
     }
-    if (isloading2 && value != 0) {
+    if (isLoading2 && value != 0) {
       (() async {
         await productProvider.filter(value);
 
         setState(() {
-          isloading2 = false;
+          isLoading2 = false;
         });
       })();
     }
-    if (isloading2 && value == 0) {
+    if (isLoading2 && value == 0) {
       (() async {
         if (valueSearch == "") {
           valueSearch = widget.searchValue;
         }
         // ignore: await_only_futures
-        listsearch = productProvider.search(valueSearch!);
+        listSearch = productProvider.search(valueSearch!);
         setState(() {
-          isloading2 = false;
+          isLoading2 = false;
         });
       })();
     }
@@ -80,7 +83,7 @@ class _FilterTouristState extends State<FilterTourist> {
                   ],
                 ),
               ),
-              isloading2
+              isLoading2
                   ? Center(
                       child: LoadingAnimationWidget.staggeredDotsWave(
                           color: color.primaryColor, size: 50),
@@ -115,7 +118,7 @@ class _FilterTouristState extends State<FilterTourist> {
                 child: TextField(
                   onChanged: (value1) {
                     setState(() {
-                      isloading2 = true;
+                      isLoading2 = true;
                       value = 0;
                       valueSearch = value1;
                     });
@@ -156,7 +159,7 @@ class _FilterTouristState extends State<FilterTourist> {
             ),
             valueSearch == ""
                 ? resultSearch(context, value.listFilter)
-                : resultSearch(context, listsearch)
+                : resultSearch(context, listSearch)
           ],
         ),
       ),
@@ -170,7 +173,7 @@ class _FilterTouristState extends State<FilterTourist> {
         children: [
           GestureDetector(
             onTap: () {
-              isloading2 = true;
+              isLoading2 = true;
               value = 0;
               valueSearch = " ";
               FocusScope.of(context).requestFocus(FocusNode());
@@ -196,7 +199,7 @@ class _FilterTouristState extends State<FilterTourist> {
           ),
           GestureDetector(
             onTap: () {
-              isloading2 = true;
+              isLoading2 = true;
               value = 1;
               valueSearch = "";
               FocusScope.of(context).requestFocus(FocusNode());
@@ -222,7 +225,7 @@ class _FilterTouristState extends State<FilterTourist> {
           ),
           GestureDetector(
             onTap: () {
-              isloading2 = true;
+              isLoading2 = true;
               value = 2;
               valueSearch = "";
               FocusScope.of(context).requestFocus(FocusNode());
@@ -248,7 +251,7 @@ class _FilterTouristState extends State<FilterTourist> {
           ),
           GestureDetector(
             onTap: () {
-              isloading2 = true;
+              isLoading2 = true;
               value = 3;
               valueSearch = "";
               FocusScope.of(context).requestFocus(FocusNode());
@@ -274,7 +277,7 @@ class _FilterTouristState extends State<FilterTourist> {
           ),
           GestureDetector(
             onTap: () {
-              isloading2 = true;
+              isLoading2 = true;
               value = 4;
               valueSearch = "";
               FocusScope.of(context).requestFocus(FocusNode());
@@ -300,7 +303,7 @@ class _FilterTouristState extends State<FilterTourist> {
           ),
           GestureDetector(
             onTap: () {
-              isloading2 = true;
+              isLoading2 = true;
               value = 5;
               valueSearch = "";
               FocusScope.of(context).requestFocus(FocusNode());
@@ -354,8 +357,9 @@ class _FilterTouristState extends State<FilterTourist> {
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(5),
-                            child: Image.network(
-                                "https://khamphahue.com.vn/${e.image}",
+                            child: CachedNetworkImage(
+                                imageUrl:
+                                    "https://khamphahue.com.vn/${e.image}",
                                 height: double.infinity,
                                 width: 90,
                                 fit: BoxFit.cover),

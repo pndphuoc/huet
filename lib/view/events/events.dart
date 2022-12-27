@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -19,6 +20,7 @@ class Events extends StatefulWidget {
 class _EventsState extends State<Events> {
   bool popular1 = true;
   bool isloading = true;
+
   @override
   Widget build(BuildContext context) {
     var productProvider = Provider.of<EventProvider>(context);
@@ -249,7 +251,7 @@ class _EventsState extends State<Events> {
                           Stack(children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(20),
-                              child: Image.network(
+                              child: CachedNetworkImage(imageUrl:
                                 value.listNextMonth[index].image.toString(),
                                 height: 170,
                                 width: double.infinity,
@@ -410,7 +412,7 @@ class _EventsState extends State<Events> {
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(15),
-                                child: Image.network(e.image.toString(),
+                                child: CachedNetworkImage(imageUrl: e.image.toString(),
                                     width: 70, height: 70, fit: BoxFit.cover),
                               ),
                               Padding(

@@ -1,4 +1,5 @@
 // import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -33,7 +34,7 @@ class _EditProfileState extends State<EditProfile> {
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
           child: Form(
@@ -95,7 +96,6 @@ class _EditProfileState extends State<EditProfile> {
                 TextButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      print("TAI UPDATE PAGE: ${user_constant.user!.uid}");
                       setState(() async {
                         await value.updateUser(name, email, password!, image,
                             phone!, user_constant.user!.isGoogle);
@@ -104,7 +104,9 @@ class _EditProfileState extends State<EditProfile> {
                           Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const HueT(index: 2,)),
+                                  builder: (context) => const HueT(
+                                        index: 2,
+                                      )),
                               (route) => false);
                         }
                       });
@@ -117,7 +119,7 @@ class _EditProfileState extends State<EditProfile> {
                         style: GoogleFonts.readexPro(
                             fontWeight: FontWeight.w400,
                             fontSize: 17,
-                            color: Color.fromARGB(255, 104, 104, 172)),
+                            color: const Color.fromARGB(255, 104, 104, 172)),
                       ),
                     ],
                   ),
@@ -148,7 +150,7 @@ class _EditProfileState extends State<EditProfile> {
               ]),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(150),
-            child: Image.network(
+            child: CachedNetworkImage(imageUrl:
               user_constant.user!.photoURL,
               width: 150,
               height: 150,

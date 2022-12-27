@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,10 +10,11 @@ import 'package:hue_t/colors.dart' as color;
 import 'package:map_launcher/map_launcher.dart' as mapp;
 
 import 'dart:async';
-import '../../permission/get_user_location.dart' as userLocation;
+import '../../permission/get_user_location.dart' as user_location;
 
 class FoodstoreDetail extends StatefulWidget {
   final Restaurant item;
+
   const FoodstoreDetail({Key? key, required this.item}) : super(key: key);
 
   @override
@@ -41,11 +43,12 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
 
   // on below line we have created the list of markers
   final List<Marker> _markers = <Marker>[];
+
   @override
   void initState() {
     super.initState();
 
-    userLocation.getUserCurrentLocation().then((value) async {
+    user_location.getUserCurrentLocation().then((value) async {
       // marker added for hotels location
 
       _markers.add(Marker(
@@ -155,8 +158,8 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
     return SizedBox(
       child: Stack(
         children: [
-          Image.network(
-            widget.item.image.toString(),
+          CachedNetworkImage(
+            imageUrl: widget.item.image.toString(),
             width: double.infinity,
             height: 230,
             fit: BoxFit.cover,
@@ -516,8 +519,8 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
                 mainAxisSpacing: 2),
             itemCount: widget.item.menu!.length,
             itemBuilder: (BuildContext ctx, index) {
-              return Image.network(
-                widget.item.menu![index]['ImageUrl'],
+              return CachedNetworkImage(
+                imageUrl: widget.item.menu![index]['ImageUrl'],
                 fit: BoxFit.cover,
               );
             }),
@@ -634,8 +637,8 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
                               children: [
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(50),
-                                  child: Image.network(
-                                    widget.item.category![0] == '2'
+                                  child: CachedNetworkImage(
+                                    imageUrl: widget.item.category![0] == '2'
                                         ? e['OwnerAvatar']
                                         : widget.item.category![0] == '4'
                                             ? e['OwnerAvatar']

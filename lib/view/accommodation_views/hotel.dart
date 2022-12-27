@@ -2,7 +2,6 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hue_t/animation/show_right.dart';
 import 'package:hue_t/providers/accommodation_provider.dart';
@@ -14,7 +13,7 @@ import '../../colors.dart' as colors;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import '../../model/accommodation/accommodationModel.dart';
-import '../../permission/get_user_location.dart' as userLocation;
+import '../../permission/get_user_location.dart' as user_location;
 
 class HotelPage extends StatefulWidget {
   const HotelPage({Key? key}) : super(key: key);
@@ -33,7 +32,6 @@ class MyBehavior extends ScrollBehavior {
 
 final ScrollController scrollController = ScrollController();
 bool isRecommendationHotel = true;
-bool _innerBoxIsScrolled = false;
 
 class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
   final ScrollController scrollController = ScrollController();
@@ -41,7 +39,8 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
   String selectedCheckOutDate = '';
   late final TabController _tabController;
 
-  Future<void> distanceCaculating(Position value, List<hotelModel> list) async {
+  Future<void> distanceCalculation(
+      Position value, List<hotelModel> list) async {
     for (int i = 0; i < list.length; i++) {
       list[i].distance = GeolocatorPlatform.instance.distanceBetween(
             value.latitude,
@@ -56,13 +55,8 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-/*    getUserCurrentLocation().then((value) async {
-      print(value.latitude.toString() + " " + value.longitude.toString());
-    });*/
     _tabController = TabController(length: 3, vsync: this);
   }
-
-  // bool isLoading = true;
 
   @override
   Widget build(BuildContext context) {
@@ -77,8 +71,8 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
             await accommodationProvider.filter("2", 5);
         accommodationProvider.listHomestays =
             await accommodationProvider.filter("3", 5);
-        await userLocation.getUserCurrentLocation().then((value) async {
-          await distanceCaculating(value, accommodationProvider.list);
+        await user_location.getUserCurrentLocation().then((value) async {
+          await distanceCalculation(value, accommodationProvider.list);
         });
         setState(() {
           accommodationProvider.isloading = false;
@@ -156,12 +150,6 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                     ),
                   ),
                 )),
-
-/*                Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: navigationBar.NavigationBar())*/
               ]),
       ),
     );
@@ -255,7 +243,7 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                 scrollDirection: Axis.horizontal,
                 itemCount: list.length,
                 itemBuilder: (context, index) =>
-                    accommodationItemHorizonal(context, index, list),
+                    accommodationItem(context, index, list),
               ),
             ),
           )
@@ -264,7 +252,7 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
     );
   }
 
-  accommodationItemHorizonal(BuildContext context, int index, list) {
+  accommodationItem(BuildContext context, int index, list) {
     return BounceInUp(
       from: 60,
       delay: const Duration(milliseconds: 500),
@@ -286,7 +274,7 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
                   image: DecorationImage(
-                      image: NetworkImage(list[index].image),
+                      image: CachedNetworkImageProvider(list[index].image),
                       fit: BoxFit.cover), // button text
                 ),
                 child: Align(
