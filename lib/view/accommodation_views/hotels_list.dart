@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:geolocator/geolocator.dart';
@@ -10,14 +11,14 @@ import '../../colors.dart' as colors;
 import '../../model/accommodation/accommodationModel.dart';
 import '../../providers/accommodation_provider.dart';
 import 'hotel_detail.dart';
-import '../../fake_data.dart' as faker;
-import 'package:hue_t/permission/get_user_location.dart' as userLocation;
+import 'package:hue_t/permission/get_user_location.dart' as user_location;
 
 class HotelsPage extends StatefulWidget {
   final String idAccomodation;
   final String title;
   final String content;
   final String image;
+
   const HotelsPage(
       {Key? key,
       required this.idAccomodation,
@@ -34,6 +35,7 @@ bool isRecommendationHotel = true;
 
 class _HotelsPageState extends State<HotelsPage> {
   List<hotelModel> listHotel = [];
+
   Future<void> distanceCaculating(Position value, List<hotelModel> list) async {
     for (int i = 0; i < list.length; i++) {
       list[i].distance = GeolocatorPlatform.instance.distanceBetween(
@@ -57,7 +59,7 @@ class _HotelsPageState extends State<HotelsPage> {
         listHotel =
             await accommodationProvider.filter(widget.idAccomodation, 100);
 
-        await userLocation.getUserCurrentLocation().then((value) async {
+        await user_location.getUserCurrentLocation().then((value) async {
           await distanceCaculating(value, listHotel);
         });
         setState(() {
@@ -234,7 +236,7 @@ class _HotelsPageState extends State<HotelsPage> {
         height: MediaQuery.of(context).size.height / 4,
         decoration: BoxDecoration(
             image: DecorationImage(
-                image: NetworkImage(widget.image),
+                image: CachedNetworkImageProvider(widget.image),
                 fit: BoxFit.cover,
                 alignment: Alignment.topCenter)),
       ),
@@ -297,8 +299,8 @@ class _HotelsPageState extends State<HotelsPage> {
                       BoxDecoration(borderRadius: BorderRadius.circular(10)),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      listHotel[index].image.toString(),
+                    child: CachedNetworkImage(
+                      imageUrl: listHotel[index].image.toString(),
                       fit: BoxFit.cover,
                       height: 100,
                       width: 100,

@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:animate_do/animate_do.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -251,8 +252,9 @@ class _EventsState extends State<Events> {
                             Stack(children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(20),
-                                child: Image.network(
-                                  value.listNextMonth[index].image.toString(),
+                                child: CachedNetworkImage(
+                                  imageUrl: value.listNextMonth[index].image
+                                      .toString(),
                                   height: 170,
                                   width: double.infinity,
                                   fit: BoxFit.cover,
@@ -425,8 +427,11 @@ class _EventsState extends State<Events> {
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(15),
-                                child: Image.network(e.image.toString(),
-                                    width: 70, height: 70, fit: BoxFit.cover),
+                                child: CachedNetworkImage(
+                                    imageUrl: e.image.toString(),
+                                    width: 70,
+                                    height: 70,
+                                    fit: BoxFit.cover),
                               ),
                               Padding(
                                 padding:

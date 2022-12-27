@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:geolocator/geolocator.dart';
@@ -11,7 +12,7 @@ import 'package:hue_t/colors.dart' as color;
 
 import 'hotel_detail.dart';
 import '../../fake_data.dart' as faker;
-import 'package:hue_t/permission/get_user_location.dart' as userLocation;
+import 'package:hue_t/permission/get_user_location.dart' as user_location;
 
 class ResortsPage extends StatefulWidget {
   final String value;
@@ -22,7 +23,7 @@ class ResortsPage extends StatefulWidget {
 }
 
 class _ResortsPageState extends State<ResortsPage> {
-  Future<void> distanceCaculating(Position value) async {
+  Future<void> distanceCalculation(Position value) async {
     for (int i = 0; i < faker.listHotels.length; i++) {
       faker.listHotels[i].distance =
           GeolocatorPlatform.instance.distanceBetween(

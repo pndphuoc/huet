@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -16,6 +17,7 @@ import '../../constants/user_info.dart' as user_constants;
 
 class FoodstoreDetail extends StatefulWidget {
   final Restaurant item;
+
   const FoodstoreDetail({Key? key, required this.item}) : super(key: key);
 
   @override
@@ -44,6 +46,7 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
 
   // on below line we have created the list of markers
   final List<Marker> _markers = <Marker>[];
+
   @override
   void initState() {
     super.initState();
@@ -231,8 +234,8 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
 
   header(BuildContext context) {
     return SizedBox(
-      child: Image.network(
-        widget.item.image.toString(),
+      child: CachedNetworkImage(
+        imageUrl: widget.item.image.toString(),
         width: double.infinity,
         height: 230,
         fit: BoxFit.cover,
@@ -545,8 +548,8 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
                 mainAxisSpacing: 2),
             itemCount: widget.item.menu!.length,
             itemBuilder: (BuildContext ctx, index) {
-              return Image.network(
-                widget.item.menu![index]['ImageUrl'],
+              return CachedNetworkImage(
+                imageUrl: widget.item.menu![index]['ImageUrl'],
                 fit: BoxFit.cover,
               );
             }),
@@ -663,8 +666,8 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
                               children: [
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(50),
-                                  child: Image.network(
-                                    widget.item.category![0] == '2'
+                                  child: CachedNetworkImage(
+                                    imageUrl: widget.item.category![0] == '2'
                                         ? e['OwnerAvatar']
                                         : widget.item.category![0] == '4'
                                             ? e['OwnerAvatar']

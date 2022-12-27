@@ -1,5 +1,4 @@
-import 'dart:async';
-
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -209,10 +208,10 @@ class _HomePageState extends State<HomePage> {
                   height: 74,
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(75),
-                      color: Color.fromARGB(255, 255, 255, 255)),
+                      color: const Color.fromARGB(255, 255, 255, 255)),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(70),
-                    child: Image.network(
+                    child: CachedNetworkImage(imageUrl:
                       user_constants.user == null
                           ? "https://st3.depositphotos.com/13159112/17145/v/600/depositphotos_171453724-stock-illustration-default-avatar-profile-icon-grey.jpg"
                           : user_constants.user!.photoURL,
@@ -256,7 +255,7 @@ class _HomePageState extends State<HomePage> {
                                 color: Colors.grey.withOpacity(0.4)))),
                     child: Row(
                       children: [
-                        Image.network(
+                        CachedNetworkImage(imageUrl:
                           "https://product.hstatic.net/200000122283/product/c-e1-bb-9d-vi-e1-bb-87t-nam_2c0683597d2d419fac401f51ccbae779_grande.jpg",
                           width: 40,
                           height: 25,
@@ -347,7 +346,7 @@ class _HomePageState extends State<HomePage> {
               "https://cdn-icons-png.flaticon.com/512/4612/4612366.png",
               "Có gì hot ?",
               const HueT(
-                index: 3,
+                index: 0,
               )),
         ]),
       ),
@@ -421,7 +420,7 @@ class _HomePageState extends State<HomePage> {
                       color: Colors.grey.withOpacity(0.1))
                 ]),
             child: Center(
-              child: Image.network(image),
+              child: CachedNetworkImage(imageUrl:image),
             ),
           ),
           const SizedBox(
@@ -454,7 +453,7 @@ class _HomePageState extends State<HomePage> {
                     color: Colors.grey.withOpacity(0.3))
               ]),
           child: Center(
-            child: Image.network(image),
+            child: CachedNetworkImage(imageUrl:image),
           ),
         ),
         const SizedBox(
@@ -524,7 +523,7 @@ class _HomePageState extends State<HomePage> {
                     margin: const EdgeInsets.only(right: 8),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
-                      child: Image.network(
+                      child: CachedNetworkImage(imageUrl:
                         e,
                         fit: BoxFit.cover,
                       ),

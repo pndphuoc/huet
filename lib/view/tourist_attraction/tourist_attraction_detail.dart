@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -10,7 +11,7 @@ import 'package:html/parser.dart';
 import 'package:provider/provider.dart';
 import '../../animation/show_up.dart';
 import '../../permission/get_user_location.dart' as userLocation;
-import 'package:map_launcher/map_launcher.dart' as mapp;
+import 'package:map_launcher/map_launcher.dart' as map_launcher;
 import '../../constants/user_info.dart' as user_constants;
 import '../../providers/favorite_provider.dart';
 
@@ -211,8 +212,8 @@ class _TouristAttractionDetailState extends State<TouristAttractionDetail> {
       SizedBox(
         width: MediaQuery.of(context).size.width,
         height: 400,
-        child: Image.network(
-          "https://khamphahue.com.vn/${widget.item.image}",
+        child: CachedNetworkImage(
+          imageUrl: "https://khamphahue.com.vn/${widget.item.image}",
           fit: BoxFit.cover,
         ),
       ),
@@ -246,8 +247,8 @@ class _TouristAttractionDetailState extends State<TouristAttractionDetail> {
                                 color: Colors.white),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(10),
-                              child: Image.network(
-                                "https://khamphahue.com.vn/$e",
+                              child: CachedNetworkImage(
+                                imageUrl: "https://khamphahue.com.vn/$e",
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -310,10 +311,11 @@ class _TouristAttractionDetailState extends State<TouristAttractionDetail> {
                 ),
                 GestureDetector(
                   onTap: () async {
-                    final availableMaps = await mapp.MapLauncher.installedMaps;
+                    final availableMaps =
+                        await map_launcher.MapLauncher.installedMaps;
 
                     await availableMaps.first.showDirections(
-                        destination: mapp.Coords(
+                        destination: map_launcher.Coords(
                             widget.item.latitude, widget.item.longitude));
 
                     /*                          await availableMaps.first.showMarker(
@@ -464,10 +466,11 @@ class _TouristAttractionDetailState extends State<TouristAttractionDetail> {
             delay: 600,
             child: GestureDetector(
               onTap: () async {
-                final availableMaps = await mapp.MapLauncher.installedMaps;
+                final availableMaps =
+                    await map_launcher.MapLauncher.installedMaps;
 
                 await availableMaps.first.showDirections(
-                    destination: mapp.Coords(
+                    destination: map_launcher.Coords(
                         widget.item.latitude, widget.item.longitude));
 
                 /*                          await availableMaps.first.showMarker(

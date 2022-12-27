@@ -4,7 +4,6 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as color;
-import 'package:hue_t/view/home/home.dart';
 import 'package:hue_t/model/attraction/tourist_attraction.dart' as tourist;
 import 'package:hue_t/providers/tourist_provider.dart';
 import 'package:hue_t/view/tourist_attraction/filter_tourist_attraction.dart';
@@ -17,31 +16,13 @@ class DataModel {
   final String title;
   final String imageName;
   final double price;
+
   DataModel(
     this.title,
     this.imageName,
     this.price,
   );
 }
-
-List<DataModel> dataList = [
-  DataModel(
-      "Đại Nội Huế",
-      "https://localvietnam.com/wp-content/uploads/2021/04/hue-imperial-gate-1024x683.jpg",
-      300.8),
-  DataModel(
-      "Lăng Tự Đức",
-      "https://baothuathienhue.vn/image/fckeditor/upload/2019/20191219/images/yeu%20hue%203.jpg",
-      245.2),
-  DataModel(
-      "Núi Bạch Mã",
-      "https://statics.vinpearl.com/Bach%20Ma%20Hue_1624595212_1661326997.jpg",
-      168.2),
-  DataModel(
-      "Trường Quốc Học Huế",
-      "https://statics.vinpearl.com/dia-diem-du-lich-Hue-04_1632724613.jpg",
-      136.7),
-];
 
 class TouristAttraction extends StatefulWidget {
   const TouristAttraction({super.key});
@@ -53,7 +34,8 @@ class TouristAttraction extends StatefulWidget {
 class _TouristAttractionState extends State<TouristAttraction> {
   late PageController _pageController;
   final int _currentPage = 0;
-  bool isloading = true;
+  bool isLoading = true;
+
   @override
   void initState() {
     super.initState();
@@ -396,8 +378,8 @@ class _TouristAttractionState extends State<TouristAttraction> {
                     child: Center(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: Image.network(
-                          image1,
+                        child: CachedNetworkImage(
+                          imageUrl: image1,
                           width: 90,
                           height: 90,
                           fit: BoxFit.cover,
@@ -414,8 +396,8 @@ class _TouristAttractionState extends State<TouristAttraction> {
                     child: Center(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: Image.network(
-                          image2,
+                        child: CachedNetworkImage(
+                          imageUrl: image2,
                           width: 90,
                           height: 90,
                           fit: BoxFit.cover,

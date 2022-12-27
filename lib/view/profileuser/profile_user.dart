@@ -1,4 +1,5 @@
 import 'package:animate_do/animate_do.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -201,15 +202,12 @@ class _ProfileUserState extends State<ProfileUser> {
                       ]),
                   child: ClipRRect(
                       borderRadius: BorderRadius.circular(150),
-                      child: Image.network(
-                        user_constants.user!.photoURL.toString(),
+                      child: CachedNetworkImage(
+                        imageUrl: user_constants.user!.photoURL.toString(),
                         width: 150,
                         height: 150,
                         fit: BoxFit.cover,
-                      )
-                      //  Image.asset(
-                      //     'assets/images/socialNetwork/avatar.png')
-                      ),
+                      )),
                 ),
                 const SizedBox(height: 5),
                 Text(
@@ -245,8 +243,8 @@ class _ProfileUserState extends State<ProfileUser> {
                             fontSize: 14, fontWeight: FontWeight.w400),
                       ),
                       const Padding(
-                        padding: const EdgeInsets.only(left: 5),
-                        child: const Icon(
+                        padding: EdgeInsets.only(left: 5),
+                        child: Icon(
                           Icons.arrow_forward_ios_outlined,
                           size: 17,
                         ),

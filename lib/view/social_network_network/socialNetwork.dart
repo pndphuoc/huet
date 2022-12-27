@@ -149,14 +149,11 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
 
     for (var e in _posts) {
       postList.add(await PostModel.fromJson(e.data() as Map<String, dynamic>));
-      print(
-          "userid cua post ${postList.last.caption}  ${(e.data() as Map<String, dynamic>)["userID"]}");
       userList.add(await getUser((e.data() as Map<String, dynamic>)["userID"]));
-      print(userList.first.name);
     }
 
     if (idOfThePostJustPosted != null) {
-      late var temp;
+      late PostModel temp;
       for (var e in postList) {
         if (e.postID == idOfThePostJustPosted) {
           temp = e;
@@ -225,7 +222,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
           )
         : Scaffold(
             backgroundColor: colors.backgroundColor,
-            resizeToAvoidBottomInset: true,
+            resizeToAvoidBottomInset: false,
             appBar: PreferredSize(
               preferredSize: const Size.fromHeight(100.0),
               child: SafeArea(
@@ -521,6 +518,14 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                       ),
                     );*/
                     Navigator.of(context).push(SwipeablePageRoute(
+                      transitionBuilder: (context, animation, secondaryAnimation, isSwipeGesture, child) {
+                        return SlideTransition(position: Tween<Offset>(
+                          begin: const Offset(1.0, 0.0),
+                          end: Offset.zero,
+                        ).animate(animation),
+                          child: child,
+                        );
+                      },transitionDuration: const Duration(milliseconds: 300),
                         builder: (BuildContext context) => const CreatePost()));
                   },
                   style: ElevatedButton.styleFrom(
@@ -622,15 +627,18 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
                   const SizedBox(
                     width: 10,
                   ),
-                  AnimatedOpacity(
-                    duration: const Duration(milliseconds: 200),
-                    opacity: _showTextField ? 0 : 1,
-                    child: GestureDetector(
-                      child: Text(
-                        _selectedAttractionTitle,
-                        style: GoogleFonts.readexPro(
-                            fontSize: 15, color: Colors.black),
-                        overflow: TextOverflow.ellipsis,
+                  SizedBox(
+                    width: constraints.maxWidth -120,
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 200),
+                      opacity: _showTextField ? 0 : 1,
+                      child: GestureDetector(
+                        child: Text(
+                          _selectedAttractionTitle,
+                          style: GoogleFonts.readexPro(
+                              fontSize: 15, color: Colors.black),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ),
                   ),

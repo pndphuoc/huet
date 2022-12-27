@@ -360,12 +360,30 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                   setState(() {
                     isPlayingVideo = false;
                   });
+
                   isPlayingVideo =
-                      await Navigator.of(context).push(SwipeablePageRoute(
-                          builder: (BuildContext context) => PostCommentsPage(
-                                postID: widget.post.postID,
-                                user: widget.user,
-                              )));
+                      await Navigator.push(
+                        context,
+                        SwipeablePageRoute(
+                          transitionDuration: const Duration(milliseconds: 300),
+                          transitionBuilder: (context, animation, secondaryAnimation, isSwipeGesture, child){
+                            // Use a custom transition animation
+                            return SlideTransition(
+                              position: Tween<Offset>(
+                                begin: const Offset(1.0, 0.0),
+                                end: Offset.zero,
+                              ).animate(animation),
+                              child: child,
+                            );
+                          },
+                          builder: (context) {
+                            return PostCommentsPage(
+                              postID: widget.post.postID,
+                              user: widget.user,
+                            );
+                          },
+                        ),
+                      );
                   /*isPlayingVideo = await Navigator.push(
                     context,
                     PageRouteBuilder(
@@ -587,7 +605,8 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                     ? buildCaptionBlock(context)
                     : Container(),
                 buildCreateDateBlock(context),
-                buildCommentBlock(context)
+                const SizedBox(height: 20,)
+                //buildCommentBlock(context)
               ],
             ),
           );
