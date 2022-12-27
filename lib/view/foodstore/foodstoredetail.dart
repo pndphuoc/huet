@@ -7,9 +7,12 @@ import 'package:hue_t/model/foodstore/restaurant.dart';
 import 'package:hue_t/model/accommodation/reviewModel.dart';
 import 'package:hue_t/colors.dart' as color;
 import 'package:map_launcher/map_launcher.dart' as mapp;
+import 'package:provider/provider.dart';
 
 import 'dart:async';
 import '../../permission/get_user_location.dart' as userLocation;
+import '../../providers/favorite_provider.dart';
+import '../../constants/user_info.dart' as user_constants;
 
 class FoodstoreDetail extends StatefulWidget {
   final Restaurant item;
@@ -22,7 +25,7 @@ class FoodstoreDetail extends StatefulWidget {
 class _FoodstoreDetailState extends State<FoodstoreDetail> {
   var link = 1;
   DateTime now = DateTime.now();
-
+  bool isFavorite = false;
   late GoogleMapController mapController;
 
   final LatLng _center = const LatLng(45.521563, -122.677433);
@@ -44,7 +47,13 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
   @override
   void initState() {
     super.initState();
+    var favoriteProvider =
+        Provider.of<FavoriteProvider>(context, listen: false);
 
+    user_constants.user == null
+        ? isFavorite = false
+        : isFavorite =
+            favoriteProvider.checkFavorite(widget.item.id.toString());
     userLocation.getUserCurrentLocation().then((value) async {
       // marker added for hotels location
 
@@ -135,78 +144,98 @@ class _FoodstoreDetailState extends State<FoodstoreDetail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        decoration: BoxDecoration(
-          color: color.backgroundColor,
-        ),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Stack(
-            children: [header(context), body(context)],
+      body: Stack(children: [
+        Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          decoration: BoxDecoration(
+            color: color.backgroundColor,
+          ),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Stack(
+              children: [header(context), body(context)],
+            ),
           ),
         ),
-      ),
+        Positioned(
+          top: 40,
+          left: 20,
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width - 40,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(15)),
+                    child: const Center(
+                      child: Icon(
+                        Icons.arrow_back_outlined,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                Consumer<FavoriteProvider>(
+                  builder: (context, value, child) => Container(
+                    decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(15)),
+                    child: IconButton(
+                        onPressed: () {
+                          if (!isFavorite) {
+                            setState(() {
+                              isFavorite = !isFavorite;
+                            });
+                            value.addFavorite(
+                                widget.item.id.toString(),
+                                widget.item.title.toString(),
+                                widget.item.address.toString(),
+                                widget.item.image.toString(),
+                                2,
+                                user_constants.user!.uid);
+                          } else {
+                            setState(() {
+                              isFavorite = !isFavorite;
+                              value.deleteFavorite(widget.item.id.toString(), 2,
+                                  user_constants.user!.uid);
+                            });
+                          }
+                        },
+                        icon: Icon(
+                          isFavorite
+                              ? Icons.favorite_sharp
+                              : Icons.favorite_border_outlined,
+                          color: Colors.white,
+                          size: 27,
+                        ),
+                        style: ButtonStyle(
+                            shape: MaterialStateProperty.all(
+                                RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15))))),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ]),
     );
   }
 
   header(BuildContext context) {
     return SizedBox(
-      child: Stack(
-        children: [
-          Image.network(
-            widget.item.image.toString(),
-            width: double.infinity,
-            height: 230,
-            fit: BoxFit.cover,
-          ),
-          Positioned(
-              width: MediaQuery.of(context).size.width,
-              top: 20,
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 216, 215, 215)
-                                .withOpacity(0.8),
-                            borderRadius: BorderRadius.circular(40)),
-                        child: const Center(
-                            child: Icon(
-                          Icons.arrow_back_ios_new_outlined,
-                          size: 17,
-                        )),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {},
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 216, 215, 215)
-                                .withOpacity(0.8),
-                            borderRadius: BorderRadius.circular(40)),
-                        child: const Center(
-                            child: Icon(
-                          Icons.favorite_border_outlined,
-                          size: 20,
-                        )),
-                      ),
-                    )
-                  ],
-                ),
-              ))
-        ],
+      child: Image.network(
+        widget.item.image.toString(),
+        width: double.infinity,
+        height: 230,
+        fit: BoxFit.cover,
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hue_t/providers/favorite_provider.dart';
 import 'package:hue_t/view/accommodation_views/hotel.dart';
 import 'package:hue_t/colors.dart' as color;
 import 'package:hue_t/main.dart';
@@ -51,13 +52,14 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    if(user_constants.user != null) {
-      print("TAI HOME: ${user_constants.user!.uid}");
-    }
     var weatherProvider = Provider.of<WeatherProvider>(context);
+    var favoriteProvider = Provider.of<FavoriteProvider>(context);
     if (weatherProvider.isloading) {
       (() async {
         await weatherProvider.getWeather();
+        if (user_constants.user != null) {
+          await favoriteProvider.getAll(user_constants.user!.uid);
+        }
         setState(() {
           weatherProvider.isloading = false;
         });

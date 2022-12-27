@@ -7,6 +7,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart';
+import 'package:hue_t/providers/favorite_provider.dart';
 import 'package:hue_t/providers/user_provider.dart';
 import 'package:hue_t/view/profileuser/edit_profile.dart';
 import 'package:hue_t/view/sign_in_out/register_user.dart';
@@ -17,6 +18,7 @@ import '../../conponents/AnimatedBtn.dart';
 import '../../main.dart';
 import 'package:hue_t/colors.dart';
 import '../profileuser/auth_service.dart';
+import '../../constants/user_info.dart' as user_constants;
 
 class SignInPage extends StatefulWidget {
   const SignInPage({Key? key}) : super(key: key);
@@ -81,49 +83,49 @@ class _SignInPageState extends State<SignInPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            backgroundColor: primaryColor,
-            resizeToAvoidBottomInset: true,
-            body: Form(
-              key: _formkey,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Stack(children: [
-                  Positioned(
-                    width: MediaQuery.of(context).size.width * 1.7,
-                    left: 100,
-                    bottom: 100,
-                    child: Image.asset(
-                      "assets/Backgrounds/Spline.png",
-                    ),
-                  ),
-                  Positioned.fill(
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                      child: const SizedBox(),
-                    ),
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    child: const RiveAnimation.asset(
-                      "assets/RiveAssets/shapes.riv",
-                    ),
-                  ),
-                  Positioned.fill(
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-                      child: const SizedBox(),
-                    ),
-                  ),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height,
-                    width: MediaQuery.of(context).size.width,
-                    child: contentBlock(context),
-                  ),
-                  backButton(context),
-                ]),
+      backgroundColor: primaryColor,
+      resizeToAvoidBottomInset: true,
+      body: Form(
+        key: _formkey,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Stack(children: [
+            Positioned(
+              width: MediaQuery.of(context).size.width * 1.7,
+              left: 100,
+              bottom: 100,
+              child: Image.asset(
+                "assets/Backgrounds/Spline.png",
               ),
             ),
-          );
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                child: const SizedBox(),
+              ),
+            ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: const RiveAnimation.asset(
+                "assets/RiveAssets/shapes.riv",
+              ),
+            ),
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                child: const SizedBox(),
+              ),
+            ),
+            SizedBox(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+              child: contentBlock(context),
+            ),
+            backButton(context),
+          ]),
+        ),
+      ),
+    );
   }
 
   @override
@@ -292,40 +294,45 @@ class _SignInPageState extends State<SignInPage>
         const SizedBox(
           height: 10,
         ),
-        Consumer<UserProvider>(
-          builder: (context, value, child) => AnimatedBtn(
-              text: "LOGIN",
-              btnAnimationController: _btnAnimationController,
-              press: () {
-                _btnAnimationController.isActive = true;
-                if (_formkey.currentState!.validate()) {
-                  Future.doWhile(() async {
-                    const RiveAnimation.asset(
-                      "assets/RiveAssets/success.riv",
-                    );
+        Consumer<FavoriteProvider>(
+          builder: (context, value1, child) => Consumer<UserProvider>(
+            builder: (context, value, child) => AnimatedBtn(
+                text: "LOGIN",
+                btnAnimationController: _btnAnimationController,
+                press: () {
+                  _btnAnimationController.isActive = true;
+                  if (_formkey.currentState!.validate()) {
+                    Future.doWhile(() async {
+                      const RiveAnimation.asset(
+                        "assets/RiveAssets/success.riv",
+                      );
 
-                    setState(() async {
-                      value.isLogin = false;
+                      setState(() async {
+                        value.isLogin = false;
 
-                      await value.login(email!, password!);
-                      if (value.isLogin) {
-                        await Future.delayed(Duration(milliseconds: 2000));
-                        Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                                builder: ((context) => HueT(
-                                      index: 1,
-                                    ))),
-                            (route) => false);
-                      } else {
-                        setState(() {});
-                      }
+                        await value.login(email!, password!);
+                        if (value.isLogin) {
+                          await Future.delayed(
+                              const Duration(milliseconds: 2000));
+                          value1.getAll(user_constants.user!.uid);
+                          // ignore: use_build_context_synchronously
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: ((context) => const HueT(
+                                        index: 1,
+                                      ))),
+                              (route) => false);
+                        } else {
+                          setState(() {});
+                        }
+                      });
+
+                      return true;
                     });
-
-                    return true;
-                  });
-                } else {}
-              }),
+                  } else {}
+                }),
+          ),
         ),
         const SizedBox(
           height: 10,
@@ -345,7 +352,8 @@ class _SignInPageState extends State<SignInPage>
             builder: (context, value, child) => ElevatedButton(
               onPressed: () async {
                 await AuthService().signInWithGoogle();
-                await value.checkEmail(FirebaseAuth.instance.currentUser!.email!);
+                await value
+                    .checkEmail(FirebaseAuth.instance.currentUser!.email!);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,

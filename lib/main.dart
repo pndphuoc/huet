@@ -7,6 +7,7 @@ import 'package:device_preview/device_preview.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:hue_t/providers/accommodation_provider.dart';
+import 'package:hue_t/providers/favorite_provider.dart';
 
 import 'package:hue_t/view/accommodation_views/hotel_detail.dart';
 import 'package:hue_t/animation/show_up.dart';
@@ -68,6 +69,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => WeatherProvider()),
         ChangeNotifierProvider(create: (context) => UserProvider()),
         ChangeNotifierProvider(create: (context) => AccomodationProvider()),
+        ChangeNotifierProvider(create: (context) => FavoriteProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -94,12 +96,11 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
 
-
-    (()async {
+    (() async {
       var userProvider = Provider.of<UserProvider>(context, listen: false);
       if (FirebaseAuth.instance.currentUser != null) {
-        await userProvider.checkEmail(FirebaseAuth.instance.currentUser!.email!);
-
+        await userProvider
+            .checkEmail(FirebaseAuth.instance.currentUser!.email!);
       }
 /*      Navigator.of(context).pushReplacement(
           CupertinoPageRoute(builder: (ctx) => const HueT()));*/

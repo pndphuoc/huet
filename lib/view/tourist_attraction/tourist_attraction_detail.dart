@@ -7,9 +7,12 @@ import 'package:html_unescape/html_unescape.dart';
 import 'package:hue_t/colors.dart' as color;
 import 'package:hue_t/model/attraction/tourist_attraction.dart';
 import 'package:html/parser.dart';
+import 'package:provider/provider.dart';
 import '../../animation/show_up.dart';
 import '../../permission/get_user_location.dart' as userLocation;
 import 'package:map_launcher/map_launcher.dart' as mapp;
+import '../../constants/user_info.dart' as user_constants;
+import '../../providers/favorite_provider.dart';
 
 String formatHtmlString(String string) {
   var unescape = HtmlUnescape();
@@ -30,6 +33,7 @@ class TouristAttractionDetail extends StatefulWidget {
 class _TouristAttractionDetailState extends State<TouristAttractionDetail> {
   bool visible = false;
   late GoogleMapController mapController;
+  bool isFavorite = false;
 
   final LatLng _center = const LatLng(45.521563, -122.677433);
 
@@ -50,7 +54,13 @@ class _TouristAttractionDetailState extends State<TouristAttractionDetail> {
   @override
   void initState() {
     super.initState();
+    var favoriteProvider =
+        Provider.of<FavoriteProvider>(context, listen: false);
 
+    user_constants.user == null
+        ? isFavorite = false
+        : isFavorite =
+            favoriteProvider.checkFavorite(widget.item.id.toString());
     userLocation.getUserCurrentLocation().then((value) async {
       // marker added for hotels location
 
@@ -111,19 +121,88 @@ class _TouristAttractionDetailState extends State<TouristAttractionDetail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        decoration: BoxDecoration(
-          color: color.backgroundColor,
-        ),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Stack(
-            children: [header(context), body(context)],
+      body: Stack(children: [
+        Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          decoration: BoxDecoration(
+            color: color.backgroundColor,
+          ),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Stack(
+              children: [header(context), body(context)],
+            ),
           ),
         ),
-      ),
+        Positioned(
+          top: 40,
+          left: 20,
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width - 40,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(15)),
+                    child: const Center(
+                      child: Icon(
+                        Icons.arrow_back_outlined,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                Consumer<FavoriteProvider>(
+                  builder: (context, value, child) => Container(
+                    decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(15)),
+                    child: IconButton(
+                        onPressed: () {
+                          if (!isFavorite) {
+                            setState(() {
+                              isFavorite = !isFavorite;
+                            });
+                            value.addFavorite(
+                                widget.item.id.toString(),
+                                widget.item.title.toString(),
+                                widget.item.address.toString(),
+                                widget.item.image.toString(),
+                                3,
+                                user_constants.user!.uid);
+                          } else {
+                            setState(() {
+                              isFavorite = !isFavorite;
+                              value.deleteFavorite(widget.item.id.toString(), 3,
+                                  user_constants.user!.uid);
+                            });
+                          }
+                        },
+                        icon: Icon(
+                          isFavorite
+                              ? Icons.favorite_sharp
+                              : Icons.favorite_border_outlined,
+                          color: Colors.white,
+                          size: 27,
+                        ),
+                        style: ButtonStyle(
+                            shape: MaterialStateProperty.all(
+                                RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15))))),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ]),
     );
   }
 
@@ -135,33 +214,6 @@ class _TouristAttractionDetailState extends State<TouristAttractionDetail> {
         child: Image.network(
           "https://khamphahue.com.vn/${widget.item.image}",
           fit: BoxFit.cover,
-        ),
-      ),
-      Padding(
-        padding: const EdgeInsets.only(left: 20.0, right: 20, top: 30),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.7),
-                    borderRadius: BorderRadius.circular(10)),
-                child: const Center(
-                    child: Icon(Icons.arrow_back_ios_new_outlined)),
-              ),
-            ),
-            const Icon(
-              Icons.favorite_border_outlined,
-              size: 35,
-              color: Colors.black87,
-            )
-          ],
         ),
       ),
       Positioned(
