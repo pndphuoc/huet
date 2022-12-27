@@ -18,7 +18,7 @@
     <application
         android:label="hue_t"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/icon"
         android:requestLegacyExternalStorage="true">
        <meta-data android:name="com.google.android.geo.API_KEY"
            android:value="AIzaSyA66KwUrjxcFG5u0exynlJ45CrbrNe3hEc"/>

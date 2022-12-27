@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:hue_t/animation/show_up.dart';
 import 'package:hue_t/colors.dart' as color;
 import 'package:hue_t/providers/event_provider.dart';
 import 'package:hue_t/view/events/evant_detail.dart';
+import 'package:hue_t/view/events/search_events.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -21,25 +23,23 @@ class Events extends StatefulWidget {
 
 class _EventsState extends State<Events> {
   bool popular1 = true;
-  bool isloading = true;
-
   @override
   Widget build(BuildContext context) {
     var productProvider = Provider.of<EventProvider>(context);
-    if (isloading) {
+    if (productProvider.isloading) {
       (() async {
         await productProvider.getAll();
         await productProvider.getThisMonth();
         await productProvider.getNextMonth();
 
         setState(() {
-          isloading = false;
+          productProvider.isloading = false;
         });
       })();
     }
     return Scaffold(
       backgroundColor: color.backgroundColor,
-      body: isloading
+      body: productProvider.isloading
           ? Center(
               child: LoadingAnimationWidget.staggeredDotsWave(
                   color: color.primaryColor, size: 50),
@@ -99,26 +99,31 @@ class _EventsState extends State<Events> {
                 ],
               ),
             ),
-            TextField(
-              onChanged: (value) {
-                setState(() {});
-              },
-              decoration: const InputDecoration(
-                  filled: true,
-                  fillColor: Color.fromARGB(255, 240, 237, 237),
-                  hintText: "Search event ...",
-                  hintStyle: TextStyle(color: Color.fromARGB(255, 206, 205, 205)),
-                  prefixIcon: Icon(Icons.search),
-                  enabledBorder: OutlineInputBorder(
+          TextField(
+            onSubmitted: (value) {
+              if (value != "") {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SearchEventPage(value: value)));
+              }
+            },
+            decoration: const InputDecoration(
+                filled: true,
+                fillColor: Color.fromARGB(255, 240, 237, 237),
+                hintText: "Search event ...",
+                hintStyle: TextStyle(color: Color.fromARGB(255, 206, 205, 205)),
+                prefixIcon: Icon(Icons.search),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                  borderSide: BorderSide(
+                      width: 0.2, color: Color.fromARGB(255, 255, 255, 255)),
+                ),
+                focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(25.0)),
                     borderSide: BorderSide(
                         width: 0.2, color: Color.fromARGB(255, 255, 255, 255)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(25.0)),
-                      borderSide: BorderSide(
-                          width: 0.2,
-                          color: Color.fromARGB(255, 255, 255, 255)))),
+                  ),),
             )
           ],
         ),
@@ -187,29 +192,32 @@ class _EventsState extends State<Events> {
                             ),
                           ),
                         ),
-                        ShowUp(
-                          delay: 300,
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                popular1 = false;
-                              });
-                            },
-                            child: Container(
-                              alignment: Alignment.center,
-                              width: MediaQuery.of(context).size.width / 4,
-                              height: 40,
-                              decoration: const BoxDecoration(),
-                              child: Text("Expired",
-                                  style: GoogleFonts.readexPro(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w500,
-                                      color: !popular1
-                                          ? const Color.fromARGB(
-                                              255, 104, 104, 172)
-                                          : const Color.fromARGB(
-                                              255, 97, 97, 97))),
-                            ),
+                        GestureDetector(
+                          onTap: () async {
+                            setState(() {
+                              popular1 = false;
+                            });
+                            await showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  //TOTO:BUG
+                                  return alertDialog(context);
+                                });
+                          },
+                          child: Container(
+                            alignment: Alignment.center,
+                            width: MediaQuery.of(context).size.width / 4,
+                            height: 40,
+                            decoration: const BoxDecoration(),
+                            child: Text("Expired",
+                                style: GoogleFonts.readexPro(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                    color: !popular1
+                                        ? const Color.fromARGB(
+                                            255, 104, 104, 172)
+                                        : const Color.fromARGB(
+                                            255, 97, 97, 97))),
                           ),
                         )
                       ],
@@ -241,7 +249,7 @@ class _EventsState extends State<Events> {
               builder: (context, value, child) => Swiper(
                 itemBuilder: (context, index) {
                   return ShowUp(
-                    delay: index*100,
+                    delay: 100 * index,
                     child: GestureDetector(
                       onTap: () => Navigator.push(
                           context,
@@ -249,8 +257,8 @@ class _EventsState extends State<Events> {
                               builder: ((context) => EventDetail(
                                   item: value.listNextMonth[index])))),
                       child: Container(
-                        margin:
-                            const EdgeInsets.only(left: 5, right: 5, bottom: 20),
+                        margin: const EdgeInsets.only(
+                            left: 5, right: 5, bottom: 20),
                         decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(20),
@@ -267,8 +275,9 @@ class _EventsState extends State<Events> {
                             Stack(children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(20),
-                                child: CachedNetworkImage(imageUrl:
-                                  value.listNextMonth[index].image.toString(),
+                                child: CachedNetworkImage(
+                                  imageUrl: value.listNextMonth[index].image
+                                      .toString(),
                                   height: 170,
                                   width: double.infinity,
                                   fit: BoxFit.cover,
@@ -278,7 +287,8 @@ class _EventsState extends State<Events> {
                                   bottom: -1,
                                   child: SizedBox(
                                     height: 60,
-                                    width: MediaQuery.of(context).size.width - 85,
+                                    width:
+                                        MediaQuery.of(context).size.width - 85,
                                     child: ClipRRect(
                                       borderRadius: const BorderRadius.only(
                                           bottomLeft: Radius.circular(20),
@@ -295,22 +305,27 @@ class _EventsState extends State<Events> {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  value.listNextMonth[index].name
+                                                  value
+                                                      .listNextMonth[index].name
                                                       .toString(),
-                                                  overflow: TextOverflow.ellipsis,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                   maxLines: 1,
                                                   style: GoogleFonts.readexPro(
                                                       fontSize: 15,
-                                                      fontWeight: FontWeight.w500,
+                                                      fontWeight:
+                                                          FontWeight.w500,
                                                       color: Colors.white),
                                                 ),
                                                 Text(
-                                                  value.listNextMonth[index].begin
+                                                  value.listNextMonth[index]
+                                                      .begin
                                                       .toString()
                                                       .split("T")[0],
                                                   style: GoogleFonts.readexPro(
                                                       fontSize: 13,
-                                                      fontWeight: FontWeight.w300,
+                                                      fontWeight:
+                                                          FontWeight.w300,
                                                       color: Colors.white
                                                           .withOpacity(0.6)),
                                                 ),
@@ -323,7 +338,8 @@ class _EventsState extends State<Events> {
                                   ))
                             ]),
                             Padding(
-                              padding: const EdgeInsets.only(left: 5, right: 10),
+                              padding:
+                                  const EdgeInsets.only(left: 5, right: 10),
                               child: Row(
                                 children: [
                                   Container(
@@ -339,7 +355,8 @@ class _EventsState extends State<Events> {
                                         ),
                                         Expanded(
                                           child: Text(
-                                            value.list[index].address.toString(),
+                                            value.list[index].address
+                                                .toString(),
                                             overflow: TextOverflow.ellipsis,
                                             maxLines: 2,
                                             style: GoogleFonts.readexPro(
@@ -405,86 +422,139 @@ class _EventsState extends State<Events> {
                 const SizedBox(
                   height: 15,
                 ),
-                ...value.listThisMonth.map((e) => ShowRight(
-                  delay: 200 + 100 * value.listThisMonth.indexOf(e),
-                  child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => EventDetail(item: e)));
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 10),
-                          width: MediaQuery.of(context).size.width,
-                          height: 90,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.2),
-                                  offset: const Offset(0, 5),
-                                  blurRadius: 10,
-                                )
-                              ]),
-                          child: Padding(
-                            padding: const EdgeInsets.all(10.0),
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(15),
-                                  child: CachedNetworkImage(imageUrl: e.image.toString(),
-                                      width: 70, height: 70, fit: BoxFit.cover),
-                                ),
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.only(left: 8.0, top: 3),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(
-                                        width: 180,
-                                        child: Text(e.name.toString(),
-                                            overflow: TextOverflow.clip,
-                                            maxLines: 2,
-                                            style: GoogleFonts.readexPro(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.w600)),
-                                      ),
-                                      const SizedBox(
-                                        height: 3,
-                                      ),
-                                      SizedBox(
-                                        width: 180,
-                                        child: Text(
-                                          e.address.toString(),
+                ...value.listThisMonth.map((e) {
+                  var index = value.list.indexOf(e);
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => EventDetail(item: e)));
+                    },
+                    child: BounceInLeft(
+                      duration: Duration(milliseconds: 1000 + 100 * index),
+                      delay: Duration(milliseconds: value.listThisMonth.indexOf(e) * 100),
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        width: MediaQuery.of(context).size.width,
+                        height: 90,
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.2),
+                                offset: const Offset(0, 5),
+                                blurRadius: 10,
+                              )
+                            ]),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(15),
+                                child: CachedNetworkImage(
+                                    imageUrl: e.image.toString(),
+                                    width: 70,
+                                    height: 70,
+                                    fit: BoxFit.cover),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 8.0, top: 3),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      width: 180,
+                                      child: Text(e.name.toString(),
                                           overflow: TextOverflow.clip,
-                                          maxLines: 1,
+                                          maxLines: 2,
                                           style: GoogleFonts.readexPro(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w400),
-                                        ),
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w600)),
+                                    ),
+                                    const SizedBox(
+                                      height: 3,
+                                    ),
+                                    SizedBox(
+                                      width: 180,
+                                      child: Text(
+                                        e.address.toString(),
+                                        overflow: TextOverflow.clip,
+                                        maxLines: 1,
+                                        style: GoogleFonts.readexPro(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400),
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
-                                const Expanded(
-                                    child: Icon(
-                                  Icons.arrow_forward_ios_outlined,
-                                  color: Colors.grey,
-                                ))
-                              ],
                             ),
+                          const Expanded(
+                              child: Icon(
+                                Icons.arrow_forward_ios_outlined,
+                                color: Colors.grey,
+                              ))]
                           ),
                         ),
                       ),
-                ))
+                    ),
+                  );
+                })
               ],
             ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget alertDialog(BuildContext context) {
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          FadeInUp(
+            duration: const Duration(milliseconds: 200),
+            child: AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
+              title: Text(
+                "Haven't Events Expired",
+                style: GoogleFonts.readexPro(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w300,
+                    fontSize: 20),
+                textAlign: TextAlign.center,
+              ),
+              actionsAlignment: MainAxisAlignment.center,
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      popular1 = true;
+                      Navigator.of(context).pop(false);
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      padding: const EdgeInsets.only(
+                          left: 40, right: 40, top: 15, bottom: 15),
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20))),
+                  child: Text(
+                    "Ok",
+                    style: GoogleFonts.readexPro(color: Colors.grey),
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 }

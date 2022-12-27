@@ -7,6 +7,9 @@ import 'package:device_preview/device_preview.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:hue_t/providers/accommodation_provider.dart';
+import 'package:hue_t/providers/favorite_provider.dart';
+
+import 'package:hue_t/view/accommodation_views/hotel_detail.dart';
 import 'package:hue_t/animation/show_up.dart';
 import 'package:hue_t/providers/event_provider.dart';
 import 'package:hue_t/providers/foodstore_provider.dart';
@@ -16,7 +19,7 @@ import 'package:hue_t/providers/weather_provider.dart';
 import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
 import 'package:hue_t/view/home/home.dart';
 import 'package:hue_t/view/profileuser/profile_user.dart';
-import 'package:hue_t/view/social_network_network/socialNetwork.dart';
+import 'package:hue_t/view/social_network_network/social_network.dart';
 import 'package:provider/provider.dart';
 import 'package:rive/rive.dart' as rive;
 import 'colors.dart' as colors;
@@ -41,6 +44,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => WeatherProvider()),
         ChangeNotifierProvider(create: (context) => UserProvider()),
         ChangeNotifierProvider(create: (context) => AccomodationProvider()),
+        ChangeNotifierProvider(create: (context) => FavoriteProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

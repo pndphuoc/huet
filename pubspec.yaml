@@ -126,6 +126,7 @@ dev_dependencies:
 flutter:
   assets:
     - assets/
+    - assets/icon.png
     - assets/images/
     - assets/images/profileuser/
     - assets/images/hotel/

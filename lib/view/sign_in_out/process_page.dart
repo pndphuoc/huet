@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hue_t/main.dart';
+import 'package:hue_t/providers/favorite_provider.dart';
 import 'package:hue_t/view/home/home.dart';
 import 'package:hue_t/view/profileuser/edit_profile.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -21,8 +22,21 @@ class _ProcessPageState extends State<ProcessPage> {
   @override
   Widget build(BuildContext context) {
     var userProvider = Provider.of<UserProvider>(context);
-    return user == null ? Scaffold(
-      backgroundColor: colors.backgroundColor,
-        body: Center(child: LoadingAnimationWidget.discreteCircle(color: colors.primaryColor, size: 30),)) : userProvider.isGoogle ? const HueT(index: 1,) : const EditProfile();
+    var favoriteProvider = Provider.of<FavoriteProvider>(context);
+    if (user != null) {
+      favoriteProvider.getAll(user!.uid);
+    }
+    return user == null
+        ? Scaffold(
+            backgroundColor: colors.backgroundColor,
+            body: Center(
+              child: LoadingAnimationWidget.discreteCircle(
+                  color: colors.primaryColor, size: 30),
+            ))
+        : userProvider.isGoogle
+            ? const HueT(
+                index: 1,
+              )
+            : const EditProfile();
   }
 }

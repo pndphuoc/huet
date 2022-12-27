@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/animation/show_up.dart';
@@ -55,18 +56,18 @@ class _TouristAttractionState extends State<TouristAttraction> {
   @override
   Widget build(BuildContext context) {
     var productProvider = Provider.of<TouristAttractionProvider>(context);
-    if (isLoading) {
+    if (productProvider.isloading) {
       (() async {
         await productProvider.getAll();
 
         setState(() {
-          isLoading = false;
+          productProvider.isloading = false;
         });
       })();
     }
     return Scaffold(
       backgroundColor: color.backgroundColor,
-      body: isLoading
+      body: productProvider.isloading
           ? Center(
               child: LoadingAnimationWidget.staggeredDotsWave(
                   color: color.primaryColor, size: 50),
@@ -75,8 +76,8 @@ class _TouristAttractionState extends State<TouristAttraction> {
               onTap: () {
                 FocusScope.of(context).requestFocus(FocusNode());
               },
-              child: Stack(
-                children: [SingleChildScrollView(
+              child: Stack(children: [
+                SingleChildScrollView(
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 100.0),
                     child: Column(
@@ -97,12 +98,8 @@ class _TouristAttractionState extends State<TouristAttraction> {
                     ),
                   ),
                 ),
-                Positioned(
-                    top: 35,
-                    left: 20,
-                    child: backButton())
-                ]
-              ),
+                Positioned(top: 35, left: 20, child: backButton())
+              ]),
             ),
     );
   }
@@ -144,7 +141,8 @@ class _TouristAttractionState extends State<TouristAttraction> {
                   filled: true,
                   fillColor: Color.fromARGB(255, 240, 237, 237),
                   hintText: "Search places to visit ...",
-                  hintStyle: TextStyle(color: Color.fromARGB(255, 206, 205, 205)),
+                  hintStyle:
+                      TextStyle(color: Color.fromARGB(255, 206, 205, 205)),
                   prefixIcon: Icon(Icons.search),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(25.0)),
@@ -263,6 +261,7 @@ class _TouristAttractionState extends State<TouristAttraction> {
       ],
     );
   }
+
   Widget backButton() {
     return Container(
       decoration: BoxDecoration(
@@ -281,6 +280,7 @@ class _TouristAttractionState extends State<TouristAttraction> {
                   borderRadius: BorderRadius.circular(15))))),
     );
   }
+
   Widget categories(BuildContext context) {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
@@ -333,120 +333,116 @@ class _TouristAttractionState extends State<TouristAttraction> {
   Widget items(BuildContext context, String title, String image1, String image2,
       String image3, int categoryid) {
     return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(SwipeablePageRoute(
-            builder: (BuildContext context) => FilterTourist(
-                  categoryId: categoryid,
-                  searchValue: "",
-                )));
-      },
-      child: Container(
-        margin: const EdgeInsets.only(top: 20),
-        padding:
-            const EdgeInsets.only(top: 15, bottom: 15, left: 30, right: 30),
-        width: double.infinity,
-        height: 175,
-        decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(0),
-            boxShadow: const [
-              BoxShadow(
-                  offset: Offset(0, 4),
-                  blurRadius: 4,
-                  color: Color.fromARGB(66, 216, 214, 214))
-            ]),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.readexPro(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black87),
-                ),
-                const Icon(
-                  Icons.arrow_forward_ios_outlined,
-                  size: 20,
-                  color: Colors.black54,
-                )
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ShowUp(
-                  delay: 100,
-                  child: Container(
-                    width: 105,
-                    height: 105,
-                    decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Center(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: CachedNetworkImage(
-                          imageUrl: image1,
-                          width: 90,
-                          height: 90,
-                          fit: BoxFit.cover,
+        onTap: () {
+          Navigator.of(context).push(SwipeablePageRoute(
+              builder: (BuildContext context) => FilterTourist(
+                    categoryId: categoryid,
+                    searchValue: "",
+                  )));
+        },
+        child: BounceInLeft(
+          child: Container(
+            margin: const EdgeInsets.only(top: 20),
+            padding:
+                const EdgeInsets.only(top: 15, bottom: 15, left: 30, right: 30),
+            width: double.infinity,
+            height: 175,
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(0),
+                boxShadow: const [
+                  BoxShadow(
+                      offset: Offset(0, 4),
+                      blurRadius: 4,
+                      color: Color.fromARGB(66, 216, 214, 214))
+                ]),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        title,
+                        style: GoogleFonts.readexPro(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black87),
+                      ),
+                      const Icon(
+                        Icons.arrow_forward_ios_outlined,
+                        size: 20,
+                        color: Colors.black54,
+                      )
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        width: 105,
+                        height: 105,
+                        decoration: BoxDecoration(
+                            color: Colors.grey.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Center(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: CachedNetworkImage(
+                              imageUrl: image1,
+                              width: 90,
+                              height: 90,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                ),
-                ShowUp(
-                  delay: 200,
-                  child: Container(
-                    width: 105,
-                    height: 105,
-                    decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Center(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: CachedNetworkImage(
-                          imageUrl: image2,
-                          width: 90,
-                          height: 90,
-                          fit: BoxFit.cover,
+                      ShowUp(
+                        delay: 200,
+                        child: Container(
+                          width: 105,
+                          height: 105,
+                          decoration: BoxDecoration(
+                              color: Colors.grey.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(10)),
+                          child: Center(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: CachedNetworkImage(
+                                imageUrl: image2,
+                                width: 90,
+                                height: 90,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                      ShowUp(
+                          delay: 300,
+                          child: Container(
+                            width: 105,
+                            height: 105,
+                            decoration: BoxDecoration(
+                                color: Colors.grey.withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Center(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: CachedNetworkImage(
+                                  imageUrl: image3,
+                                  width: 90,
+                                  height: 90,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          )),
+                    ],
                   ),
-                ),
-                ShowUp(
-                  delay: 300,
-                  child: Container(
-                    width: 105,
-                    height: 105,
-                    decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.3),
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Center(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: CachedNetworkImage(
-                          imageUrl: image3,
-                          width: 90,
-                          height: 90,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
+                ]),
+          ),
+        ));
   }
 }

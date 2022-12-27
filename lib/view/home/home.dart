@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/animation/show_left.dart';
 import 'package:hue_t/animation/show_right.dart';
 import 'package:hue_t/animation/show_up.dart';
+import 'package:hue_t/providers/favorite_provider.dart';
 import 'package:hue_t/view/accommodation_views/hotel.dart';
 import 'package:hue_t/colors.dart' as color;
 import 'package:hue_t/main.dart';
@@ -12,7 +13,12 @@ import 'package:hue_t/providers/weather_provider.dart';
 import 'package:hue_t/view/events/events.dart';
 import 'package:hue_t/view/foodstore/foodstore.dart';
 import 'package:hue_t/view/sign_in_out/sign_in_page.dart';
+import 'package:hue_t/view/social_network_network/social_network.dart';
 import 'package:hue_t/view/tourist_attraction/tourist_attraction.dart';
+import 'package:hue_t/view/utilities/atm.dart';
+import 'package:hue_t/view/utilities/gas_station.dart';
+import 'package:hue_t/view/utilities/taxi.dart';
+import 'package:hue_t/view/utilities/wc_public.dart';
 import 'package:provider/provider.dart';
 import 'package:swipeable_page_route/swipeable_page_route.dart';
 import '../../constants/user_info.dart' as user_constants;
@@ -55,9 +61,13 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     var weatherProvider = Provider.of<WeatherProvider>(context);
+    var favoriteProvider = Provider.of<FavoriteProvider>(context);
     if (weatherProvider.isloading) {
       (() async {
         await weatherProvider.getWeather();
+        if (user_constants.user != null) {
+          await favoriteProvider.getAll(user_constants.user!.uid);
+        }
         setState(() {
           weatherProvider.isloading = false;
         });
@@ -392,19 +402,23 @@ class _HomePageState extends State<HomePage> {
                 buttonLinkSmall(
                     context,
                     "https://cdn-icons-png.flaticon.com/512/2676/2676606.png",
-                    "ATM", 300),
-                buttonLinkSmall(
-                    context,
-                    "https://cdn-icons-png.flaticon.com/512/891/891035.png",
-                    "Gas station", 200),
+                    "ATM",
+                    const ATMPage(), 0),
                 buttonLinkSmall(
                     context,
                     "https://cdn-icons-png.flaticon.com/512/8327/8327497.png",
-                    "Public WC", 100),
+                    "WC Public",
+                    const WCPublicPage(), 100),
+                buttonLinkSmall(
+                    context,
+                    "https://cdn-icons-png.flaticon.com/512/891/891035.png",
+                    "Gas Station",
+                    const GasStationPage(), 300),
                 buttonLinkSmall(
                     context,
                     "https://cdn-icons-png.flaticon.com/512/2401/2401174.png",
-                    "Taxi", 0),
+                    "Taxi",
+                    const TaxiPage(), 200),
               ],
             )
           ],
@@ -498,13 +512,16 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget buttonLinkSmall(BuildContext context, String image, String name, int delay) {
+  Widget buttonLinkSmall(
+      BuildContext context, String image, String name, Widget page, int delay) {
     return ShowUp(
-      delay: delay,
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
+        delay: delay, child: Column(
+      children: [
+        GestureDetector(
+          onTap: () => Navigator.push(
+              context, MaterialPageRoute(builder: (context) => page)),
+          child: Container(
+            padding: const EdgeInsets.all(18),
             width: 60,
             height: 60,
             decoration: BoxDecoration(
@@ -517,25 +534,25 @@ class _HomePageState extends State<HomePage> {
                       color: Colors.grey.withOpacity(0.3))
                 ]),
             child: Center(
-              child: CachedNetworkImage(imageUrl:image),
+              child: CachedNetworkImage(imageUrl: image),
             ),
           ),
-          const SizedBox(
-            height: 8,
+        ),
+        const SizedBox(
+          height: 8,
+        ),
+        SizedBox(
+          width: MediaQuery.of(context).size.width/5,
+          child: Center(
+            child: Text(name,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.readexPro(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black87)),
           ),
-          SizedBox(
-            width: 70,
-            child: Center(
-              child: Text(name,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.readexPro(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black87)),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],)
     );
   }
 
@@ -555,10 +572,8 @@ class _HomePageState extends State<HomePage> {
                       fontWeight: FontWeight.w500,
                       color: Colors.black87)),
               GestureDetector(
-                onTap: () => Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Events()),
-                    (route) => false),
+                onTap: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => const Events())),
                 child: Text("See all",
                     style: GoogleFonts.readexPro(
                         fontSize: 13,

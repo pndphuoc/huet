@@ -8,6 +8,7 @@ import 'package:hue_t/providers/user_provider.dart';
 import 'package:hue_t/view/profileuser/profile_user.dart';
 import 'package:provider/provider.dart';
 import '../../constants/user_info.dart' as user_constant;
+import '../../main.dart';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({Key? key}) : super(key: key);
@@ -66,10 +67,13 @@ class _EditProfileState extends State<EditProfile> {
               children: [
                 TextButton(
                   onPressed: () {
-                    Navigator.pop(
+                    Navigator.pushAndRemoveUntil(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const ProfileUser()));
+                            builder: (context) => const HueT(
+                                  index: 1,
+                                )),
+                        (route) => false);
                   },
                   child: Row(
                     children: [
@@ -271,7 +275,7 @@ class _EditProfileState extends State<EditProfile> {
                     height: 10,
                   ),
                   TextFormField(
-                    initialValue: phone,
+                    initialValue: phone ?? "",
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),

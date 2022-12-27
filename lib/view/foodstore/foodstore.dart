@@ -97,8 +97,7 @@ class _FoodstoreState extends State<Foodstore> {
           final coordinates = Coordinates(value.latitude, value.longitude);
           var addresses =
               await Geocoder.local.findAddressesFromCoordinates(coordinates);
-          address = addresses.first.addressLine.toString();
-
+          restaurantProvider.addresss = addresses.first.addressLine.toString();
           await distanceCalculation(value, restaurantProvider.list);
         });
         setState(() {
@@ -106,6 +105,8 @@ class _FoodstoreState extends State<Foodstore> {
         });
       })();
     }
+    address = restaurantProvider.addresss;
+
     return Scaffold(
       body: restaurantProvider.isloading
           ? Center(
@@ -405,7 +406,11 @@ class _FoodstoreState extends State<Foodstore> {
                                                         size: 14,
                                                       ),
                                                       Text(
-                                                          "${e.distance!.toStringAsFixed(2)} km",
+                                                          e.distance?.toStringAsFixed(
+                                                                      2) !=
+                                                                  null
+                                                              ? "${e.distance!.toStringAsFixed(2)} km"
+                                                              : "km",
                                                           style: GoogleFonts
                                                               .readexPro(
                                                             fontSize: 13,
@@ -694,7 +699,11 @@ class _FoodstoreState extends State<Foodstore> {
                                                       width: 3,
                                                     ),
                                                     Text(
-                                                        "${e.distance!.toStringAsFixed(2)} km",
+                                                        e.distance?.toStringAsFixed(
+                                                                    2) !=
+                                                                null
+                                                            ? "${e.distance!.toStringAsFixed(2)} km"
+                                                            : "km",
                                                         style: GoogleFonts
                                                             .readexPro(
                                                           fontSize: 13,
@@ -860,7 +869,11 @@ class _FoodstoreState extends State<Foodstore> {
                                                       width: 3,
                                                     ),
                                                     Text(
-                                                        "${e.distance!.toStringAsFixed(2)} km",
+                                                        e.distance?.toStringAsFixed(
+                                                                    2) !=
+                                                                null
+                                                            ? "${e.distance!.toStringAsFixed(2)} km"
+                                                            : "km",
                                                         style: GoogleFonts
                                                             .readexPro(
                                                           fontSize: 13,

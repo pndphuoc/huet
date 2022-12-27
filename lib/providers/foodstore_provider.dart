@@ -12,6 +12,7 @@ class FoodstoreProvider extends ChangeNotifier {
   List<Restaurant> list = [];
   List<Restaurant> listfull = [];
   List<Restaurant> listSearch = [];
+  String addresss = "";
 
   Future<void> getapi() async {
     String apiURL = "${url.url}/api/foodstore";

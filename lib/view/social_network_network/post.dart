@@ -16,7 +16,7 @@ import 'package:hue_t/model/user/user.dart';
 import 'package:hue_t/providers/tourist_provider.dart';
 import 'package:hue_t/providers/user_provider.dart';
 import 'package:hue_t/view/social_network_network/post_comments.dart';
-import 'package:hue_t/view/social_network_network/socialNetwork.dart';
+import 'package:hue_t/view/social_network_network/social_network.dart';
 import 'package:hue_t/view/social_network_network/video_widget.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:intl/intl.dart';
@@ -159,8 +159,14 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
               child: DropdownButton2(
                 customButton: const Icon(Icons.more_vert_outlined),
                 items: [
-                  ...MenuItems.itemsList.map((e) =>
-                      DropdownMenuItem(value: e, child: MenuItems.buildItem(e)))
+                  if (widget.post.userID == user_info.user!.uid)
+                    ...MenuItems.itemsListForPostOfCurrentUser.map((e) =>
+                        DropdownMenuItem(
+                            value: e, child: MenuItems.buildItem(e)))
+                  else
+                    ...MenuItems.itemsListForPostNotOfCurrentUser.map((e) =>
+                        DropdownMenuItem(
+                            value: e, child: MenuItems.buildItem(e)))
                 ],
                 onChanged: (value) {
                   MenuItem selected = value as MenuItem;
@@ -361,29 +367,29 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                     isPlayingVideo = false;
                   });
 
-                  isPlayingVideo =
-                      await Navigator.push(
-                        context,
-                        SwipeablePageRoute(
-                          transitionDuration: const Duration(milliseconds: 300),
-                          transitionBuilder: (context, animation, secondaryAnimation, isSwipeGesture, child){
-                            // Use a custom transition animation
-                            return SlideTransition(
-                              position: Tween<Offset>(
-                                begin: const Offset(1.0, 0.0),
-                                end: Offset.zero,
-                              ).animate(animation),
-                              child: child,
-                            );
-                          },
-                          builder: (context) {
-                            return PostCommentsPage(
-                              postID: widget.post.postID,
-                              user: widget.user,
-                            );
-                          },
-                        ),
-                      );
+                  isPlayingVideo = await Navigator.push(
+                    context,
+                    SwipeablePageRoute(
+                      transitionDuration: const Duration(milliseconds: 300),
+                      transitionBuilder: (context, animation,
+                          secondaryAnimation, isSwipeGesture, child) {
+                        // Use a custom transition animation
+                        return SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(1.0, 0.0),
+                            end: Offset.zero,
+                          ).animate(animation),
+                          child: child,
+                        );
+                      },
+                      builder: (context) {
+                        return PostCommentsPage(
+                          postID: widget.post.postID,
+                          user: widget.user,
+                        );
+                      },
+                    ),
+                  );
                   /*isPlayingVideo = await Navigator.push(
                     context,
                     PageRouteBuilder(
@@ -605,7 +611,9 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                     ? buildCaptionBlock(context)
                     : Container(),
                 buildCreateDateBlock(context),
-                const SizedBox(height: 20,)
+                const SizedBox(
+                  height: 20,
+                )
                 //buildCommentBlock(context)
               ],
             ),
@@ -622,12 +630,18 @@ class MenuItem {
 }
 
 class MenuItems {
-  static const List<MenuItem> itemsList = [delete, edit];
+  static const List<MenuItem> itemsListForPostOfCurrentUser = [
+    delete,
+    edit,
+    report
+  ];
+  static const List<MenuItem> itemsListForPostNotOfCurrentUser = [report];
 
   //static const List<MenuItem> secondItems = [logout];
 
   static const delete = MenuItem(text: 'Delete');
   static const edit = MenuItem(text: 'Edit');
+  static const report = MenuItem(text: 'Report');
 
 /*  static const share = MenuItem(text: 'Share', icon: Icons.share);
   static const settings = MenuItem(text: 'Settings', icon: Icons.settings);
@@ -651,6 +665,8 @@ class MenuItems {
       case MenuItems.delete:
         break;
       case MenuItems.edit:
+        break;
+      case MenuItems.report:
         break;
 /*      case MenuItems.settings:
       //Do something

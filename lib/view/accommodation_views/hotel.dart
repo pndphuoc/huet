@@ -4,9 +4,11 @@ import 'package:flutter/rendering.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hue_t/animation/show_right.dart';
+import 'package:hue_t/animation/show_up.dart';
 import 'package:hue_t/providers/accommodation_provider.dart';
 import 'package:hue_t/view/accommodation_views/hotels_list.dart';
 import 'package:hue_t/view/accommodation_views/hotel_detail.dart';
+import 'package:hue_t/view/accommodation_views/resorts_list.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:swipeable_page_route/swipeable_page_route.dart';
@@ -151,14 +153,12 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                     ),
                   ),
                 )),
-                Positioned(
-                    top: 50,
-                    left: 20,
-                    child: backButton())
+                Positioned(top: 50, left: 20, child: backButton())
               ]),
       ),
     );
   }
+
   Widget backButton() {
     return Container(
       decoration: BoxDecoration(
@@ -177,6 +177,7 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
                   borderRadius: BorderRadius.circular(15))))),
     );
   }
+
   accommodationBlock(BuildContext context, String name, List<hotelModel> list) {
     return Container(
       decoration: BoxDecoration(
@@ -275,51 +276,48 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
   }
 
   accommodationItem(BuildContext context, int index, list) {
-    return BounceInUp(
-      from: 60,
-      delay: const Duration(milliseconds: 500),
-      duration: Duration(milliseconds: 1500 + index * 300),
-      child: Container(
-        decoration: BoxDecoration(
-            color: colors.isDarkMode
-                ? colors.accomodationItemColorDarkMode
-                : Colors.white,
-            borderRadius: BorderRadius.circular(15)),
-        margin: index == 0
-            ? const EdgeInsets.only(left: 20)
-            : index == list.length - 1
-                ? const EdgeInsets.only(left: 10, right: 20)
-                : const EdgeInsets.only(left: 10),
-        child: GestureDetector(
-            child: Container(
-                width: MediaQuery.of(context).size.width / 2.8,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  image: DecorationImage(
-                      image: CachedNetworkImageProvider(list[index].image),
-                      fit: BoxFit.cover), // button text
-                ),
-                child: Align(
-                    alignment: Alignment.bottomLeft,
-                    child: Container(
-                      margin: const EdgeInsets.only(left: 7, bottom: 7),
-                      child: Text(
-                        list[index].name,
-                        style: GoogleFonts.readexPro(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500),
-                        maxLines: 1,
-                        overflow: TextOverflow.clip,
-                      ),
-                    ))),
-            onTap: () {
-              Navigator.of(context, rootNavigator: true).push(
-                  SwipeablePageRoute(
-                      builder: (context) => HotelDetail(model: list[index])));
-            }),
-      ),
-    );
+    return ShowUp(
+        delay: 100 * index,
+        child: Container(
+          decoration: BoxDecoration(
+              color: colors.isDarkMode
+                  ? colors.accomodationItemColorDarkMode
+                  : Colors.white,
+              borderRadius: BorderRadius.circular(15)),
+          margin: index == 0
+              ? const EdgeInsets.only(left: 20)
+              : index == list.length - 1
+                  ? const EdgeInsets.only(left: 10, right: 20)
+                  : const EdgeInsets.only(left: 10),
+          child: GestureDetector(
+              child: Container(
+                  width: MediaQuery.of(context).size.width / 2.8,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    image: DecorationImage(
+                        image: CachedNetworkImageProvider(list[index].image),
+                        fit: BoxFit.cover), // button text
+                  ),
+                  child: Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Container(
+                        margin: const EdgeInsets.only(left: 7, bottom: 7),
+                        child: Text(
+                          list[index].name,
+                          style: GoogleFonts.readexPro(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500),
+                          maxLines: 1,
+                          overflow: TextOverflow.clip,
+                        ),
+                      ))),
+              onTap: () {
+                Navigator.of(context, rootNavigator: true).push(
+                    SwipeablePageRoute(
+                        builder: (context) => HotelDetail(model: list[index])));
+              }),
+        ));
   }
 
   searchBlock(BuildContext context) {
@@ -334,7 +332,6 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-
                 Text(
                   "HUE ACCOMMODATION",
                   style: GoogleFonts.readexPro(
@@ -344,8 +341,17 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
             ),
           ),
           TextField(
-            onChanged: (value) {
-              setState(() {});
+            onSubmitted: (values) {
+              if (values != "") {
+                setState(() {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ResortsPage(
+                                value: values,
+                              )));
+                });
+              }
             },
             decoration: const InputDecoration(
                 filled: true,
