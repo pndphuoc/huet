@@ -6,10 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/providers/accommodation_provider.dart';
 import 'package:hue_t/providers/favorite_provider.dart';
-
-import 'package:hue_t/view/accommodation_views/hotel_detail.dart';
 import 'package:hue_t/animation/show_up.dart';
 import 'package:hue_t/providers/event_provider.dart';
 import 'package:hue_t/providers/foodstore_provider.dart';
@@ -19,10 +18,13 @@ import 'package:hue_t/providers/weather_provider.dart';
 import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
 import 'package:hue_t/view/home/home.dart';
 import 'package:hue_t/view/profileuser/profile_user.dart';
+import 'package:hue_t/view/sign_in_out/sign_in_page.dart';
 import 'package:hue_t/view/social_network_network/social_network.dart';
 import 'package:provider/provider.dart';
 import 'package:rive/rive.dart' as rive;
+import 'package:swipeable_page_route/swipeable_page_route.dart';
 import 'colors.dart' as colors;
+import 'package:hue_t/constants/user_info.dart' as user_info;
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -204,7 +206,7 @@ class _HueTState extends State<HueT> {
   ];
   int _selectedItemPosition = 1;
   final List<Widget> _children = [
-    const SocialNetWorkPage(),
+    SocialNetWorkPage(pageController: pageController,),
     HomePage(pageController: pageController,),
     const ProfileUser(),
   ];
@@ -283,6 +285,16 @@ class _HueTState extends State<HueT> {
             onPageChanged: (index) {
               setState(() {
                 _selectedItemPosition = index;
+                if(_selectedItemPosition == 0) {
+                  if(user_info.user == null) {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          //TOTO:BUG
+                          return _buildLogInAlertDialog(context);
+                        });
+                  }
+                }
               });
             },
           ),
@@ -301,6 +313,75 @@ class _HueTState extends State<HueT> {
             ),
           )
         ]),
+      ),
+    );
+  }
+
+  Widget _buildLogInAlertDialog(BuildContext context) {
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          FadeInUp(
+            duration: const Duration(milliseconds: 200),
+            child: AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
+              title: Text(
+                "You are not logged in",
+                style: GoogleFonts.readexPro(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 25),
+                textAlign: TextAlign.center,
+              ),
+              content: Text(
+                "You must be logged in to use this feature",
+                style: GoogleFonts.readexPro(
+                  color: Colors.grey,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              actionsAlignment: MainAxisAlignment.center,
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                    pageController.animateTo(1, duration: Duration(milliseconds: 300), curve: Curves.easeIn);
+                  },
+                  style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      padding: const EdgeInsets.only(
+                          left: 40, right: 40, top: 15, bottom: 15),
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20))),
+                  child: Text(
+                    "Cancel",
+                    style: GoogleFonts.readexPro(color: Colors.grey),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    pageController.animateTo(2, duration: Duration(milliseconds: 300), curve: Curves.easeIn);
+                    Navigator.of(context).push(SwipeablePageRoute(builder: (context) => SignInPage(),));
+                  },
+                  style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      padding: const EdgeInsets.only(
+                          left: 40, right: 40, top: 15, bottom: 15),
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20))),
+                  child: Text(
+                    "Log in",
+                    style: GoogleFonts.readexPro(color: Colors.grey),
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
       ),
     );
   }

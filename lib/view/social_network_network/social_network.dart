@@ -1,11 +1,12 @@
 import 'dart:convert';
 
+import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
-import 'package:hue_t/constants/user_info.dart';
+import 'package:hue_t/constants/user_info.dart' as user_info;
 import 'package:hue_t/model/attraction/tourist_attraction.dart';
 import 'package:hue_t/model/social_network/post_model.dart';
 import 'package:hue_t/view/social_network_network/post.dart';
@@ -16,19 +17,19 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:quickalert/models/quickalert_type.dart';
-import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:swipeable_page_route/swipeable_page_route.dart';
 import 'package:tiengviet/tiengviet.dart';
 import '../../constants/host_url.dart' as url;
 import '../../model/user/user.dart';
 import '../../providers/tourist_provider.dart';
+import '../sign_in_out/sign_in_page.dart';
 import 'constants.dart' as constants;
 import 'create_post.dart';
 import 'package:http/http.dart' as http;
 
 class SocialNetWorkPage extends StatefulWidget {
-  const SocialNetWorkPage({Key? key}) : super(key: key);
+  final PageController pageController;
+  const SocialNetWorkPage({Key? key, required this.pageController}) : super(key: key);
 
   @override
   State<SocialNetWorkPage> createState() => _SocialNetWorkPageState();
