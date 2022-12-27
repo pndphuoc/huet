@@ -65,7 +65,8 @@ class _FoodstoreState extends State<Foodstore> {
   //
   //   });
   // }
-  Future<void> distanceCalculation(Position value, List<Restaurant> list) async {
+  Future<void> distanceCalculation(
+      Position value, List<Restaurant> list) async {
     for (int i = 0; i < list.length; i++) {
       list[i].distance = GeolocatorPlatform.instance.distanceBetween(
             value.latitude,
@@ -90,8 +91,7 @@ class _FoodstoreState extends State<Foodstore> {
           final coordinates = Coordinates(value.latitude, value.longitude);
           var addresses =
               await Geocoder.local.findAddressesFromCoordinates(coordinates);
-          address = addresses.first.addressLine.toString();
-
+          restaurantProvider.addresss = addresses.first.addressLine.toString();
           await distanceCalculation(value, restaurantProvider.list);
         });
         setState(() {
@@ -99,6 +99,8 @@ class _FoodstoreState extends State<Foodstore> {
         });
       })();
     }
+    address = restaurantProvider.addresss;
+
     return Scaffold(
       body: restaurantProvider.isloading
           ? Center(
@@ -360,8 +362,8 @@ class _FoodstoreState extends State<Foodstore> {
                                       borderRadius: const BorderRadius.only(
                                           topLeft: Radius.circular(15),
                                           topRight: Radius.circular(15)),
-                                      child: CachedNetworkImage(imageUrl:
-                                        e.image.toString(),
+                                      child: CachedNetworkImage(
+                                        imageUrl: e.image.toString(),
                                         width: double.infinity,
                                         height: 140,
                                         fit: BoxFit.cover,
@@ -410,7 +412,11 @@ class _FoodstoreState extends State<Foodstore> {
                                                         size: 14,
                                                       ),
                                                       Text(
-                                                          "${e.distance!.toStringAsFixed(2)} km",
+                                                          e.distance?.toStringAsFixed(
+                                                                      2) !=
+                                                                  null
+                                                              ? "${e.distance!.toStringAsFixed(2)} km"
+                                                              : "km",
                                                           style: GoogleFonts
                                                               .readexPro(
                                                             fontSize: 13,
@@ -607,7 +613,8 @@ class _FoodstoreState extends State<Foodstore> {
                                     children: [
                                       ClipRRect(
                                         borderRadius: BorderRadius.circular(5),
-                                        child: CachedNetworkImage(imageUrl: e.image.toString(),
+                                        child: CachedNetworkImage(
+                                            imageUrl: e.image.toString(),
                                             height: double.infinity,
                                             width: 90,
                                             fit: BoxFit.cover),
@@ -677,7 +684,11 @@ class _FoodstoreState extends State<Foodstore> {
                                                       width: 3,
                                                     ),
                                                     Text(
-                                                        "${e.distance!.toStringAsFixed(2)} km",
+                                                        e.distance?.toStringAsFixed(
+                                                                    2) !=
+                                                                null
+                                                            ? "${e.distance!.toStringAsFixed(2)} km"
+                                                            : "km",
                                                         style: GoogleFonts
                                                             .readexPro(
                                                           fontSize: 13,
@@ -776,7 +787,8 @@ class _FoodstoreState extends State<Foodstore> {
                                     children: [
                                       ClipRRect(
                                         borderRadius: BorderRadius.circular(5),
-                                        child: CachedNetworkImage(imageUrl: e.image.toString(),
+                                        child: CachedNetworkImage(
+                                            imageUrl: e.image.toString(),
                                             height: double.infinity,
                                             width: 90,
                                             fit: BoxFit.cover),
@@ -844,7 +856,11 @@ class _FoodstoreState extends State<Foodstore> {
                                                       width: 3,
                                                     ),
                                                     Text(
-                                                        "${e.distance!.toStringAsFixed(2)} km",
+                                                        e.distance?.toStringAsFixed(
+                                                                    2) !=
+                                                                null
+                                                            ? "${e.distance!.toStringAsFixed(2)} km"
+                                                            : "km",
                                                         style: GoogleFonts
                                                             .readexPro(
                                                           fontSize: 13,

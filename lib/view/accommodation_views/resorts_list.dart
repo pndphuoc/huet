@@ -4,20 +4,23 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/animation/show_up.dart';
+import 'package:hue_t/providers/accommodation_provider.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:provider/provider.dart';
 import '../../animation/show_right.dart';
-import '../../colors.dart' as colors;
+import 'package:hue_t/colors.dart' as color;
+
 import 'hotel_detail.dart';
 import '../../fake_data.dart' as faker;
 import 'package:hue_t/permission/get_user_location.dart' as user_location;
 
 class ResortsPage extends StatefulWidget {
-  const ResortsPage({Key? key}) : super(key: key);
+  final String value;
+  const ResortsPage({Key? key, required this.value}) : super(key: key);
 
   @override
   State<ResortsPage> createState() => _ResortsPageState();
 }
-
-bool isRecommendationHotel = true;
 
 class _ResortsPageState extends State<ResortsPage> {
   Future<void> distanceCalculation(Position value) async {
@@ -33,209 +36,119 @@ class _ResortsPageState extends State<ResortsPage> {
     }
   }
 
-  bool isLoading = true;
+  bool isloading = true;
+  bool isloading2 = true;
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      user_location.getUserCurrentLocation().then((value) async {
-        await distanceCalculation(value);
+    var accommodationProvider = Provider.of<AccomodationProvider>(context);
+
+    if (isloading) {
+      (() async {
+        await accommodationProvider.searchItem(widget.value);
         setState(() {
-          isLoading = false;
+          isloading = false;
+          isloading2 = false;
         });
-      });
+      })();
     }
-    if (isRecommendationHotel) {
-      faker.listHotels.sort(
-        (b, a) {
-          return a.rating!.compareTo(b.rating!);
-        },
-      );
-    } else {
-      faker.listHotels.sort(
-        (a, b) {
-          return a.distance!.compareTo(b.distance!);
-        },
-      );
+    if (isloading2) {
+      (() async {
+        setState(() {
+          isloading2 = false;
+        });
+      })();
     }
+
     return Scaffold(
-      body: Stack(
-        children: [contentBlock(context), backButton(context)],
-      ),
-    );
-  }
-
-  contentBlock(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          banner(context),
-          const SizedBox(
-            height: 15,
-          ),
-          descriptionBlock(context),
-          const SizedBox(
-            height: 15,
-          ),
-          sortBlock(context),
-          const SizedBox(
-            height: 15,
-          ),
-          ...faker.listHotels
-              .map((e) => hotelItem(context, faker.listHotels.indexOf(e)))
-        ],
-      ),
-    );
-  }
-
-  backButton(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.3),
-          borderRadius: BorderRadius.circular(15)),
-      margin: const EdgeInsets.only(top: 40, left: 20),
-      child: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(
-            Icons.arrow_back_outlined,
-            color: Colors.white,
-          ),
-          style: ButtonStyle(
-              shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15))))),
-    );
-  }
-
-  sortBlock(BuildContext context) {
-    return ShowUp(
-      delay: 200,
-      child: Container(
-        height: 50,
-        width: MediaQuery.of(context).size.width,
-        margin: const EdgeInsets.only(
-          left: 20,
-          right: 20,
-        ),
-        decoration: BoxDecoration(
-            color: colors.accommodationItemColor,
-            borderRadius: BorderRadius.circular(25)),
-        child: Stack(children: [
-          /*AnimatedContainer(duration: Duration(milliseconds: 500),
-            margin: EdgeInsets.all(5),
-            decoration: BoxDecoration(
-                color: Colors.green,
-                borderRadius: BorderRadius.circular(25)
-            ),
-            width: double.infinity/2,
-            height: double.infinity,
-
-            child: Container(),
-          ),*/
-          LayoutBuilder(builder: (ctx, constraints) {
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              margin: EdgeInsets.only(
-                  left: isRecommendationHotel ? 5 : constraints.maxWidth * 0.5,
-                  top: 5,
-                  bottom: 5,
-                  right: 5),
-              height: constraints.maxHeight,
-              width: constraints.maxWidth * 0.5,
-              child: Container(
-                decoration: BoxDecoration(
-                    color: colors.filterItemColor,
-                    borderRadius: BorderRadius.circular(25)),
-              ),
-            );
-          }),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Expanded(
-                child: SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    child: TextButton(
-                        style: ButtonStyle(
-                            overlayColor: MaterialStateColor.resolveWith(
-                                (states) => Colors.transparent)),
-                        onPressed: () {
-                          setState(() {
-                            isRecommendationHotel = true;
-                          });
-                        },
-                        child: Text(
-                          "Recommendation",
-                          style: isRecommendationHotel == true
-                              ? GoogleFonts.montserrat(
-                                  color: colors.primaryColor,
-                                  fontWeight: FontWeight.w600)
-                              : GoogleFonts.montserrat(color: Colors.black),
-                        ))),
-              ),
-              Expanded(
-                  child: TextButton(
-                      style: ButtonStyle(
-                          overlayColor: MaterialStateColor.resolveWith(
-                              (states) => Colors.transparent)),
-                      onPressed: () {
-                        setState(() {
-                          isRecommendationHotel = false;
-                        });
-                      },
-                      child: Text(
-                        "Near to you",
-                        style: isRecommendationHotel == false
-                            ? GoogleFonts.montserrat(
-                                color: colors.primaryColor,
-                                fontWeight: FontWeight.w600)
-                            : GoogleFonts.montserrat(color: Colors.black),
-                      )))
-            ],
-          ),
-        ]),
-      ),
-    );
-  }
-
-  banner(BuildContext context) {
-    return ShowUp(
-      delay: 0,
-      child: Container(
-        height: MediaQuery.of(context).size.height / 4,
-        decoration: const BoxDecoration(
-            image: DecorationImage(
-                image: CachedNetworkImageProvider(
-                    "https://cdn4.tropicalsky.co.uk/images/1800x600/indochine-palace-main-image.jpg"),
-                fit: BoxFit.cover,
-                alignment: Alignment.topCenter)),
-      ),
-    );
-  }
-
-  descriptionBlock(BuildContext context) {
-    return ShowUp(
-      delay: 100,
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width,
-        child: Center(
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).requestFocus(FocusNode());
+        },
+        child: SingleChildScrollView(
           child: Column(
             children: [
-              Text(
-                "Resorts",
-                style: GoogleFonts.poppins(
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
-                textAlign: TextAlign.center,
+              Padding(
+                padding: const EdgeInsets.only(top: 40.0, left: 20, right: 20),
+                child: Column(
+                  children: [
+                    search(context),
+                  ],
+                ),
               ),
-              Text("Best-rated resort in the last month",
-                  style: GoogleFonts.poppins(
-                      fontSize: 15, fontWeight: FontWeight.w300),
-                  textAlign: TextAlign.center),
+              isloading2
+                  ? Center(
+                      child: LoadingAnimationWidget.staggeredDotsWave(
+                          color: color.primaryColor, size: 50),
+                    )
+                  : result(context),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  search(BuildContext context) {
+    return SizedBox(
+        width: MediaQuery.of(context).size.width,
+        height: 60,
+        child: Row(
+          children: [
+            GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 243, 241, 241),
+                    borderRadius: BorderRadius.circular(5)),
+                child: const Icon(Icons.arrow_back_ios_new_outlined),
+              ),
+            ),
+            Consumer<AccomodationProvider>(
+              builder: (context, value2, child) => Expanded(
+                child: TextField(
+                  onChanged: (value1) async {
+                    await value2.searchItem(value1);
+                  },
+                  decoration: InputDecoration(
+                      filled: true,
+                      fillColor: color.filterItemColor,
+                      hintText: "What are you cracing?",
+                      hintStyle: const TextStyle(
+                          color: Color.fromARGB(255, 206, 205, 205)),
+                      prefixIcon: const Icon(Icons.search),
+                      enabledBorder: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(15.0)),
+                        borderSide: BorderSide(
+                            width: 0.2,
+                            color: Color.fromARGB(255, 255, 255, 255)),
+                      ),
+                      focusedBorder: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(15.0)),
+                          borderSide: BorderSide(
+                              width: 0.2,
+                              color: Color.fromARGB(255, 255, 255, 255)))),
+                ),
+              ),
+            ),
+          ],
+        ));
+  }
+
+  result(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 60),
+      child: Consumer<AccomodationProvider>(
+        builder: (context, value, child) => Column(
+          children: [
+            const SizedBox(
+              height: 3,
+            ),
+            ...value.listSearch
+                .map((e) => hotelItem(context, value.listSearch.indexOf(e)))
+          ],
         ),
       ),
     );
@@ -244,130 +157,134 @@ class _ResortsPageState extends State<ResortsPage> {
   hotelItem(BuildContext context, int index) {
     return ShowRight(
       delay: 300 + index * 100,
-      child: Container(
-        margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) {
-              // do something
-              return HotelDetail(model: faker.listHotels[index]);
-            }));
-          },
-          style: ElevatedButton.styleFrom(
-              elevation: 0.0,
-              shadowColor: Colors.white,
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              )),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Container(
-                margin: const EdgeInsets.only(top: 15, bottom: 15),
-                decoration:
-                    BoxDecoration(borderRadius: BorderRadius.circular(10)),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: CachedNetworkImage(
-                    imageUrl: faker.listHotels[index].images.first,
-                    fit: BoxFit.cover,
-                    height: 100,
-                    width: 100,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.only(
-                      top: 20, right: 20, bottom: 20, left: 10),
-                  height: 130,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        faker.listHotels[index].name,
-                        style: GoogleFonts.notoSans(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black),
-                        maxLines: 1,
+      child: Consumer<AccomodationProvider>(
+        builder: (context, value, child) => Container(
+          margin: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+          child: ElevatedButton(
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                // do something
+                return HotelDetail(model: value.listSearch[index]);
+              }));
+            },
+            style: ElevatedButton.styleFrom(
+                elevation: 0.0,
+                shadowColor: Colors.white,
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                )),
+            child: SizedBox(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(top: 15, bottom: 15),
+                    decoration:
+                        BoxDecoration(borderRadius: BorderRadius.circular(10)),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.network(
+                        value.listSearch[index].image.toString(),
+                        fit: BoxFit.cover,
+                        height: 100,
+                        width: 100,
                       ),
-                      RichText(
-                          text: TextSpan(children: [
-                        WidgetSpan(
-                          child: RatingBar(
-                            ratingWidget: RatingWidget(
-                                full: const Icon(
-                                  Icons.star,
-                                  color: Colors.yellow,
-                                ),
-                                half: const Icon(
-                                  Icons.star_half,
-                                  color: Colors.yellow,
-                                ),
-                                empty: const Icon(
-                                  Icons.star_border,
-                                  color: Colors.yellow,
-                                )),
-                            onRatingUpdate: (rating) {},
-                            itemSize: 15,
-                            allowHalfRating: true,
-                            initialRating:
-                                faker.listHotels[index].rating != null
-                                    ? faker.listHotels[index].rating!
-                                    : 0,
-                          ),
-                        ),
-                        const TextSpan(text: " "),
-                        TextSpan(
-                            text: faker.listHotels[index].rating != null
-                                ? faker.listHotels[index].rating!.toString()
-                                : "No review",
-                            style: GoogleFonts.montserrat(
-                                color: Colors.black, fontSize: 11))
-                      ])),
-                      RichText(
-                          text: TextSpan(children: [
-                        const WidgetSpan(
-                            child: Icon(
-                          Icons.map_outlined,
-                          size: 16,
-                          color: Colors.grey,
-                        )),
-                        TextSpan(
-                            text: faker.listHotels[index].distance != null
-                                ? " ${faker.listHotels[index].distance!.toStringAsFixed(2)} km"
-                                : " km",
-                            style: const TextStyle(
-                                fontSize: 12, color: Colors.black))
-                      ])),
-                      RichText(
-                          text: TextSpan(children: [
-                        const WidgetSpan(
-                            child: Icon(
-                          Icons.attach_money,
-                          size: 20,
-                          color: Colors.black,
-                        )),
-                        TextSpan(
-                            text: faker.listHotels[index].price.toString(),
-                            style: GoogleFonts.montserrat(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                            )),
-                        TextSpan(
-                            text: "/night",
-                            style: GoogleFonts.montserrat(
-                                fontSize: 12, color: Colors.grey))
-                      ]))
-                    ],
+                    ),
                   ),
-                ),
-              )
-            ],
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.only(
+                          top: 20, right: 20, bottom: 20, left: 10),
+                      height: 130,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            value.listSearch[index].name,
+                            style: GoogleFonts.readexPro(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black),
+                            maxLines: 1,
+                          ),
+                          RichText(
+                              text: TextSpan(children: [
+                            WidgetSpan(
+                              child: RatingBar(
+                                ratingWidget: RatingWidget(
+                                    full: const Icon(
+                                      Icons.star,
+                                      color: Colors.yellow,
+                                    ),
+                                    half: const Icon(
+                                      Icons.star_half,
+                                      color: Colors.yellow,
+                                    ),
+                                    empty: const Icon(
+                                      Icons.star_border,
+                                      color: Colors.yellow,
+                                    )),
+                                onRatingUpdate: (rating) {},
+                                itemSize: 15,
+                                allowHalfRating: true,
+                                initialRating:
+                                    value.listSearch[index].rating != null
+                                        ? value.listSearch[index].rating!
+                                        : 0,
+                              ),
+                            ),
+                            const TextSpan(text: " "),
+                            TextSpan(
+                                text: value.listSearch[index].rating != null
+                                    ? value.listSearch[index].rating!.toString()
+                                    : "No review",
+                                style: GoogleFonts.readexPro(
+                                    color: Colors.black, fontSize: 11))
+                          ])),
+                          RichText(
+                              text: TextSpan(children: [
+                            const WidgetSpan(
+                                child: Icon(
+                              Icons.map_outlined,
+                              size: 16,
+                              color: Colors.grey,
+                            )),
+                            TextSpan(
+                                text: value.listSearch[index].distance != null
+                                    ? " ${value.listSearch[index].distance!.toStringAsFixed(2)} km"
+                                    : " km",
+                                style: const TextStyle(
+                                    fontSize: 12, color: Colors.black))
+                          ])),
+                          RichText(
+                              text: TextSpan(children: [
+                            const WidgetSpan(
+                                child: Icon(
+                              Icons.attach_money,
+                              size: 20,
+                              color: Colors.black,
+                            )),
+                            TextSpan(
+                                text: "${value.listSearch[index].price} VND",
+                                style: GoogleFonts.readexPro(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 17,
+                                )),
+                            TextSpan(
+                                text: "/night",
+                                style: GoogleFonts.readexPro(
+                                    fontSize: 12, color: Colors.grey))
+                          ]))
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
           ),
         ),
       ),

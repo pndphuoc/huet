@@ -7,11 +7,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as color;
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:hue_t/main.dart';
+import 'package:hue_t/providers/favorite_provider.dart';
 import 'package:hue_t/view/profileuser/edit_profile.dart';
+import 'package:hue_t/view/profileuser/favorite_page.dart';
 import 'package:hue_t/view/profileuser/loginin_page.dart';
 import 'package:hue_t/view/sign_in_out/register_user.dart';
 import 'package:hue_t/view/sign_in_out/sign_in_page.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:provider/provider.dart';
 import '../../colors.dart';
 import '../../constants/user_info.dart' as user_constants;
 import 'auth_service.dart';
@@ -288,34 +291,40 @@ class _ProfileUserState extends State<ProfileUser> {
             children: [
               GestureDetector(
                 onTap: () {
-                  /*user_constants.user == null
-                      ? accountNavigator(context,  AuthService().handleAuthState(FavoritePage()))
-                      : Container();*/
+                  user_constants.user == null
+                      ? accountNavigator(
+                          context,
+                          AuthService().handleAuthState(
+                              const FavoritePage(), const SignInPage()))
+                      : accountNavigator(context, const FavoritePage());
                 },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.favorite_border_outlined,
-                            color: Colors.black54),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        Text(
-                          'Favorites',
-                          style: GoogleFonts.readexPro(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w400,
+                child: Container(
+                  decoration: const BoxDecoration(),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.favorite_border_outlined,
                               color: Colors.black54),
-                        ),
-                      ],
-                    ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            'Favorites',
+                            style: GoogleFonts.readexPro(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.black54),
+                          ),
+                        ],
+                      ),
 
-                    const Icon(Icons.arrow_forward_ios_outlined,
-                        size: 17, color: Colors.black54),
-                    //Download
-                  ],
+                      const Icon(Icons.arrow_forward_ios_outlined,
+                          size: 17, color: Colors.black54),
+                      //Download
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(
@@ -556,34 +565,38 @@ class _ProfileUserState extends State<ProfileUser> {
                     style: GoogleFonts.readexPro(color: Colors.grey),
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: () async {
-                    setState(() {
-                      isLoading = true;
-                    });
-                    if (FirebaseAuth.instance.currentUser != null) {
-                      await AuthService().signOut(context);
-                    } else {
-                      user_constants.user = null;
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (BuildContext context) => const HueT(),
-                        ),
-                        (Route<dynamic> route) => false,
-                      );
-                    }
-                    setState(() {
-                      isLoading = false;
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.only(
-                          left: 40, right: 40, top: 15, bottom: 15),
-                      backgroundColor: primaryColor,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20))),
-                  child: const Text("Yes"),
+                Consumer<FavoriteProvider>(
+                  builder: (context, value, child) => ElevatedButton(
+                    onPressed: () async {
+                      value.listFavorite = [];
+
+                      setState(() {
+                        isLoading = true;
+                      });
+                      if (FirebaseAuth.instance.currentUser != null) {
+                        await AuthService().signOut(context);
+                      } else {
+                        user_constants.user = null;
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (BuildContext context) => const HueT(),
+                          ),
+                          (Route<dynamic> route) => false,
+                        );
+                      }
+                      setState(() {
+                        isLoading = false;
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.only(
+                            left: 40, right: 40, top: 15, bottom: 15),
+                        backgroundColor: primaryColor,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20))),
+                    child: const Text("Yes"),
+                  ),
                 ),
               ],
             ),

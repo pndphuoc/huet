@@ -5,11 +5,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:hue_t/model/event/event.dart';
 import 'package:hue_t/constants/host_url.dart' as url;
+import 'package:tiengviet/tiengviet.dart';
 
 class EventProvider extends ChangeNotifier {
   List<Event> list = [];
   List<Event> listThisMonth = [];
   List<Event> listNextMonth = [];
+  List<Event> listSearch = [];
+  bool isloading = true;
 
   Future<void> getAll() async {
     String apiURL = "${url.url}/api/event";
@@ -45,5 +48,18 @@ class EventProvider extends ChangeNotifier {
       return Event.fromJson(e);
     }).toList();
     notifyListeners();
+  }
+
+  Future<void> searchItem(String value) async {
+    listSearch = [];
+    notifyListeners();
+
+    for (int i = 0; i < list.length; i++) {
+      if (TiengViet.parse(list[i].name.toString().toLowerCase())
+          .contains(TiengViet.parse(value.toLowerCase()))) {
+        listSearch.add(list[i]);
+        notifyListeners();
+      }
+    }
   }
 }

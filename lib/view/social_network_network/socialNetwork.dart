@@ -59,6 +59,7 @@ class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
   static const int postsLimit = 5;
 
   void _onRefresh() async {
+    userList.clear();
     postList.clear();
     userList.clear();
     _posts.clear();

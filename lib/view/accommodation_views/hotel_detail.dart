@@ -7,14 +7,19 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_geocoder/geocoder.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:hue_t/providers/favorite_provider.dart';
 import 'package:hue_t/view/accommodation_views/all_reviews.dart';
 import 'package:hue_t/model/accommodation/accommodationModel.dart';
 import 'package:hue_t/animation/show_up.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:hue_t/view/profileuser/favorite_page.dart';
+import 'package:provider/provider.dart';
 import '../../animation/show_right.dart';
 import '../../colors.dart' as colors;
 import '../../model/accommodation/reviewModel.dart';
 import 'package:map_launcher/map_launcher.dart' as map;
 import '../../permission/get_user_location.dart' as user_location;
+import '../../constants/user_info.dart' as user_constants;
 
 class HotelDetail extends StatefulWidget {
   const HotelDetail({Key? key, required this.model}) : super(key: key);
@@ -28,6 +33,7 @@ class _HotelDetailState extends State<HotelDetail> {
   bool isloading = true;
   String address = "";
   int currentPos = 0;
+  bool isFavorite = false;
   late GoogleMapController mapController;
 
   final LatLng _center = const LatLng(45.521563, -122.677433);
@@ -75,7 +81,12 @@ class _HotelDetailState extends State<HotelDetail> {
   @override
   void initState() {
     super.initState();
+    var favoriteProvider =
+        Provider.of<FavoriteProvider>(context, listen: false);
 
+    user_constants.user == null
+        ? isFavorite = false
+        : isFavorite = favoriteProvider.checkFavorite(widget.model.id);
     user_location.getUserCurrentLocation().then((value) async {
       // marker added for hotels location
       final coordinates = Coordinates(
@@ -487,22 +498,72 @@ class _HotelDetailState extends State<HotelDetail> {
             ],
           ),
         ),
-        Container(
-          decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(15)),
-          margin: const EdgeInsets.only(top: 40, left: 20),
-          child: IconButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              icon: const Icon(
-                Icons.arrow_back_outlined,
-                color: Colors.white,
-              ),
-              style: ButtonStyle(
-                  shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15))))),
+        Positioned(
+          top: 40,
+          left: 20,
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width - 40,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(15)),
+                    child: const Center(
+                      child: Icon(
+                        Icons.arrow_back_outlined,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                Consumer<FavoriteProvider>(
+                  builder: (context, value, child) => Container(
+                    decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(15)),
+                    child: IconButton(
+                        onPressed: () {
+                          if (!isFavorite) {
+                            setState(() {
+                              isFavorite = !isFavorite;
+                            });
+                            value.addFavorite(
+                                widget.model.id,
+                                widget.model.name,
+                                widget.model.address,
+                                widget.model.image.toString(),
+                                1,
+                                user_constants.user!.uid);
+                          } else {
+                            setState(() {
+                              isFavorite = !isFavorite;
+                              value.deleteFavorite(
+                                  widget.model.id, 1, user_constants.user!.uid);
+                            });
+                          }
+                        },
+                        icon: Icon(
+                          isFavorite
+                              ? Icons.favorite_sharp
+                              : Icons.favorite_border_outlined,
+                          color: Colors.white,
+                          size: 27,
+                        ),
+                        style: ButtonStyle(
+                            shape: MaterialStateProperty.all(
+                                RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15))))),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ]),
       bottomNavigationBar: Container(

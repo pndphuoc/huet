@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as color;
 import 'package:hue_t/providers/event_provider.dart';
 import 'package:hue_t/view/events/evant_detail.dart';
+import 'package:hue_t/view/events/search_events.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -19,25 +21,23 @@ class Events extends StatefulWidget {
 
 class _EventsState extends State<Events> {
   bool popular1 = true;
-  bool isloading = true;
-
   @override
   Widget build(BuildContext context) {
     var productProvider = Provider.of<EventProvider>(context);
-    if (isloading) {
+    if (productProvider.isloading) {
       (() async {
         await productProvider.getAll();
         await productProvider.getThisMonth();
         await productProvider.getNextMonth();
 
         setState(() {
-          isloading = false;
+          productProvider.isloading = false;
         });
       })();
     }
     return Scaffold(
       backgroundColor: color.backgroundColor,
-      body: isloading
+      body: productProvider.isloading
           ? Center(
               child: LoadingAnimationWidget.staggeredDotsWave(
                   color: color.primaryColor, size: 50),
@@ -96,8 +96,13 @@ class _EventsState extends State<Events> {
             ),
           ),
           TextField(
-            onChanged: (value) {
-              setState(() {});
+            onSubmitted: (value) {
+              if (value != "") {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SearchEventPage(value: value)));
+              }
             },
             decoration: const InputDecoration(
                 filled: true,
@@ -177,10 +182,16 @@ class _EventsState extends State<Events> {
                           ),
                         ),
                         GestureDetector(
-                          onTap: () {
+                          onTap: () async {
                             setState(() {
                               popular1 = false;
                             });
+                            await showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  //TOTO:BUG
+                                  return alertDialog(context);
+                                });
                           },
                           child: Container(
                             alignment: Alignment.center,
@@ -232,113 +243,125 @@ class _EventsState extends State<Events> {
                         MaterialPageRoute(
                             builder: ((context) => EventDetail(
                                 item: value.listNextMonth[index])))),
-                    child: Container(
-                      margin:
-                          const EdgeInsets.only(left: 5, right: 5, bottom: 20),
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.grey.withOpacity(0.6),
-                                blurRadius: 20,
-                                spreadRadius: 0,
-                                blurStyle: BlurStyle.normal,
-                                offset: const Offset(3, 3))
-                          ]),
-                      child: Column(
-                        children: [
-                          Stack(children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: CachedNetworkImage(imageUrl:
-                                value.listNextMonth[index].image.toString(),
-                                height: 170,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
+                    child: FadeIn(
+                      delay: const Duration(milliseconds: 300),
+                      child: Container(
+                        margin: const EdgeInsets.only(
+                            left: 5, right: 5, bottom: 20),
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Colors.grey.withOpacity(0.6),
+                                  blurRadius: 20,
+                                  spreadRadius: 0,
+                                  blurStyle: BlurStyle.normal,
+                                  offset: const Offset(3, 3))
+                            ]),
+                        child: Column(
+                          children: [
+                            Stack(children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: CachedNetworkImage(
+                                  imageUrl: value.listNextMonth[index].image
+                                      .toString(),
+                                  height: 170,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
-                            ),
-                            Positioned(
-                                bottom: -1,
-                                child: SizedBox(
-                                  height: 60,
-                                  width: MediaQuery.of(context).size.width - 85,
-                                  child: ClipRRect(
-                                    borderRadius: const BorderRadius.only(
-                                        bottomLeft: Radius.circular(20),
-                                        bottomRight: Radius.circular(20)),
-                                    child: BackdropFilter(
-                                      filter: ImageFilter.blur(
-                                          sigmaX: 5.0, sigmaY: 5.0),
-                                      child: Container(
-                                        color: Colors.white.withOpacity(0.3),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(10.0),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                value.listNextMonth[index].name
-                                                    .toString(),
-                                                overflow: TextOverflow.ellipsis,
-                                                maxLines: 1,
-                                                style: GoogleFonts.readexPro(
-                                                    fontSize: 15,
-                                                    fontWeight: FontWeight.w500,
-                                                    color: Colors.white),
-                                              ),
-                                              Text(
-                                                value.listNextMonth[index].begin
-                                                    .toString()
-                                                    .split("T")[0],
-                                                style: GoogleFonts.readexPro(
-                                                    fontSize: 13,
-                                                    fontWeight: FontWeight.w300,
-                                                    color: Colors.white
-                                                        .withOpacity(0.6)),
-                                              ),
-                                            ],
+                              Positioned(
+                                  bottom: -1,
+                                  child: SizedBox(
+                                    height: 60,
+                                    width:
+                                        MediaQuery.of(context).size.width - 85,
+                                    child: ClipRRect(
+                                      borderRadius: const BorderRadius.only(
+                                          bottomLeft: Radius.circular(20),
+                                          bottomRight: Radius.circular(20)),
+                                      child: BackdropFilter(
+                                        filter: ImageFilter.blur(
+                                            sigmaX: 5.0, sigmaY: 5.0),
+                                        child: Container(
+                                          color: Colors.white.withOpacity(0.3),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(10.0),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  value
+                                                      .listNextMonth[index].name
+                                                      .toString(),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  maxLines: 1,
+                                                  style: GoogleFonts.readexPro(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color: Colors.white),
+                                                ),
+                                                Text(
+                                                  value.listNextMonth[index]
+                                                      .begin
+                                                      .toString()
+                                                      .split("T")[0],
+                                                  style: GoogleFonts.readexPro(
+                                                      fontSize: 13,
+                                                      fontWeight:
+                                                          FontWeight.w300,
+                                                      color: Colors.white
+                                                          .withOpacity(0.6)),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ))
-                          ]),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 5, right: 10),
-                            child: Row(
-                              children: [
-                                Container(
-                                  alignment: Alignment.centerLeft,
-                                  width:
-                                      MediaQuery.of(context).size.width - 120,
-                                  height: 50,
-                                  child: Row(
-                                    children: [
-                                      const Icon(Icons.location_on_outlined),
-                                      const SizedBox(
-                                        width: 3,
-                                      ),
-                                      Expanded(
-                                        child: Text(
-                                          value.list[index].address.toString(),
-                                          overflow: TextOverflow.ellipsis,
-                                          maxLines: 2,
-                                          style: GoogleFonts.readexPro(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w500,
+                                  ))
+                            ]),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 5, right: 10),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    alignment: Alignment.centerLeft,
+                                    width:
+                                        MediaQuery.of(context).size.width - 120,
+                                    height: 50,
+                                    child: Row(
+                                      children: [
+                                        const Icon(Icons.location_on_outlined),
+                                        const SizedBox(
+                                          width: 3,
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            value.list[index].address
+                                                .toString(),
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 2,
+                                            style: GoogleFonts.readexPro(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   );
@@ -385,13 +408,17 @@ class _EventsState extends State<Events> {
                 const SizedBox(
                   height: 15,
                 ),
-                ...value.listThisMonth.map((e) => GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => EventDetail(item: e)));
-                      },
+                ...value.listThisMonth.map((e) {
+                  var index = value.list.indexOf(e);
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => EventDetail(item: e)));
+                    },
+                    child: BounceInLeft(
+                      duration: Duration(milliseconds: 1500 + 300 * index),
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 10),
                         width: MediaQuery.of(context).size.width,
@@ -412,8 +439,11 @@ class _EventsState extends State<Events> {
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(15),
-                                child: CachedNetworkImage(imageUrl: e.image.toString(),
-                                    width: 70, height: 70, fit: BoxFit.cover),
+                                child: CachedNetworkImage(
+                                    imageUrl: e.image.toString(),
+                                    width: 70,
+                                    height: 70,
+                                    fit: BoxFit.cover),
                               ),
                               Padding(
                                 padding:
@@ -456,12 +486,61 @@ class _EventsState extends State<Events> {
                           ),
                         ),
                       ),
-                    ))
+                    ),
+                  );
+                })
               ],
             ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget alertDialog(BuildContext context) {
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          FadeInUp(
+            duration: const Duration(milliseconds: 200),
+            child: AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
+              title: Text(
+                "Haven't Events Expired",
+                style: GoogleFonts.readexPro(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w300,
+                    fontSize: 20),
+                textAlign: TextAlign.center,
+              ),
+              actionsAlignment: MainAxisAlignment.center,
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      popular1 = true;
+                      Navigator.of(context).pop(false);
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      padding: const EdgeInsets.only(
+                          left: 40, right: 40, top: 15, bottom: 15),
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20))),
+                  child: Text(
+                    "Ok",
+                    style: GoogleFonts.readexPro(color: Colors.grey),
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 }

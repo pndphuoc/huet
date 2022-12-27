@@ -7,6 +7,7 @@ import 'package:hue_t/animation/show_right.dart';
 import 'package:hue_t/providers/accommodation_provider.dart';
 import 'package:hue_t/view/accommodation_views/hotels_list.dart';
 import 'package:hue_t/view/accommodation_views/hotel_detail.dart';
+import 'package:hue_t/view/accommodation_views/resorts_list.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import '../../colors.dart' as colors;
@@ -337,8 +338,17 @@ class _HotelPageState extends State<HotelPage> with TickerProviderStateMixin {
             ),
           ),
           TextField(
-            onChanged: (value) {
-              setState(() {});
+            onSubmitted: (values) {
+              if (values != "") {
+                setState(() {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ResortsPage(
+                                value: values,
+                              )));
+                });
+              }
             },
             decoration: const InputDecoration(
                 filled: true,

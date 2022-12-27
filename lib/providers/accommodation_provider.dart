@@ -13,6 +13,7 @@ class AccomodationProvider extends ChangeNotifier {
   List<hotelModel> listHotel = [];
   List<hotelModel> listResort = [];
   List<hotelModel> listHomestays = [];
+  List<hotelModel> listSearch = [];
 
   Future<void> getAll() async {
     String apiURL = "${url.url}/api/hotel";
@@ -37,5 +38,17 @@ class AccomodationProvider extends ChangeNotifier {
     }).toList();
     notifyListeners();
     return listFilter;
+  }
+
+  Future<void> searchItem(String value) async {
+    listSearch = [];
+    notifyListeners();
+
+    for (int i = 0; i < list.length; i++) {
+      if (list[i].name.toString().toLowerCase().contains(value.toLowerCase())) {
+        listSearch.add(list[i]);
+        notifyListeners();
+      }
+    }
   }
 }
