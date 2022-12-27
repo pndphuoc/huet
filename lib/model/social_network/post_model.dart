@@ -1,18 +1,21 @@
 import 'package:hue_t/model/social_network/comment_model.dart';
 import 'media_model.dart';
 import '../../firebase_function/comment_function.dart';
+import 'package:hue_t/constants/user_info.dart';
 
 class PostModel {
   String postID;
   String? caption;
-  int userID;
-  String attractionID;
+  String userID;
+  int attractionID;
   List<Media> medias;
   List<String> likedUsers;
   List<Comment>? comments;
-  int? commentsCount;
+  int commentsCount;
   DateTime createDate;
   bool isDeleted;
+  int likesCount;
+  bool? isLiked;
 
   PostModel(
       {required this.postID,
@@ -24,7 +27,10 @@ class PostModel {
        this.comments,
       required this.createDate,
       required this.isDeleted,
-      this.commentsCount});
+      required this.commentsCount,
+      required this.likesCount,
+        this.isLiked
+      });
 
   Map<String, dynamic> toJson() {
     var mediaJson = [];
@@ -39,7 +45,9 @@ class PostModel {
       'medias': mediaJson,
       'likedUsers': likedUsers,
       'createDate': createDate,
-      'isDeleted': false
+      'isDeleted': false,
+      'likesCount': 0,
+      'commentsCount': 0
     };
   }
 
@@ -48,22 +56,20 @@ class PostModel {
     for (var e in List.from(json['medias'])) {
       medias.add(Media.fromJson(e));
     }
-    /*List<Comment> comments = [];
-    comments = await getAllComment(json['postID']);*/
-/*    for(var e in json['comments']){
-      comments.add(Comment.fromJson(e));
-    }*/
     return PostModel(
-        commentsCount: await getCommentsCount(json['postID']),
+        commentsCount: json['commentsCount'],
         postID: json['postID'],
         userID: json['userID'],
         caption: json['caption'],
-        attractionID: json['attractionID'],
+        attractionID: json["attractionID"],
         medias: medias,
         likedUsers: List<String>.from(json['likedUsers']),
         //comments: comments,
         createDate: json['createDate'].toDate(),
-        isDeleted: json['isDeleted']);
+        isDeleted: json['isDeleted'],
+        likesCount: json['likesCount'],
+        isLiked: user == null ? false : likeStatus(List<String>.from(json['likedUsers']), user!.uid)
+    );
   }
 
 /*  static PostModel fromJson(Map<String, dynamic> json) {

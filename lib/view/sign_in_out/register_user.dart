@@ -33,16 +33,7 @@ class _RegisterUserState extends State<RegisterUser> {
 
   @override
   Widget build(BuildContext context) {
-    return isLoading
-        ? Scaffold(
-            backgroundColor: Colors.white,
-            body: Center(
-                child: LoadingAnimationWidget.discreteCircle(
-              size: 50,
-              color: primaryColor,
-            )),
-          )
-        : Scaffold(
+    return Scaffold(
             resizeToAvoidBottomInset: true,
             body: Form(
               key: _formkey,
@@ -240,9 +231,6 @@ class _RegisterUserState extends State<RegisterUser> {
             height: 60,
             child: ElevatedButton(
               onPressed: () async {
-                setState(() {
-                  isLoading = true;
-                });
                 await AuthService().signInWithGoogle();
                 setState(() {
                   isLoading = false;
@@ -255,9 +243,6 @@ class _RegisterUserState extends State<RegisterUser> {
                     (route) => false);
                 await value
                     .checkEmail(FirebaseAuth.instance.currentUser!.email!);
-                setState(() {
-                  isLoading = false;
-                });
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,

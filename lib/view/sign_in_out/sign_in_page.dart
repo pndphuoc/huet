@@ -81,16 +81,7 @@ class _SignInPageState extends State<SignInPage>
 
   @override
   Widget build(BuildContext context) {
-    return isLoading
-        ? Scaffold(
-            backgroundColor: Colors.white,
-            body: Center(
-                child: LoadingAnimationWidget.discreteCircle(
-              size: 50,
-              color: primaryColor,
-            )),
-          )
-        : Scaffold(
+    return Scaffold(
             backgroundColor: primaryColor,
             resizeToAvoidBottomInset: true,
             body: Form(
@@ -112,12 +103,12 @@ class _SignInPageState extends State<SignInPage>
                       child: const SizedBox(),
                     ),
                   ),
-                   SizedBox(
-                     width: MediaQuery.of(context).size.width,
-                     child: const RiveAnimation.asset(
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    child: const RiveAnimation.asset(
                       "assets/RiveAssets/shapes.riv",
                     ),
-                   ),
+                  ),
                   Positioned.fill(
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
@@ -354,22 +345,8 @@ class _SignInPageState extends State<SignInPage>
           child: Consumer<UserProvider>(
             builder: (context, value, child) => ElevatedButton(
               onPressed: () async {
-                setState(() {
-                  isLoading = true;
-                });
                 await AuthService().signInWithGoogle();
-                await value
-                    .checkEmail(FirebaseAuth.instance.currentUser!.email!);
-                setState(() {
-                  isLoading = false;
-                });
-
-                // Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //         builder: (context) => const HueT(
-                //               index: 1,
-                //             )));
+                await value.checkEmail(FirebaseAuth.instance.currentUser!.email!);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,

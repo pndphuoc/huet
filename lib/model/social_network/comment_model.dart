@@ -1,24 +1,42 @@
 import 'package:hue_t/firebase_function/comment_function.dart';
 import '../../constants/user_info.dart' as user_info;
+import '../user/user.dart';
+
 class Comment {
   String id;
   String userID;
+  User? user;
   String content;
   List<String> likedUsers;
   DateTime createDate;
   List<Comment>? replyComments;
-  int? replyCount = 0;
+  int? replyCount;
   int? likeCount;
   bool? isLiked;
-  Comment({required this.id, required this.userID, required this.content, required this.likedUsers, required this.createDate, this.replyCount, this.isLiked, this.likeCount, this.replyComments});
+
+  Comment(
+      {required this.id,
+      required this.userID,
+      required this.content,
+      required this.likedUsers,
+      required this.createDate,
+      this.replyCount,
+      this.isLiked,
+      this.likeCount,
+      this.replyComments,
+      this.user
+      });
+
   static Comment fromJson(Map<String, dynamic> json) {
-    return Comment(id: json['id'],
-        userID: json['userID'],
-        content: json['content'],
-        likedUsers: json['likedUsers'].cast<String>(),
-        createDate: json['createDate'].toDate(),
-        isLiked: likeStatus(json['likedUsers'], user_info.user!.uid),
-        likeCount: json['likedUsers'].cast<String>().length,
+    return Comment(
+      id: json['id'],
+      userID: json['userID'],
+      content: json['content'],
+      likedUsers: json['likedUsers'].cast<String>(),
+      createDate: json['createDate'].toDate(),
+      isLiked: likeStatus(json['likedUsers'], user_info.user!.uid),
+      likeCount: json['likedUsers'].cast<String>().length,
+      replyCount: json['replyCount'] == null ? 0 : json['replyCount'] as int
     );
   }
 
@@ -29,7 +47,7 @@ class Comment {
       'content': content,
       'likedUsers': likedUsers,
       'createDate': createDate,
+      'replyCount': replyCount
     };
   }
 }
-

@@ -12,8 +12,9 @@ import 'package:video_compress/video_compress.dart';
 import '../../model/social_network/media_model.dart';
 import 'constants.dart' as constants;
 import 'image_item_widget.dart';
+import 'package:hue_t/constants/user_info.dart';
 
-typedef void ResultCallback(bool val);
+typedef void ResultCallback(String val);
 
 class UploadingWidget extends StatefulWidget {
   const UploadingWidget({Key? key, required this.list, this.caption, required this.attractionId, required this.callback}) : super(key: key);
@@ -90,33 +91,32 @@ class _UploadingWidgetState extends State<UploadingWidget> {
     return mediaList;
   }
 
-  Future<void> uploadPostContent(List<Media> mediaList) async {
-/*    List<Object> mediaJson = [];
-    for (int i=0 ; i<mediaList.length; i++) {
-      mediaJson.add(mediaList[i].toJson());
-    }*/
-
+  Future<String> uploadPostContent(List<Media> mediaList) async {
+    print("tai man hinh upload: ${user!.uid}");
     final docPost = FirebaseFirestore.instance.collection('post').doc();
     final post = PostModel(
-      attractionID: widget.attractionId,
-      userID: 1,
+      attractionID: int.parse(widget.attractionId),
+      userID: user!.uid,
       caption: widget.caption!,
       isDeleted: false,
       likedUsers: [],
       comments: [],
       medias: mediaList,
       postID: docPost.id,
-      createDate: DateTime.now()
+      createDate: DateTime.now(),
+      likesCount: 0,
+      commentsCount: 0
     );
 
     final json = post.toJson();
     docPost.set(json);
-
+    return post.postID;
   }
 
   Future<void> createPost() async {
-    await uploadPostContent(await uploadMedia());
+    String postId= await uploadPostContent(await uploadMedia());
     constants.isUploading = false;
+    widget.callback(postId);
     constants.postInfomation = null;
   }
 
@@ -132,9 +132,6 @@ class _UploadingWidgetState extends State<UploadingWidget> {
       file.absolute.path, outPath,
       quality: 75
     );
-
-    print(file.lengthSync());
-    print(result?.lengthSync());
     return result;
   }
 
@@ -143,7 +140,7 @@ class _UploadingWidgetState extends State<UploadingWidget> {
     super.initState();
     createPost();
 
-    widget.callback(true);
+
   }
 
   Widget buildUploadingProgress(BuildContext context, double progress) {

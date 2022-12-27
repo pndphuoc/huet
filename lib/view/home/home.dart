@@ -51,8 +51,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    if(user_constants.user != null) {
+      print("TAI HOME: ${user_constants.user!.uid}");
+    }
     var weatherProvider = Provider.of<WeatherProvider>(context);
-
     if (weatherProvider.isloading) {
       (() async {
         await weatherProvider.getWeather();
@@ -64,13 +66,15 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       backgroundColor: color.backgroundColor,
-      body: Column(
-        children: [
-          header(context),
-          body(context),
-          utilities(context),
-          slider(context)
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            header(context),
+            body(context),
+            utilities(context),
+            slider(context)
+          ],
+        ),
       ),
     );
   }

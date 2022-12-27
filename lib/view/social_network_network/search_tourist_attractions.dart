@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
 import 'package:hue_t/model/attraction/tourist_attraction.dart';
+import 'package:hue_t/providers/tourist_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:tiengviet/tiengviet.dart';
 import '../../fake_data.dart' as faker;
 
 import 'complete_upload.dart';
@@ -22,6 +25,21 @@ class SearchTouristAttractionPage extends StatefulWidget {
 
 class _SearchTouristAttractionPageState
     extends State<SearchTouristAttractionPage> {
+  late List<TouristAttraction> _searchResult = [];
+  final _searchTextController = TextEditingController();
+
+  _searchAttraction(String value) {
+    final _attractionList = Provider.of<TouristAttractionProvider>(context, listen: false).list;
+    _searchResult = _attractionList.where((element) => TiengViet.parse(element.title.toLowerCase()).contains(TiengViet.parse(value.trim().toLowerCase()))).toList();
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _searchResult = Provider.of<TouristAttractionProvider>(context, listen: false).list;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,15 +65,17 @@ class _SearchTouristAttractionPageState
         ),
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            searchInputBlock(context),
-            const SizedBox(
-              height: 20,
-            ),
-            for (int i = 0; i < 10 && i < faker.listAttraction.length; i++)
-              touristAttractionBlock(context, faker.listAttraction[i]),
-          ],
+        child: Consumer<TouristAttractionProvider>(
+          builder: (context, value, child) => Column(
+            children: [
+              searchInputBlock(context),
+              const SizedBox(
+                height: 20,
+              ),
+             for(var e in _searchResult)
+               touristAttractionBlock(context, e),
+            ],
+          ),
         ),
       ),
     );
@@ -98,6 +118,7 @@ class _SearchTouristAttractionPageState
           color: colors.SN_panelBackgroundColor,
           borderRadius: BorderRadius.circular(10)),
       child: TextField(
+        controller: _searchTextController,
         textInputAction: TextInputAction.newline,
         keyboardType: TextInputType.multiline,
         maxLines: 1,
@@ -110,7 +131,9 @@ class _SearchTouristAttractionPageState
             contentPadding: EdgeInsets.fromLTRB(10, 15, 10, 10),
             border: InputBorder.none,
             hintText: "Search for tourist attractions"),
-        onChanged: (value) {},
+        onChanged: (value) {
+          _searchAttraction(value);
+        },
       ),
     );
   }
