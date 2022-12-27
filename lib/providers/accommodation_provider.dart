@@ -42,6 +42,8 @@ class AccomodationProvider extends ChangeNotifier {
 
   Future<void> searchItem(String value) async {
     listSearch = [];
+    notifyListeners();
+
     for (int i = 0; i < list.length; i++) {
       if (list[i].name.toString().toLowerCase().contains(value.toLowerCase())) {
         listSearch.add(list[i]);

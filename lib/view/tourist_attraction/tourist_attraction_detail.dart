@@ -434,7 +434,7 @@ class _TouristAttractionDetailState extends State<TouristAttractionDetail> {
                       visible = !visible;
                     });
                   },
-                  child: Text(visible ? 'Thu nhỏ' : 'Xem thêm',
+                  child: Text(visible ? 'Small' : 'More',
                       style: GoogleFonts.readexPro(
                           fontSize: 16,
                           fontWeight: FontWeight.w400,

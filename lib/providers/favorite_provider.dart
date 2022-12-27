@@ -10,7 +10,7 @@ import '../../constants/user_info.dart' as user_constants;
 
 class FavoriteProvider extends ChangeNotifier {
   List<Favorite> listFavorite = [];
-
+  List<Favorite> listFilter = [];
   Future<void> getAll(String userID) async {
     String apiURL = "${url.url}/api/favourite/$userID";
     var client = http.Client();
@@ -84,6 +84,22 @@ class FavoriteProvider extends ChangeNotifier {
       // then throw an exception.
 
       return false;
+    }
+  }
+
+  Future<void> filter(int category, String userID) async {
+    if (category == 0) {
+      listFilter = listFavorite;
+    } else {
+      String apiURL = "${url.url}/api/favourite/$userID/$category";
+      var client = http.Client();
+      var jsonString = await client.get(Uri.parse(apiURL));
+      var jsonObject = jsonDecode(jsonString.body);
+      var newsListObject = jsonObject as List;
+      listFilter = newsListObject.map((e) {
+        return Favorite.fromJson(e);
+      }).toList();
+      notifyListeners();
     }
   }
 }

@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as color;
 import 'package:hue_t/providers/event_provider.dart';
 import 'package:hue_t/view/events/evant_detail.dart';
+import 'package:hue_t/view/events/search_events.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -95,8 +96,13 @@ class _EventsState extends State<Events> {
             ),
           ),
           TextField(
-            onChanged: (value) {
-              setState(() {});
+            onSubmitted: (value) {
+              if (value != "") {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SearchEventPage(value: value)));
+              }
             },
             decoration: const InputDecoration(
                 filled: true,
@@ -176,10 +182,16 @@ class _EventsState extends State<Events> {
                           ),
                         ),
                         GestureDetector(
-                          onTap: () {
+                          onTap: () async {
                             setState(() {
                               popular1 = false;
                             });
+                            await showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  //TOTO:BUG
+                                  return alertDialog(context);
+                                });
                           },
                           child: Container(
                             alignment: Alignment.center,
@@ -482,6 +494,53 @@ class _EventsState extends State<Events> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget alertDialog(BuildContext context) {
+    return Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          FadeInUp(
+            duration: const Duration(milliseconds: 200),
+            child: AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
+              title: Text(
+                "Haven't Events Expired",
+                style: GoogleFonts.readexPro(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w300,
+                    fontSize: 20),
+                textAlign: TextAlign.center,
+              ),
+              actionsAlignment: MainAxisAlignment.center,
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      popular1 = true;
+                      Navigator.of(context).pop(false);
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      padding: const EdgeInsets.only(
+                          left: 40, right: 40, top: 15, bottom: 15),
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20))),
+                  child: Text(
+                    "Ok",
+                    style: GoogleFonts.readexPro(color: Colors.grey),
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 }

@@ -10,7 +10,12 @@ import 'package:hue_t/providers/weather_provider.dart';
 import 'package:hue_t/view/events/events.dart';
 import 'package:hue_t/view/foodstore/foodstore.dart';
 import 'package:hue_t/view/sign_in_out/sign_in_page.dart';
+import 'package:hue_t/view/social_network_network/socialNetwork.dart';
 import 'package:hue_t/view/tourist_attraction/tourist_attraction.dart';
+import 'package:hue_t/view/utilities/atm.dart';
+import 'package:hue_t/view/utilities/gas_station.dart';
+import 'package:hue_t/view/utilities/taxi.dart';
+import 'package:hue_t/view/utilities/wc_public.dart';
 import 'package:provider/provider.dart';
 import '../../constants/user_info.dart' as user_constants;
 import 'package:hue_t/view/profileuser/auth_service.dart';
@@ -191,7 +196,7 @@ class _HomePageState extends State<HomePage> {
                             const SizedBox(
                               height: 3,
                             ),
-                            Text("Chào mừng bạn đến với Huế Travel",
+                            Text("Welcome to Hue Travel",
                                 style: GoogleFonts.readexPro(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w400,
@@ -211,8 +216,8 @@ class _HomePageState extends State<HomePage> {
                       color: const Color.fromARGB(255, 255, 255, 255)),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(70),
-                    child: CachedNetworkImage(imageUrl:
-                      user_constants.user == null
+                    child: CachedNetworkImage(
+                      imageUrl: user_constants.user == null
                           ? "https://st3.depositphotos.com/13159112/17145/v/600/depositphotos_171453724-stock-illustration-default-avatar-profile-icon-grey.jpg"
                           : user_constants.user!.photoURL,
                       width: 70,
@@ -255,8 +260,9 @@ class _HomePageState extends State<HomePage> {
                                 color: Colors.grey.withOpacity(0.4)))),
                     child: Row(
                       children: [
-                        CachedNetworkImage(imageUrl:
-                          "https://product.hstatic.net/200000122283/product/c-e1-bb-9d-vi-e1-bb-87t-nam_2c0683597d2d419fac401f51ccbae779_grande.jpg",
+                        CachedNetworkImage(
+                          imageUrl:
+                              "https://product.hstatic.net/200000122283/product/c-e1-bb-9d-vi-e1-bb-87t-nam_2c0683597d2d419fac401f51ccbae779_grande.jpg",
                           width: 40,
                           height: 25,
                           filterQuality: FilterQuality.low,
@@ -329,25 +335,23 @@ class _HomePageState extends State<HomePage> {
           buttonLink(
               context,
               "https://cdn-icons-png.flaticon.com/512/9198/9198907.png",
-              "Ở đâu ?",
+              "Lodging",
               const HotelPage()),
           buttonLink(
               context,
               "https://cdn-icons-png.flaticon.com/512/2934/2934108.png",
-              "Ăn gì ?",
+              "Food",
               const Foodstore()),
           buttonLink(
               context,
               "https://cdn-icons-png.flaticon.com/512/2972/2972857.png",
-              "Đi đâu ?",
+              "Visit Place",
               const TouristAttraction()),
           buttonLink(
               context,
               "https://cdn-icons-png.flaticon.com/512/4612/4612366.png",
-              "Có gì hot ?",
-              const HueT(
-                index: 0,
-              )),
+              "Huegram",
+              const SocialNetWorkPage()),
         ]),
       ),
     );
@@ -361,7 +365,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Tiện ích",
+            Text("Extension",
                 style: GoogleFonts.readexPro(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
@@ -376,19 +380,23 @@ class _HomePageState extends State<HomePage> {
                 buttonLinkSmall(
                     context,
                     "https://cdn-icons-png.flaticon.com/512/2676/2676606.png",
-                    "ATM"),
-                buttonLinkSmall(
-                    context,
-                    "https://cdn-icons-png.flaticon.com/512/891/891035.png",
-                    "Cây xăng"),
+                    "ATM",
+                    const ATMPage()),
                 buttonLinkSmall(
                     context,
                     "https://cdn-icons-png.flaticon.com/512/8327/8327497.png",
-                    "WC Công Cộng"),
+                    "WC Public",
+                    const WCPublicPage()),
                 buttonLinkSmall(
                     context,
                     "https://cdn-icons-png.flaticon.com/512/2401/2401174.png",
-                    "Taxi"),
+                    "Taxi",
+                    const TaxiPage()),
+                buttonLinkSmall(
+                    context,
+                    "https://cdn-icons-png.flaticon.com/512/891/891035.png",
+                    "Gas Station",
+                    const GasStationPage()),
               ],
             )
           ],
@@ -420,7 +428,7 @@ class _HomePageState extends State<HomePage> {
                       color: Colors.grey.withOpacity(0.1))
                 ]),
             child: Center(
-              child: CachedNetworkImage(imageUrl:image),
+              child: CachedNetworkImage(imageUrl: image),
             ),
           ),
           const SizedBox(
@@ -436,31 +444,36 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget buttonLinkSmall(BuildContext context, String image, String name) {
+  Widget buttonLinkSmall(
+      BuildContext context, String image, String name, Widget page) {
     return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.all(20),
-          width: 60,
-          height: 60,
-          decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                    blurRadius: 3,
-                    offset: const Offset(0, 2),
-                    color: Colors.grey.withOpacity(0.3))
-              ]),
-          child: Center(
-            child: CachedNetworkImage(imageUrl:image),
+        GestureDetector(
+          onTap: () => Navigator.push(
+              context, MaterialPageRoute(builder: (context) => page)),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                      blurRadius: 3,
+                      offset: const Offset(0, 2),
+                      color: Colors.grey.withOpacity(0.3))
+                ]),
+            child: Center(
+              child: CachedNetworkImage(imageUrl: image),
+            ),
           ),
         ),
         const SizedBox(
           height: 8,
         ),
         SizedBox(
-          width: 70,
+          width: 90,
           child: Center(
             child: Text(name,
                 textAlign: TextAlign.center,
@@ -484,17 +497,15 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Sự kiện",
+              Text("Event",
                   style: GoogleFonts.readexPro(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                       color: Colors.black87)),
               GestureDetector(
-                onTap: () => Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => const Events()),
-                    (route) => false),
-                child: Text("Xem tất cả",
+                onTap: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => const Events())),
+                child: Text("See all",
                     style: GoogleFonts.readexPro(
                         fontSize: 13,
                         fontWeight: FontWeight.w400,
@@ -523,8 +534,8 @@ class _HomePageState extends State<HomePage> {
                     margin: const EdgeInsets.only(right: 8),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
-                      child: CachedNetworkImage(imageUrl:
-                        e,
+                      child: CachedNetworkImage(
+                        imageUrl: e,
                         fit: BoxFit.cover,
                       ),
                     ),
