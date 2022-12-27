@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hue_t/animation/show_right.dart';
 import 'package:hue_t/model/attraction/tourist_attraction.dart';
 import 'package:hue_t/providers/tourist_provider.dart';
 import 'package:hue_t/colors.dart' as color;
@@ -337,68 +338,71 @@ class _FilterTouristState extends State<FilterTourist> {
       child: Consumer<TouristAttractionProvider>(
         builder: (context, value, child) => Column(
           children: [
-            ...listlist.map((e) => GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => TouristAttractionDetail(
-                                  item: e,
-                                )));
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    width: MediaQuery.of(context).size.width,
-                    height: 120,
-                    color: Colors.white,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(5),
-                            child: CachedNetworkImage(
-                                imageUrl:
-                                    "https://khamphahue.com.vn/${e.image}",
-                                height: double.infinity,
-                                width: 90,
-                                fit: BoxFit.cover),
-                          ),
-                          const SizedBox(
-                            width: 15,
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(
-                                  height: 5,
-                                ),
-                                Text(e.title.toString(),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 2,
-                                    style: GoogleFonts.readexPro(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w600,
-                                    )),
-                                const SizedBox(
-                                  height: 4,
-                                ),
-                                Text(e.address.toString(),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 2,
-                                    style: GoogleFonts.readexPro(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w400,
-                                        color: Colors.grey)),
-                              ],
+            ...listlist.map((e) => ShowRight(
+              delay: 100 * listlist.indexOf(e),
+              child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => TouristAttractionDetail(
+                                    item: e,
+                                  )));
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      width: MediaQuery.of(context).size.width,
+                      height: 120,
+                      color: Colors.white,
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(5),
+                              child: CachedNetworkImage(
+                                  imageUrl:
+                                      "https://khamphahue.com.vn/${e.image}",
+                                  height: double.infinity,
+                                  width: 90,
+                                  fit: BoxFit.cover),
                             ),
-                          )
-                        ],
+                            const SizedBox(
+                              width: 15,
+                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text(e.title.toString(),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 2,
+                                      style: GoogleFonts.readexPro(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w600,
+                                      )),
+                                  const SizedBox(
+                                    height: 4,
+                                  ),
+                                  Text(e.address.toString(),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 2,
+                                      style: GoogleFonts.readexPro(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w400,
+                                          color: Colors.grey)),
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ))
+            ))
           ],
         ),
       ),

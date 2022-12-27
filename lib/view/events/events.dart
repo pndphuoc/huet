@@ -5,6 +5,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hue_t/animation/show_right.dart';
+import 'package:hue_t/animation/show_up.dart';
 import 'package:hue_t/colors.dart' as color;
 import 'package:hue_t/providers/event_provider.dart';
 import 'package:hue_t/view/events/evant_detail.dart';
@@ -58,43 +60,45 @@ class _EventsState extends State<Events> {
   }
 
   header(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        children: [
-          Container(
-            margin: const EdgeInsets.only(top: 10),
-            width: MediaQuery.of(context).size.width,
-            height: 60,
-            decoration: const BoxDecoration(),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                  child: Container(
+    return ShowUp(
+      delay: 0,
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            Container(
+              margin: const EdgeInsets.only(top: 10),
+              width: MediaQuery.of(context).size.width,
+              height: 60,
+              decoration: const BoxDecoration(),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      width: 45,
+                      height: 45,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.grey.withOpacity(0.4)),
+                      child: const Center(child: Icon(Icons.arrow_back)),
+                    ),
+                  ),
+                  Text(
+                    "HUE EVENTS",
+                    style: GoogleFonts.readexPro(
+                        fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(
                     width: 45,
                     height: 45,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.grey.withOpacity(0.4)),
-                    child: const Center(child: Icon(Icons.arrow_back)),
-                  ),
-                ),
-                Text(
-                  "HUE EVENTS",
-                  style: GoogleFonts.readexPro(
-                      fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(
-                  width: 45,
-                  height: 45,
-                )
-              ],
+                  )
+                ],
+              ),
             ),
-          ),
           TextField(
             onSubmitted: (value) {
               if (value != "") {
@@ -118,10 +122,11 @@ class _EventsState extends State<Events> {
                 focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(25.0)),
                     borderSide: BorderSide(
-                        width: 0.2,
-                        color: Color.fromARGB(255, 255, 255, 255)))),
-          )
-        ],
+                        width: 0.2, color: Color.fromARGB(255, 255, 255, 255)),
+                  ),),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -138,10 +143,13 @@ class _EventsState extends State<Events> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "Upcoming Event",
-                      style: GoogleFonts.readexPro(
-                          fontSize: 17, fontWeight: FontWeight.w500),
+                    ShowRight(
+                      delay: 100,
+                      child: Text(
+                        "Upcoming Event",
+                        style: GoogleFonts.readexPro(
+                            fontSize: 17, fontWeight: FontWeight.w500),
+                      ),
                     ),
                     Text(
                       "",
@@ -159,26 +167,29 @@ class _EventsState extends State<Events> {
                   children: [
                     Row(
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              popular1 = true;
-                            });
-                          },
-                          child: Container(
-                            alignment: Alignment.center,
-                            width: MediaQuery.of(context).size.width / 4,
-                            height: 40,
-                            decoration: const BoxDecoration(),
-                            child: Text("Next Month",
-                                style: GoogleFonts.readexPro(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w500,
-                                    color: popular1
-                                        ? const Color.fromARGB(
-                                            255, 104, 104, 172)
-                                        : const Color.fromARGB(
-                                            255, 87, 86, 86))),
+                        ShowUp(
+                          delay: 200,
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                popular1 = true;
+                              });
+                            },
+                            child: Container(
+                              alignment: Alignment.center,
+                              width: MediaQuery.of(context).size.width / 4,
+                              height: 40,
+                              decoration: const BoxDecoration(),
+                              child: Text("Next Month",
+                                  style: GoogleFonts.readexPro(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                      color: popular1
+                                          ? const Color.fromARGB(
+                                              255, 104, 104, 172)
+                                          : const Color.fromARGB(
+                                              255, 87, 86, 86))),
+                            ),
                           ),
                         ),
                         GestureDetector(
@@ -237,14 +248,14 @@ class _EventsState extends State<Events> {
             child: Consumer<EventProvider>(
               builder: (context, value, child) => Swiper(
                 itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: ((context) => EventDetail(
-                                item: value.listNextMonth[index])))),
-                    child: FadeIn(
-                      delay: const Duration(milliseconds: 300),
+                  return ShowUp(
+                    delay: 100 * index,
+                    child: GestureDetector(
+                      onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: ((context) => EventDetail(
+                                  item: value.listNextMonth[index])))),
                       child: Container(
                         margin: const EdgeInsets.only(
                             left: 5, right: 5, bottom: 20),
@@ -391,10 +402,13 @@ class _EventsState extends State<Events> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "This Month Event",
-                      style: GoogleFonts.readexPro(
-                          fontSize: 17, fontWeight: FontWeight.w500),
+                    ShowUp(
+                      delay: 200,
+                      child: Text(
+                        "This Month Event",
+                        style: GoogleFonts.readexPro(
+                            fontSize: 17, fontWeight: FontWeight.w500),
+                      ),
                     ),
                     Text(
                       "",
@@ -418,7 +432,8 @@ class _EventsState extends State<Events> {
                               builder: (context) => EventDetail(item: e)));
                     },
                     child: BounceInLeft(
-                      duration: Duration(milliseconds: 1500 + 300 * index),
+                      duration: Duration(milliseconds: 1000 + 100 * index),
+                      delay: Duration(milliseconds: value.listThisMonth.indexOf(e) * 100),
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 10),
                         width: MediaQuery.of(context).size.width,
@@ -476,13 +491,12 @@ class _EventsState extends State<Events> {
                                     ),
                                   ],
                                 ),
-                              ),
-                              const Expanded(
-                                  child: Icon(
+                            ),
+                          const Expanded(
+                              child: Icon(
                                 Icons.arrow_forward_ios_outlined,
                                 color: Colors.grey,
-                              ))
-                            ],
+                              ))]
                           ),
                         ),
                       ),

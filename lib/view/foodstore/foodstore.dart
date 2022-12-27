@@ -6,12 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hue_t/animation/show_right.dart';
+import 'package:hue_t/animation/show_up.dart';
 import 'package:hue_t/providers/foodstore_provider.dart';
 import 'package:hue_t/view/foodstore/foodstoredetail.dart';
 import 'package:hue_t/view/foodstore/search_foodstore.dart';
 import 'package:hue_t/colors.dart' as color;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:swipeable_page_route/swipeable_page_route.dart';
 import '../../permission/get_user_location.dart' as user_location;
 
 import '../../model/foodstore/restaurant.dart';
@@ -21,6 +24,7 @@ class Category {
   String? name;
   String? image;
   Color? color;
+
   Category({this.id, this.name, this.image, this.color});
 }
 
@@ -33,6 +37,7 @@ class Foodstore extends StatefulWidget {
 
 class _FoodstoreState extends State<Foodstore> {
   var popular1 = true;
+
   // bool isloading = true;
   String address = "";
   List<Category> categories = [
@@ -57,6 +62,7 @@ class _FoodstoreState extends State<Foodstore> {
         image: "assets/images/foodstore/category/3.png",
         color: const Color.fromARGB(255, 250, 247, 220)),
   ];
+
   // @override
   // void initState() {
   //   // TODO: implement initState
@@ -135,6 +141,10 @@ class _FoodstoreState extends State<Foodstore> {
                         ],
                       ),
                     ),
+                    Positioned(
+                        top: 35,
+                        left: 20,
+                        child: backButton())
                   ],
                 ),
               ),
@@ -143,76 +153,60 @@ class _FoodstoreState extends State<Foodstore> {
   }
 
   header(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        children: [
-          Container(
-            margin: const EdgeInsets.only(top: 10),
-            width: MediaQuery.of(context).size.width,
-            height: 60,
-            decoration: const BoxDecoration(),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                  child: Container(
-                    width: 45,
-                    height: 45,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.grey.withOpacity(0.4)),
-                    child: const Center(child: Icon(Icons.arrow_back)),
+    return ShowUp(
+      delay: 0,
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            Container(
+              margin: const EdgeInsets.only(top: 10),
+              width: MediaQuery.of(context).size.width,
+              height: 60,
+              decoration: const BoxDecoration(),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "HUE FOOD",
+                    style: GoogleFonts.readexPro(
+                        fontSize: 22, fontWeight: FontWeight.bold),
                   ),
-                ),
-                Text(
-                  "HUE FOOD",
-                  style: GoogleFonts.readexPro(
-                      fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(
-                  width: 45,
-                  height: 45,
-                )
-              ],
+                ],
+              ),
             ),
-          ),
-          const SizedBox(
-            height: 5,
-          ),
-          TextField(
-            onSubmitted: (value) {
-              if (value != "") {
-                setState(() {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              SearchFoodStore(value: "0", searchValue: value)));
-                });
-              }
-            },
-            decoration: const InputDecoration(
-                filled: true,
-                fillColor: Color.fromARGB(255, 240, 237, 237),
-                hintText: "Search foodstore ...",
-                hintStyle: TextStyle(color: Color.fromARGB(255, 206, 205, 205)),
-                prefixIcon: Icon(Icons.search),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(25.0)),
-                  borderSide: BorderSide(
-                      width: 0.2, color: Color.fromARGB(255, 255, 255, 255)),
-                ),
-                focusedBorder: OutlineInputBorder(
+            const SizedBox(
+              height: 5,
+            ),
+            TextField(
+              onSubmitted: (value) {
+                if (value != "") {
+                  setState(() {
+                    Navigator.of(context).push(SwipeablePageRoute(
+                        builder: (BuildContext context) =>
+                            SearchFoodStore(value: "0", searchValue: value)));
+                  });
+                }
+              },
+              decoration: const InputDecoration(
+                  filled: true,
+                  fillColor: Color.fromARGB(255, 240, 237, 237),
+                  hintText: "Search foodstore ...",
+                  hintStyle: TextStyle(color: Color.fromARGB(255, 206, 205, 205)),
+                  prefixIcon: Icon(Icons.search),
+                  enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(25.0)),
                     borderSide: BorderSide(
-                        width: 0.2,
-                        color: Color.fromARGB(255, 255, 255, 255)))),
-          )
-        ],
+                        width: 0.2, color: Color.fromARGB(255, 255, 255, 255)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                      borderSide: BorderSide(
+                          width: 0.2,
+                          color: Color.fromARGB(255, 255, 255, 255)))),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -220,13 +214,16 @@ class _FoodstoreState extends State<Foodstore> {
   category(BuildContext context) {
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text("Category",
-                style: GoogleFonts.readexPro(
-                    fontSize: 18, fontWeight: FontWeight.w600)),
-          ],
+        ShowRight(
+          delay: 100,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Category",
+                  style: GoogleFonts.readexPro(
+                      fontSize: 18, fontWeight: FontWeight.w600)),
+            ],
+          ),
         ),
         Container(
           margin: const EdgeInsets.only(top: 25),
@@ -235,44 +232,43 @@ class _FoodstoreState extends State<Foodstore> {
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
-              ...categories.map((e) => GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => SearchFoodStore(
-                                    value: e.id.toString(),
-                                    searchValue: "",
-                                  )));
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.only(right: 15),
-                      width: 160,
-                      decoration: BoxDecoration(
-                          color: e.color as Color,
-                          borderRadius: BorderRadius.circular(15)),
-                      child: Stack(
-                        children: [
-                          Positioned(
-                              top: 10,
-                              left: 10,
-                              child: Text(e.name.toString(),
-                                  style: GoogleFonts.readexPro(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w500))),
-                          Positioned(
-                              right: 0,
-                              bottom: 0,
-                              child: Image.asset(
-                                e.image.toString(),
-                                width: 60,
-                                height: 60,
-                                fit: BoxFit.contain,
-                              ))
-                        ],
+              ...categories.map((e) => ShowUp(
+                delay: 100 + 100*categories.indexOf(e),
+                child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(SwipeablePageRoute(
+                            builder: (BuildContext context) => SearchFoodStore(
+                                value: e.id.toString(), searchValue: "")));
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 15),
+                        width: 160,
+                        decoration: BoxDecoration(
+                            color: e.color as Color,
+                            borderRadius: BorderRadius.circular(15)),
+                        child: Stack(
+                          children: [
+                            Positioned(
+                                top: 10,
+                                left: 10,
+                                child: Text(e.name.toString(),
+                                    style: GoogleFonts.readexPro(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w500))),
+                            Positioned(
+                                right: 0,
+                                bottom: 0,
+                                child: Image.asset(
+                                  e.image.toString(),
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.contain,
+                                ))
+                          ],
+                        ),
                       ),
                     ),
-                  ))
+              ))
             ],
           ),
         )
@@ -281,7 +277,7 @@ class _FoodstoreState extends State<Foodstore> {
   }
 
   nearby(BuildContext context) {
-    return Container(
+    return ShowRight(delay: 200, child: Container(
       margin: const EdgeInsets.only(top: 20),
       child: Column(
         children: [
@@ -327,11 +323,9 @@ class _FoodstoreState extends State<Foodstore> {
                     var index = value.list.indexOf(e);
                     return GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    FoodstoreDetail(item: e)));
+                        Navigator.of(context).push(SwipeablePageRoute(
+                            builder: (BuildContext context) =>  FoodstoreDetail(item: e)
+                        ));
                       },
                       child: BounceInDown(
                         delay: const Duration(milliseconds: 600),
@@ -373,9 +367,9 @@ class _FoodstoreState extends State<Foodstore> {
                                       padding: const EdgeInsets.all(10.0),
                                       child: Column(
                                         crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        CrossAxisAlignment.start,
                                         mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                        MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(e.title.toString(),
                                               overflow: TextOverflow.ellipsis,
@@ -385,22 +379,22 @@ class _FoodstoreState extends State<Foodstore> {
                                                   fontWeight: FontWeight.w500)),
                                           Column(
                                             crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                            CrossAxisAlignment.start,
                                             children: [
                                               Text("Opening",
                                                   style: GoogleFonts.readexPro(
                                                       fontSize: 14,
                                                       fontWeight:
-                                                          FontWeight.w600,
+                                                      FontWeight.w600,
                                                       color:
-                                                          Colors.lightGreen)),
+                                                      Colors.lightGreen)),
                                               const SizedBox(
                                                 height: 5,
                                               ),
                                               Row(
                                                 mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
+                                                MainAxisAlignment
+                                                    .spaceBetween,
                                                 children: [
                                                   Row(
                                                     children: [
@@ -421,7 +415,7 @@ class _FoodstoreState extends State<Foodstore> {
                                                               .readexPro(
                                                             fontSize: 13,
                                                             fontWeight:
-                                                                FontWeight.w500,
+                                                            FontWeight.w500,
                                                           )),
                                                     ],
                                                   ),
@@ -447,7 +441,7 @@ class _FoodstoreState extends State<Foodstore> {
                                                               .readexPro(
                                                             fontSize: 13,
                                                             fontWeight:
-                                                                FontWeight.w500,
+                                                            FontWeight.w500,
                                                           ))
                                                     ],
                                                   )
@@ -472,14 +466,14 @@ class _FoodstoreState extends State<Foodstore> {
                                         borderRadius: BorderRadius.circular(5)),
                                     child: Row(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.center,
+                                      CrossAxisAlignment.center,
                                       mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                      MainAxisAlignment.center,
                                       children: [
                                         Icon(
                                           Icons.star,
                                           color: const Color.fromARGB(
-                                                  255, 255, 177, 59)
+                                              255, 255, 177, 59)
                                               .withOpacity(0.8),
                                           size: 15,
                                         ),
@@ -491,7 +485,7 @@ class _FoodstoreState extends State<Foodstore> {
                                           style: TextStyle(
                                               fontWeight: FontWeight.w600,
                                               color:
-                                                  Colors.white.withOpacity(0.9),
+                                              Colors.white.withOpacity(0.9),
                                               fontSize: 12),
                                         ),
                                       ],
@@ -509,9 +503,26 @@ class _FoodstoreState extends State<Foodstore> {
           )
         ],
       ),
+    ));
+  }
+  Widget backButton() {
+    return Container(
+      decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(15)),
+      child: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: const Icon(
+            Icons.arrow_back_outlined,
+            color: Colors.white,
+          ),
+          style: ButtonStyle(
+              shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15))))),
     );
   }
-
   popular(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 60),
@@ -522,44 +533,50 @@ class _FoodstoreState extends State<Foodstore> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        popular1 = true;
-                      });
-                    },
-                    child: Container(
-                      width: MediaQuery.of(context).size.width / 2,
-                      height: 40,
-                      decoration: const BoxDecoration(),
-                      child: Center(
-                        child: Text("Hot",
-                            style: GoogleFonts.readexPro(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: popular1
-                                    ? const Color.fromARGB(255, 104, 104, 172)
-                                    : const Color.fromARGB(255, 87, 86, 86))),
+                  ShowUp(
+                    delay: 300,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          popular1 = true;
+                        });
+                      },
+                      child: Container(
+                        width: MediaQuery.of(context).size.width / 2,
+                        height: 40,
+                        decoration: const BoxDecoration(),
+                        child: Center(
+                          child: Text("Hot",
+                              style: GoogleFonts.readexPro(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: popular1
+                                      ? const Color.fromARGB(255, 104, 104, 172)
+                                      : const Color.fromARGB(255, 87, 86, 86))),
+                        ),
                       ),
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        popular1 = false;
-                      });
-                    },
-                    child: Container(
-                      width: MediaQuery.of(context).size.width / 2,
-                      height: 40,
-                      child: Center(
-                        child: Text("Rating",
-                            style: GoogleFonts.readexPro(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: !popular1
-                                    ? const Color.fromARGB(255, 104, 104, 172)
-                                    : const Color.fromARGB(255, 97, 97, 97))),
+                  ShowUp(
+                    delay: 400,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          popular1 = false;
+                        });
+                      },
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width / 2,
+                        height: 40,
+                        child: Center(
+                          child: Text("Rating",
+                              style: GoogleFonts.readexPro(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: !popular1
+                                      ? const Color.fromARGB(255, 104, 104, 172)
+                                      : const Color.fromARGB(255, 97, 97, 97))),
+                        ),
                       ),
                     ),
                   )
@@ -591,11 +608,9 @@ class _FoodstoreState extends State<Foodstore> {
                           var index = value.list.indexOf(e);
                           return GestureDetector(
                             onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          FoodstoreDetail(item: e)));
+                              Navigator.of(context).push(SwipeablePageRoute(
+                                  builder: (BuildContext context) =>  FoodstoreDetail(item: e)
+                              ));
                             },
                             child: BounceInLeft(
                               from: 150,
@@ -608,7 +623,7 @@ class _FoodstoreState extends State<Foodstore> {
                                 height: 120,
                                 color: Colors.white,
                                 child: Padding(
-                                  padding: const EdgeInsets.all(10.0),
+                                  padding: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
                                   child: Row(
                                     children: [
                                       ClipRRect(
@@ -770,11 +785,9 @@ class _FoodstoreState extends State<Foodstore> {
                       children: [
                         ...value.sort().map((e) => GestureDetector(
                               onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            FoodstoreDetail(item: e)));
+                                Navigator.of(context).push(SwipeablePageRoute(
+                                    builder: (BuildContext context) =>  FoodstoreDetail(item: e)
+                                ));
                               },
                               child: Container(
                                 margin: const EdgeInsets.only(bottom: 10),

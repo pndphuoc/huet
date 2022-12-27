@@ -71,7 +71,7 @@ class _EditProfileState extends State<EditProfile> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => const HueT(
-                                  index: 2,
+                                  index: 1,
                                 )),
                         (route) => false);
                   },

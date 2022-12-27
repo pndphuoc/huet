@@ -196,29 +196,6 @@ class _HotelDetailState extends State<HotelDetail> {
                     Positioned(
                       bottom: 10,
                       right: 10,
-                      //   child: Row(
-                      //     mainAxisAlignment: MainAxisAlignment.center,
-                      //     children: widget.model.images.map((e) {
-                      //       int index = widget.model.images.indexOf(e);
-                      //       return AnimatedContainer(
-                      //         duration: const Duration(milliseconds: 100),
-                      //         width: currentPos == index ? 20 : 8.0,
-                      //         height: 8.0,
-                      //         margin: const EdgeInsets.symmetric(
-                      //             vertical: 10.0, horizontal: 2.0),
-                      //         decoration: BoxDecoration(
-                      //             shape: currentPos == index
-                      //                 ? BoxShape.rectangle
-                      //                 : BoxShape.rectangle,
-                      //             borderRadius: currentPos == index
-                      //                 ? BorderRadius.circular(8)
-                      //                 : BorderRadius.circular(8),
-                      //             color: currentPos == index
-                      //                 ? const Color.fromRGBO(255, 255, 255, 10)
-                      //                 : const Color.fromRGBO(236, 236, 236, 0.5)),
-                      //       );
-                      //     }).toList(),
-                      //   ),
                       child: Container(
                         padding: const EdgeInsets.only(left: 10, right: 10),
                         height: 27,

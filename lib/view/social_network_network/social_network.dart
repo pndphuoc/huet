@@ -34,7 +34,7 @@ class SocialNetWorkPage extends StatefulWidget {
   State<SocialNetWorkPage> createState() => _SocialNetWorkPageState();
 }
 
-//PostModel samplePost = PostModel(postID: '1', caption: "In the Hue",  userID: 1, attractionID: "1", medias: ["assets/images/socialNetwork/img.png", "assets/images/socialNetwork/img1.png"], likeCount: 69, commentCount: 1, createDate: DateTime(2022, 11, 26), isDeleted: false);
+//PostModel samplePost = PostModel(postID: '1', caption: "In the Hue",  userID: 1, attractionID: "1", medias: ["assets/images/socialNetwork/santa.gif", "assets/images/socialNetwork/img1.png"], likeCount: 69, commentCount: 1, createDate: DateTime(2022, 11, 26), isDeleted: false);
 
 class _SocialNetWorkPageState extends State<SocialNetWorkPage> {
   Future<void> requestStoragePermission() async {

@@ -11,43 +11,18 @@ import 'package:hue_t/providers/favorite_provider.dart';
 
 import 'package:hue_t/view/accommodation_views/hotel_detail.dart';
 import 'package:hue_t/animation/show_up.dart';
-import 'package:hue_t/model/user/user.dart';
-import 'package:hue_t/provider/google_sign_in.dart';
 import 'package:hue_t/providers/event_provider.dart';
 import 'package:hue_t/providers/foodstore_provider.dart';
 import 'package:hue_t/providers/tourist_provider.dart';
 import 'package:hue_t/providers/user_provider.dart';
 import 'package:hue_t/providers/weather_provider.dart';
-import 'package:hue_t/view/Foodstore/foodstore.dart';
-import 'package:hue_t/view/events/events.dart';
-import 'package:hue_t/view/foodstore/foodstore.dart';
-import 'package:hue_t/view/foodstore/foodstoredetail.dart';
-import 'package:hue_t/animation/show_up.dart';
-import 'package:hue_t/view/Foodstore/foodstore.dart';
 import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
 import 'package:hue_t/view/home/home.dart';
-import 'package:hue_t/view/accommodation_views/hotel.dart';
-import 'package:hue_t/view/profileuser/auth_service.dart';
-import 'package:hue_t/view/profileuser/loginin_page.dart';
 import 'package:hue_t/view/profileuser/profile_user.dart';
-import 'package:hue_t/view/foodstore/search_foodstore.dart';
-import 'package:hue_t/view/social_network_network/socialNetwork.dart';
+import 'package:hue_t/view/social_network_network/social_network.dart';
 import 'package:provider/provider.dart';
 import 'package:rive/rive.dart' as rive;
-import 'package:hue_t/view/tourist_attraction/tourist_attraction.dart';
-import 'view/accommodation_views/homestays_list.dart';
-import 'view/accommodation_views/hotels_list.dart';
-import 'view/accommodation_views/resorts_list.dart';
 import 'colors.dart' as colors;
-import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
-import 'package:hue_t/view/home/home.dart';
-import 'package:hue_t/view/accommodation_views/hotel.dart';
-import 'view/accommodation_views/homestays_list.dart';
-import 'view/accommodation_views/hotels_list.dart';
-import 'view/accommodation_views/resorts_list.dart';
-import 'colors.dart' as colors;
-import 'constants/user_info.dart' as userConstant;
-import 'model/user/user.dart' as userModel;
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -219,17 +194,18 @@ class _HueTState extends State<HueT> {
 
   Color? containerColor;
 
+  static final PageController pageController = PageController(initialPage: 1);
+
   List<Color> containerColors = [
     const Color(0xFFFDE1D7),
     const Color(0xFFE4EDF5),
     const Color(0xFFE7EEED),
     const Color(0xFFF4E4CE),
   ];
-
   int _selectedItemPosition = 1;
   final List<Widget> _children = [
     const SocialNetWorkPage(),
-    const HomePage(),
+    HomePage(pageController: pageController,),
     const ProfileUser(),
   ];
 
@@ -259,7 +235,7 @@ class _HueTState extends State<HueT> {
       onTap: (index) {
         setState(() {
           _selectedItemPosition = index;
-          _pageController.animateToPage(_selectedItemPosition, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+          pageController.animateToPage(_selectedItemPosition, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
         });
       },
       items: const [
@@ -289,7 +265,7 @@ class _HueTState extends State<HueT> {
     }
   }
 
-  final PageController _pageController = PageController(initialPage: 1);
+
 
   @override
   Widget build(BuildContext context) {
@@ -302,7 +278,7 @@ class _HueTState extends State<HueT> {
       home: Scaffold(
         body: Stack(children: [
           PageView(
-            controller: _pageController,
+            controller: pageController,
             children: _children,
             onPageChanged: (index) {
               setState(() {
