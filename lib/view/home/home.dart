@@ -51,6 +51,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    if(user_constants.user != null) {
+      print("TAI HOME: ${user_constants.user!.uid}");
+    }
     var weatherProvider = Provider.of<WeatherProvider>(context);
     if (weatherProvider.isloading) {
       (() async {

@@ -23,18 +23,15 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:swipeable_page_route/swipeable_page_route.dart';
 import '../../constants/user_info.dart' as user_info;
-import '../../firebase_function/common_function.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
 import '../tourist_attraction/tourist_attraction_detail.dart';
-import 'constants.dart' as constants;
 
 class Post extends StatefulWidget {
   const Post(
       {Key? key,
       required this.post,
       required this.isInView,
-      required this.callback, required this.user})
+      required this.callback,
+      required this.user})
       : super(key: key);
   final PostModel post;
   final bool isInView;
@@ -67,6 +64,8 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
   late int likeCount;
   late User userOfPost;
   bool isLoading = true;
+  bool isPlayingVideo = true;
+
 /*  @override
   void dispose() {
     _heartController.dispose();
@@ -101,8 +100,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
   Widget buildNameAndAttraction(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(left: 15, right: 15, top: 15),
-      child: Consumer<UserProvider>(
-          builder: (context, value, child) {
+      child: Consumer<UserProvider>(builder: (context, value, child) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -111,7 +109,8 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                 height: 50,
                 width: 50,
                 child: CircleAvatar(
-                  backgroundImage: CachedNetworkImageProvider(widget.user.photoURL),
+                  backgroundImage:
+                      CachedNetworkImageProvider(widget.user.photoURL),
                 )),
             Expanded(
               child: Column(
@@ -124,11 +123,16 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                   ),
                   Consumer<TouristAttractionProvider>(
                     builder: (context, value, child) {
-                      TouristAttraction att = value.list.where((element) => element.id == widget.post.attractionID).toList().first;
+                      TouristAttraction att = value.list
+                          .where((element) =>
+                              element.id == widget.post.attractionID)
+                          .toList()
+                          .first;
                       return TextButton(
                         onPressed: () {
                           Navigator.of(context).push(SwipeablePageRoute(
-                            builder: (BuildContext context) => TouristAttractionDetail(item: att),
+                            builder: (BuildContext context) =>
+                                TouristAttractionDetail(item: att),
                           ));
                         },
                         style: TextButton.styleFrom(
@@ -139,7 +143,8 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                         ),
                         child: Text(att.title,
                             style: GoogleFonts.readexPro(
-                                color: Colors.black, fontWeight: FontWeight.w500),
+                                color: Colors.black,
+                                fontWeight: FontWeight.w500),
                             overflow: TextOverflow.ellipsis),
                       );
                     },
@@ -232,7 +237,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                             const Icon(Icons.error),
                       );
                     } else {
-                      if (widget.isInView!) {
+                      if (widget.isInView && isPlayingVideo) {
                         return VideoWidget(url: e.url, play: true);
                       } else {
                         return VideoWidget(url: e.url, play: false);
@@ -351,8 +356,17 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                 width: 10,
               ),
               GestureDetector(
-                onTap: () {
-                  Navigator.push(
+                onTap: () async {
+                  setState(() {
+                    isPlayingVideo = false;
+                  });
+                  isPlayingVideo =
+                      await Navigator.of(context).push(SwipeablePageRoute(
+                          builder: (BuildContext context) => PostCommentsPage(
+                                postID: widget.post.postID,
+                                user: widget.user,
+                              )));
+                  /*isPlayingVideo = await Navigator.push(
                     context,
                     PageRouteBuilder(
                       transitionDuration: const Duration(milliseconds: 300),
@@ -378,7 +392,8 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
                         );
                       },
                     ),
-                  );
+                  );*/
+                  setState(() {});
                   FocusManager.instance.primaryFocus?.unfocus();
                 },
                 child: Row(
@@ -540,7 +555,7 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     var attractionProvider = Provider.of<TouristAttractionProvider>(context);
-    if(attractionProvider.list.isEmpty)  {
+    if (attractionProvider.list.isEmpty) {
       attractionProvider.getAll();
       setState(() {
         isLoading = false;
@@ -550,26 +565,32 @@ class _PostState extends State<Post> with TickerProviderStateMixin {
         isLoading = false;
       });
     }
-    return isLoading ? Center(child: LoadingAnimationWidget.discreteCircle(color: colors.primaryColor, size: 30),) : Container(
-      margin: const EdgeInsets.only(bottom: 10, top: 10, left: 20, right: 20),
-      width: MediaQuery.of(context).size.width,
-      decoration: BoxDecoration(
-          color: colors.SN_postBackgroundColor,
-          borderRadius: BorderRadius.circular(30)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          buildNameAndAttraction(context),
-          buildMediasBlock(context),
-          buildActionBlock(context),
-          widget.post.caption!.isNotEmpty
-              ? buildCaptionBlock(context)
-              : Container(),
-          buildCreateDateBlock(context),
-          buildCommentBlock(context)
-        ],
-      ),
-    );
+    return isLoading
+        ? Center(
+            child: LoadingAnimationWidget.discreteCircle(
+                color: colors.primaryColor, size: 30),
+          )
+        : Container(
+            margin:
+                const EdgeInsets.only(bottom: 10, top: 10, left: 20, right: 20),
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+                color: colors.SN_postBackgroundColor,
+                borderRadius: BorderRadius.circular(30)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                buildNameAndAttraction(context),
+                buildMediasBlock(context),
+                buildActionBlock(context),
+                widget.post.caption!.isNotEmpty
+                    ? buildCaptionBlock(context)
+                    : Container(),
+                buildCreateDateBlock(context),
+                buildCommentBlock(context)
+              ],
+            ),
+          );
   }
 }
 

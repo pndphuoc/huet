@@ -2,6 +2,7 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hue_t/main.dart';
 import 'package:hue_t/providers/user_provider.dart';
 import 'package:hue_t/view/profileuser/profile_user.dart';
 import 'package:provider/provider.dart';
@@ -98,6 +99,7 @@ class _EditProfileState extends State<EditProfile> {
                 TextButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
+                      print("TAI UPDATE PAGE: ${user_constant.user!.uid}");
                       setState(() async {
                         await value.updateUser(name, email, password!, image,
                             phone!, user_constant.user!.isGoogle);
@@ -106,7 +108,7 @@ class _EditProfileState extends State<EditProfile> {
                           Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const ProfileUser()),
+                                  builder: (context) => const HueT(index: 2,)),
                               (route) => false);
                         }
                       });
