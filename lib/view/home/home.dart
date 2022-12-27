@@ -52,7 +52,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     var weatherProvider = Provider.of<WeatherProvider>(context);
-
     if (weatherProvider.isloading) {
       (() async {
         await weatherProvider.getWeather();

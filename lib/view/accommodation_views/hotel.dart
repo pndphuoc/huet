@@ -1,12 +1,11 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_snake_navigationbar/flutter_snake_navigationbar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hue_t/animation/show_right.dart';
 import 'package:hue_t/providers/accommodation_provider.dart';
-import 'package:hue_t/view/accommodation_views/homestays_list.dart';
 import 'package:hue_t/view/accommodation_views/hotels_list.dart';
 import 'package:hue_t/view/accommodation_views/hotel_detail.dart';
 import 'package:hue_t/view/accommodation_views/resorts_list.dart';
@@ -14,9 +13,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import '../../colors.dart' as colors;
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hue_t/animation/show_up.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import '../../fake_data.dart' as faker;
 import '../../model/accommodation/accommodationModel.dart';
 import '../../permission/get_user_location.dart' as userLocation;
 

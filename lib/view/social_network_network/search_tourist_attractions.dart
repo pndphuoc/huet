@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart' as colors;
 import 'package:hue_t/model/attraction/tourist_attraction.dart';
+import 'package:hue_t/providers/tourist_provider.dart';
+import 'package:provider/provider.dart';
 import '../../fake_data.dart' as faker;
 
 import 'complete_upload.dart';
@@ -47,15 +49,17 @@ class _SearchTouristAttractionPageState
         ),
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            searchInputBlock(context),
-            const SizedBox(
-              height: 20,
-            ),
-            for (int i = 0; i < 10 && i < faker.listAttraction.length; i++)
-              touristAttractionBlock(context, faker.listAttraction[i]),
-          ],
+        child: Consumer<TouristAttractionProvider>(
+          builder: (context, value, child) => Column(
+            children: [
+              searchInputBlock(context),
+              const SizedBox(
+                height: 20,
+              ),
+             for(var e in value.list)
+               touristAttractionBlock(context, e),
+            ],
+          ),
         ),
       ),
     );

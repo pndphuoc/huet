@@ -95,33 +95,6 @@ class _CommentWidgetState extends State<CommentWidget>
     _getReplyComments();
     likeCount = widget.cmt.likedUsers.length;
   }
-  _showPopupMenu(Offset offset) async {
-    double left = offset.dx;
-    double top = offset.dy;
-    await showMenu(
-      context: context,
-      position: RelativeRect.fromLTRB(left, top, 0, 0),
-      items: [
-        PopupMenuItem<String>(
-          onTap: () async{
-            await deleteComment(widget.cmt, widget.postID);
-            Fluttertoast.showToast(
-                msg: "Deleted 1 comment",
-                toastLength: Toast.LENGTH_SHORT,
-                gravity: ToastGravity.CENTER,
-                timeInSecForIosWeb: 1,
-                textColor: Colors.white,
-                fontSize: 16.0);
-            widget.delCallback(widget.cmt);
-          },
-            value: 'del',
-            child: Text('Delete')),
-        PopupMenuItem<String>(
-            value: 'edit',
-            child: Text('Edit')),],
-      elevation: 8.0,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -131,17 +104,7 @@ class _CommentWidgetState extends State<CommentWidget>
         GestureDetector(
           behavior: HitTestBehavior.opaque,
           onLongPressStart: (details) {
-            _showPopupMenu(details.globalPosition);
-           /* setState(() {
-              isSelectingItem = true;
-            });*/
           },
-
-/*            onLongPress: () {
-            //widget.selectCallback(widget.cmt, false, widget.cmt.id);
-
-            //setState(() {});
-          },*/
           child: Container(
             padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
             decoration: BoxDecoration(
