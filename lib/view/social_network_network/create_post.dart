@@ -12,6 +12,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+import 'package:swipeable_page_route/swipeable_page_route.dart';
 import 'package:video_player/video_player.dart';
 import '../../providers/tourist_provider.dart';
 import 'image_item_widget.dart';
@@ -232,10 +233,9 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
                           ));*/
                       Navigator.push(
                         context,
-                        PageRouteBuilder(
+                        SwipeablePageRoute(
                           transitionDuration: const Duration(milliseconds: 300),
-                          transitionsBuilder: (BuildContext context, Animation<double> animation,
-                              Animation<double> secondaryAnimation, Widget child) {
+                          transitionBuilder: (context, animation, secondaryAnimation, isSwipeGesture, child){
                             // Use a custom transition animation
                             return SlideTransition(
                               position: Tween<Offset>(
@@ -245,8 +245,7 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
                               child: child,
                             );
                           },
-                          pageBuilder: (BuildContext context, Animation<double> animation,
-                              Animation<double> secondaryAnimation) {
+                          builder: (context) {
                             return CompleteUploadPage(
                                 medias: isMultiSelect
                                     ? selectedList
@@ -573,7 +572,13 @@ class _CreatePostState extends State<CreatePost> with TickerProviderStateMixin {
                     splashColor: Colors.transparent,
                     constraints: const BoxConstraints(),
                     onPressed: () {
-                      _requestAssets();
+                      Fluttertoast.showToast(
+                          msg: 'On developing',
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.CENTER,
+                          timeInSecForIosWeb: 1,
+                          textColor: Colors.white,
+                          fontSize: 16.0);
                     },
                     icon: const Icon(
                       Icons.camera_alt_outlined,
