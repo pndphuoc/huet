@@ -16,6 +16,8 @@ import '../../constants/user_info.dart' as user_constants;
 import 'auth_service.dart';
 import 'package:hue_t/colors.dart' as colors;
 
+import 'favorite_page.dart';
+
 class ProfileUser extends StatefulWidget {
   const ProfileUser({Key? key}) : super(key: key);
 
@@ -297,9 +299,10 @@ class _ProfileUserState extends State<ProfileUser> {
             children: [
               GestureDetector(
                 onTap: () {
-                  /*user_constants.user == null
-                      ? accountNavigator(context,  AuthService().handleAuthState(FavoritePage()))
-                      : Container();*/
+                  user_constants.user == null
+                      ? accountNavigator(context,  AuthService().handleAuthState(const HueT(),const FavoritePage()))
+                      : accountNavigator(context, const FavoritePage());
+
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
