@@ -1,14 +1,24 @@
+import 'dart:async';
 import 'dart:ui';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/colors.dart';
+import 'package:hue_t/providers/favorite_provider.dart';
+import 'package:hue_t/providers/user_provider.dart';
+import 'package:hue_t/view/profileuser/edit_profile.dart';
 import 'package:hue_t/view/sign_in_out/register_user.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:provider/provider.dart';
 import 'package:rive/rive.dart';
 import '../../conponents/AnimatedBtn.dart';
 import '../../main.dart';
 import 'package:hue_t/colors.dart';
 import '../profileuser/auth_service.dart';
+import '../../constants/user_info.dart' as user_constants;
 
 class SignInPage extends StatefulWidget {
   const SignInPage({Key? key}) : super(key: key);
@@ -17,10 +27,21 @@ class SignInPage extends StatefulWidget {
   State<SignInPage> createState() => _SignInPageState();
 }
 
-
-class _SignInPageState extends State<SignInPage> {
-  late RiveAnimationController _btnAnimationController;
+class _SignInPageState extends State<SignInPage>
+    with SingleTickerProviderStateMixin {
   bool isShowSignInDialog = false;
+  late RiveAnimationController _btnAnimationController;
+
+  bool isLoading = false;
+
+  List<ColorTween> tweenAnimations = [];
+  int tweenIndex = 0;
+  late AnimationController controller;
+  List<Animation<Color?>> colorAnimations = [];
+
+  final _formkey = GlobalKey<FormState>();
+  String? email;
+  String? password;
 
   @override
   void initState() {
@@ -29,6 +50,34 @@ class _SignInPageState extends State<SignInPage> {
       autoplay: false,
     );
     super.initState();
+    // controller = AnimationController(
+    //   vsync: this,
+    //   duration: duration,
+    // );
+    // for (int i = 0; i < colors.length - 1; i++) {
+    //   tweenAnimations.add(ColorTween(begin: colors[i], end: colors[i + 1]));
+    // }
+    // tweenAnimations
+    //     .add(ColorTween(begin: colors[colors.length - 1], end: colors[0]));
+    // for (int i = 0; i < colors.length; i++) {
+    //   Animation<Color?> animation = tweenAnimations[i].animate(CurvedAnimation(
+    //       parent: controller,
+    //       curve: Interval((1 / colors.length) * (i + 1) - 0.05,
+    //           (1 / colors.length) * (i + 1),
+    //           curve: Curves.linear)));
+    //
+    //   colorAnimations.add(animation);
+    // }
+    // if (kDebugMode) {
+    //   print(colorAnimations.length);
+    // }
+    // tweenIndex = 0;
+    // timer = Timer.periodic(duration, (Timer t) {
+    //   setState(() {
+    //     tweenIndex = (tweenIndex + 1) % colors.length;
+    //   });
+    // });
+    // controller.forward();
   }
 
   @override
@@ -36,48 +85,65 @@ class _SignInPageState extends State<SignInPage> {
     return Scaffold(
       backgroundColor: primaryColor,
       resizeToAvoidBottomInset: true,
-      body: SingleChildScrollView(
-        child: Stack(children: [
-          Positioned(
-            width: MediaQuery.of(context).size.width * 1.7,
-            left: 100,
-            bottom: 100,
-            child: Image.asset(
-              "assets/Backgrounds/Spline.png",
+      body: Form(
+        key: _formkey,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Stack(children: [
+            Positioned(
+              width: MediaQuery.of(context).size.width * 1.7,
+              left: 100,
+              bottom: 100,
+              child: Image.asset(
+                "assets/Backgrounds/Spline.png",
+              ),
             ),
-          ),
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-              child: const SizedBox(),
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                child: const SizedBox(),
+              ),
             ),
-          ),
-          const RiveAnimation.asset(
-            "assets/RiveAssets/shapes.riv",
-          ),
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-              child: const SizedBox(),
+            SizedBox(
+              width: MediaQuery.of(context).size.width,
+              child: const RiveAnimation.asset(
+                "assets/RiveAssets/shapes.riv",
+              ),
             ),
-          ),
-          SizedBox(
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                child: const SizedBox(),
+              ),
+            ),
+            SizedBox(
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
-              child: contentBlock(context),),
-          backButton(context),
-        ]),
+              child: contentBlock(context),
+            ),
+            backButton(context),
+          ]),
+        ),
       ),
     );
   }
 
+  @override
+  // void dispose() {
+  //   timer.cancel();
+  //   controller.dispose();
+  //   super.dispose();
+  // }
+
   contentBlock(BuildContext context) {
-    return Column(
-      children: [
-        headerLogin(context),
-        labelInput(context),
-        buttonLogin(context)
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          headerLogin(context),
+          labelInput(context),
+          buttonLogin(context)
+        ],
+      ),
     );
   }
 
@@ -87,17 +153,20 @@ class _SignInPageState extends State<SignInPage> {
           color: Colors.black.withOpacity(0.3),
           borderRadius: BorderRadius.circular(15)),
       margin: const EdgeInsets.only(top: 40, left: 20),
-      child: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(
-            Icons.arrow_back_outlined,
-            color: Colors.white,
-          ),
-          style: ButtonStyle(
-              shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15))))),
+      child: Consumer<UserProvider>(
+        builder: (context, value, child) => IconButton(
+            onPressed: () {
+              value.isLogin = true;
+              Navigator.pop(context);
+            },
+            icon: const Icon(
+              Icons.arrow_back_outlined,
+              color: Colors.white,
+            ),
+            style: ButtonStyle(
+                shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15))))),
+      ),
     );
   }
 
@@ -134,14 +203,17 @@ class _SignInPageState extends State<SignInPage> {
           children: [
             TextFormField(
               decoration: InputDecoration(
-                focusedBorder:
-                    UnderlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                errorStyle: const TextStyle(color: Colors.red),
+                focusedBorder: UnderlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none),
                 filled: true,
                 enabledBorder: const OutlineInputBorder(
                   borderSide: BorderSide.none,
                   borderRadius: BorderRadius.all(Radius.circular(10)),
                 ),
-                fillColor: const Color.fromARGB(255, 235, 235, 235).withOpacity(0.6),
+                fillColor:
+                    const Color.fromARGB(255, 235, 235, 235).withOpacity(0.6),
                 hintText: 'Enter your mail',
                 labelStyle: const TextStyle(color: Colors.black54),
                 labelText: 'Email',
@@ -151,9 +223,14 @@ class _SignInPageState extends State<SignInPage> {
                 ),
               ),
               validator: (value) {
-                if (value == null) {
-                  return 'Your email';
+                if (value!.isEmpty) {
+                  return "Không được để trống";
                 }
+                if (!EmailValidator.validate(value)) {
+                  return "Email nhập không hợp lệ !";
+                }
+
+                email = value;
                 return null;
               },
             ),
@@ -162,15 +239,16 @@ class _SignInPageState extends State<SignInPage> {
             ),
             TextFormField(
               decoration: InputDecoration(
-                focusedBorder:
-                UnderlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-
+                focusedBorder: UnderlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none),
                 filled: true,
                 enabledBorder: const OutlineInputBorder(
                   borderSide: BorderSide.none,
                   borderRadius: BorderRadius.all(Radius.circular(10)),
                 ),
-                fillColor: const Color.fromARGB(255, 235, 235, 235).withOpacity(0.6),
+                fillColor:
+                    const Color.fromARGB(255, 235, 235, 235).withOpacity(0.6),
                 hintText: 'Enter your password',
                 labelStyle: const TextStyle(color: Colors.black54),
                 labelText: 'Password',
@@ -180,12 +258,27 @@ class _SignInPageState extends State<SignInPage> {
                 ),
               ),
               validator: (value) {
-                if (value == null) {
-                  return 'Your email';
+                if (value!.isEmpty) {
+                  return "Không được để trống";
                 }
+
+                password = value;
                 return null;
               },
             ),
+            const SizedBox(
+              height: 15,
+            ),
+            Consumer<UserProvider>(
+                builder: (context, value, child) => value.isLogin
+                    ? const SizedBox(
+                        height: 0,
+                      )
+                    : Text(
+                        'Tài khoản hoặc mật khẩu không đúng!',
+                        style: GoogleFonts.readexPro(
+                            fontWeight: FontWeight.w400, color: Colors.red),
+                      )),
             const SizedBox(
               height: 20,
             )
@@ -201,20 +294,45 @@ class _SignInPageState extends State<SignInPage> {
         const SizedBox(
           height: 10,
         ),
-        AnimatedBtn(
-            text: "LOGIN",
-            btnAnimationController: _btnAnimationController,
-            press: (){
-              _btnAnimationController.isActive = true;
-              Future.doWhile(() async {
-                const RiveAnimation.asset(
-                  "assets/RiveAssets/success.riv",
-                );
-                await Future.delayed(const Duration(milliseconds: 1500), () => Navigator.push(context,MaterialPageRoute(builder: (context) => const HueT())),);
-                return true;
-              }
-              );
-            }
+        Consumer<FavoriteProvider>(
+          builder: (context, value1, child) => Consumer<UserProvider>(
+            builder: (context, value, child) => AnimatedBtn(
+                text: "LOGIN",
+                btnAnimationController: _btnAnimationController,
+                press: () {
+                  _btnAnimationController.isActive = true;
+                  if (_formkey.currentState!.validate()) {
+                    Future.doWhile(() async {
+                      const RiveAnimation.asset(
+                        "assets/RiveAssets/success.riv",
+                      );
+
+                      setState(() async {
+                        value.isLogin = false;
+
+                        await value.login(email!, password!);
+                        if (value.isLogin) {
+                          await Future.delayed(
+                              const Duration(milliseconds: 2000));
+                          value1.getAll(user_constants.user!.uid);
+                          // ignore: use_build_context_synchronously
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: ((context) => const HueT(
+                                        index: 1,
+                                      ))),
+                              (route) => false);
+                        } else {
+                          setState(() {});
+                        }
+                      });
+
+                      return true;
+                    });
+                  } else {}
+                }),
+          ),
         ),
         const SizedBox(
           height: 10,
@@ -230,48 +348,66 @@ class _SignInPageState extends State<SignInPage> {
         Container(
           margin: const EdgeInsets.only(left: 30, right: 30),
           height: 60,
-          child: ElevatedButton(
-            onPressed: () {
-              AuthService().signInWithGoogle();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40),
+          child: Consumer<UserProvider>(
+            builder: (context, value, child) => ElevatedButton(
+              onPressed: () async {
+                await AuthService().signInWithGoogle();
+                await value
+                    .checkEmail(FirebaseAuth.instance.currentUser!.email!);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(40),
+                ),
               ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Image.asset(
-                  'assets/images/profileuser/google_logo.png',
-                  width: 30,
-                  height: 30,
-                ),
-                Text(
-                  'Continue with Google',
-                  style: GoogleFonts.readexPro(
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black,
-                      fontSize: 17),
-                ),
-                const SizedBox(
-                  width: 30,
-                )
-              ],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Image.asset(
+                    'assets/images/profileuser/google_logo.png',
+                    width: 30,
+                    height: 30,
+                  ),
+                  Text(
+                    'Continue with Google',
+                    style: GoogleFonts.readexPro(
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black,
+                        fontSize: 17),
+                  ),
+                  const SizedBox(
+                    width: 30,
+                  )
+                ],
+              ),
             ),
           ),
         ),
-        const SizedBox(height: 15,),
+        const SizedBox(
+          height: 15,
+        ),
         GestureDetector(
           onTap: () {
-            Navigator.push(context,MaterialPageRoute(builder: (context) => const RegisterUser()));
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => AuthService()
+                        .handleAuthState(const HueT(), const RegisterUser())));
           },
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("Don't have an account? ", style: GoogleFonts.readexPro(fontWeight: FontWeight.w300, color: Colors.white),),
-              Text("Register Now", style: GoogleFonts.readexPro(fontWeight: FontWeight.w500, color: Colors.black87),)
+              Text(
+                "Don't have an account? ",
+                style: GoogleFonts.readexPro(
+                    fontWeight: FontWeight.w300, color: Colors.white),
+              ),
+              Text(
+                "Register Now",
+                style: GoogleFonts.readexPro(
+                    fontWeight: FontWeight.w500, color: Colors.black87),
+              )
             ],
           ),
         ),

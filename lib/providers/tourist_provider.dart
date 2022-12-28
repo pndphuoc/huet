@@ -9,7 +9,7 @@ import 'package:tiengviet/tiengviet.dart';
 
 class TouristAttractionProvider extends ChangeNotifier {
   List<TouristAttraction> list = [];
-
+  bool isloading = true;
   Future<void> getAll() async {
     String apiURL = "${url.url}/api/tourist";
     var client = http.Client();

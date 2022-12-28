@@ -3,7 +3,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hue_t/model/social_network/postModel.dart';
+import 'package:hue_t/model/social_network/post_model.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'dart:io';
 import 'package:path/path.dart' as p;
@@ -12,8 +12,9 @@ import 'package:video_compress/video_compress.dart';
 import '../../model/social_network/media_model.dart';
 import 'constants.dart' as constants;
 import 'image_item_widget.dart';
+import 'package:hue_t/constants/user_info.dart';
 
-typedef void ResultCallback(bool val);
+typedef void ResultCallback(String val);
 
 class UploadingWidget extends StatefulWidget {
   const UploadingWidget({Key? key, required this.list, this.caption, required this.attractionId, required this.callback}) : super(key: key);
@@ -90,32 +91,32 @@ class _UploadingWidgetState extends State<UploadingWidget> {
     return mediaList;
   }
 
-  Future uploadPostContent(List<Media> mediaList) async {
-/*    List<Object> mediaJson = [];
-    for (int i=0 ; i<mediaList.length; i++) {
-      mediaJson.add(mediaList[i].toJson());
-    }*/
-
+  Future<String> uploadPostContent(List<Media> mediaList) async {
+    print("tai man hinh upload: ${user!.uid}");
     final docPost = FirebaseFirestore.instance.collection('post').doc();
     final post = PostModel(
-      attractionID: widget.attractionId,
-      userID: 1,
+      attractionID: int.parse(widget.attractionId),
+      userID: user!.uid,
       caption: widget.caption!,
       isDeleted: false,
-      likeCount: 0,
-      commentCount: 0,
+      likedUsers: [],
+      comments: [],
       medias: mediaList,
       postID: docPost.id,
-      createDate: DateTime.now()
+      createDate: DateTime.now(),
+      likesCount: 0,
+      commentsCount: 0
     );
 
     final json = post.toJson();
-    return docPost.set(json);
+    docPost.set(json);
+    return post.postID;
   }
 
   Future<void> createPost() async {
-    await uploadPostContent(await uploadMedia());
+    String postId= await uploadPostContent(await uploadMedia());
     constants.isUploading = false;
+    widget.callback(postId);
     constants.postInfomation = null;
   }
 
@@ -131,9 +132,6 @@ class _UploadingWidgetState extends State<UploadingWidget> {
       file.absolute.path, outPath,
       quality: 75
     );
-
-    print(file.lengthSync());
-    print(result?.lengthSync());
     return result;
   }
 
@@ -142,7 +140,7 @@ class _UploadingWidgetState extends State<UploadingWidget> {
     super.initState();
     createPost();
 
-    widget.callback(true);
+
   }
 
   Widget buildUploadingProgress(BuildContext context, double progress) {

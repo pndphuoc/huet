@@ -16,12 +16,12 @@
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <application
-        android:label="hue_t"
+        android:label="HueTravel"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/launcher_icon"
         android:requestLegacyExternalStorage="true">
        <meta-data android:name="com.google.android.geo.API_KEY"
-           android:value="AIzaSyDNI_ZWPqvdS6r6gPVO50I4TlYkfkZdXh8"/>
+           android:value="AIzaSyA66KwUrjxcFG5u0exynlJ45CrbrNe3hEc"/>
 
         <activity
             android:name=".MainActivity"

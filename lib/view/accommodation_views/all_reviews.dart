@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hue_t/animation/show_right.dart';
-import '../colors.dart' as colors;
-import '../model/reviewModel.dart';
+import '../../colors.dart' as colors;
+import '../../model/accommodation/reviewModel.dart';
 
 class AllReviews extends StatefulWidget {
   const AllReviews({Key? key, required this.hotelId}) : super(key: key);
@@ -17,8 +17,8 @@ List<reviewModel> reviewsList = [
   reviewModel(
       id: 1,
       userId: 1,
-      rating: 5,
-      review: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      rating: 3,
+      review: "Khách sạn có ma",
       images: [
         "https://www.gannett-cdn.com/-mm-/05b227ad5b8ad4e9dcb53af4f31d7fbdb7fa901b/c=0-64-2119-1259/local/-/media/USATODAY/USATODAY/2014/08/13/1407953244000-177513283.jpg"
       ],
@@ -85,22 +85,23 @@ class _AllReviewsState extends State<AllReviews> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
             SliverAppBar(
               backgroundColor: colors.primaryColor,
-              title: Text('Reviews'),
+              title: const Text('Reviews'),
               pinned: true,
               floating: true,
               forceElevated: innerBoxIsScrolled,
               bottom: TabBar(
                 tabs: <Tab>[
-                  Tab(text: 'All reviews'),
-                  Tab(text: 'Photos/Videos'),
+                  const Tab(text: 'All reviews'),
+                  const Tab(text: 'Photos/Videos'),
                   Tab(
                       child: RichText(
-                    text: TextSpan(children: [
+                    text: const TextSpan(children: [
                       TextSpan(text: "Rating "),
                       WidgetSpan(child: Icon(Icons.keyboard_arrow_down))
                     ]),
@@ -115,9 +116,9 @@ class _AllReviewsState extends State<AllReviews> with TickerProviderStateMixin {
           controller: _tabController,
           children: [
             SingleChildScrollView(
-              physics: BouncingScrollPhysics(),
+              physics: const BouncingScrollPhysics(),
               child: Container(
-                margin: EdgeInsets.all(20),
+                margin: const EdgeInsets.all(20),
                 child: Column(
                   children: [
                     ...reviewsList.map(
@@ -127,9 +128,9 @@ class _AllReviewsState extends State<AllReviews> with TickerProviderStateMixin {
               ),
             ),
             SingleChildScrollView(
-              physics: BouncingScrollPhysics(),
+              physics: const BouncingScrollPhysics(),
               child: Container(
-                margin: EdgeInsets.all(20),
+                margin: const EdgeInsets.all(20),
                 child: Column(
                   children: [
                     ...reviewsList
@@ -141,7 +142,7 @@ class _AllReviewsState extends State<AllReviews> with TickerProviderStateMixin {
                 ),
               ),
             ),
-            Icon(Icons.directions_car, size: 350),
+            const Icon(Icons.directions_car, size: 350),
           ],
         ),
       ),
@@ -150,9 +151,10 @@ class _AllReviewsState extends State<AllReviews> with TickerProviderStateMixin {
 
   reviewsBlock(BuildContext context, int index) {
     return ShowRight(
+        delay: 100 * index,
         child: Container(
-          margin: EdgeInsets.only(bottom: 15),
-          padding: EdgeInsets.all(10),
+          margin: const EdgeInsets.only(bottom: 15),
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(15),
               color: colors.reviewItemColor),
@@ -161,10 +163,10 @@ class _AllReviewsState extends State<AllReviews> with TickerProviderStateMixin {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                    margin: EdgeInsets.only(right: 10),
+                    margin: const EdgeInsets.only(right: 10),
                     height: 30,
                     width: 30,
-                    child: CircleAvatar(
+                    child: const CircleAvatar(
                       backgroundImage:
                           AssetImage("assets/images/hotel/avatar.png"),
                     )),
@@ -174,7 +176,7 @@ class _AllReviewsState extends State<AllReviews> with TickerProviderStateMixin {
                     children: [
                       Text(
                         "Incognito",
-                        style: GoogleFonts.montserrat(
+                        style: GoogleFonts.readexPro(
                             color: Colors.black,
                             fontSize: 15,
                             fontWeight: FontWeight.w600),
@@ -198,17 +200,17 @@ class _AllReviewsState extends State<AllReviews> with TickerProviderStateMixin {
                         allowHalfRating: true,
                         initialRating: reviewsList[index].rating.toDouble(),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
-                      Text(reviewsList[index].review!),
-                      SizedBox(
+                      Text(reviewsList[index].review!, style: GoogleFonts.readexPro(color: Colors.black),),
+                      const SizedBox(
                         height: 10,
                       ),
                       Wrap(
                         children: [
                           if (reviewsList[index].images != null)
-                            ...reviewsList[index].images!.map((i) => Container(
+                            ...reviewsList[index].images!.map((i) => SizedBox(
                                   width: 70,
                                   child: AspectRatio(
                                     aspectRatio: 1 / 1,
@@ -222,12 +224,12 @@ class _AllReviewsState extends State<AllReviews> with TickerProviderStateMixin {
                                 ))
                         ],
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 5,
                       ),
                       Text(
                         reviewsList[index].reviewDate.toString(),
-                        style: GoogleFonts.montserrat(
+                        style: GoogleFonts.readexPro(
                             color: Colors.grey,
                             fontWeight: FontWeight.w300,
                             fontSize: 13),
@@ -238,7 +240,6 @@ class _AllReviewsState extends State<AllReviews> with TickerProviderStateMixin {
               ],
             ),
           ),
-        ),
-        delay: 100 * index);
+        ));
   }
 }

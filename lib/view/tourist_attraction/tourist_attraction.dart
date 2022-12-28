@@ -1,45 +1,32 @@
 import 'dart:math';
 
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hue_t/animation/show_up.dart';
 import 'package:hue_t/colors.dart' as color;
-import 'package:hue_t/view/home/home.dart';
 import 'package:hue_t/model/attraction/tourist_attraction.dart' as tourist;
 import 'package:hue_t/providers/tourist_provider.dart';
 import 'package:hue_t/view/tourist_attraction/filter_tourist_attraction.dart';
 import 'package:hue_t/view/tourist_attraction/tourist_attraction_detail.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:swipeable_page_route/swipeable_page_route.dart';
+
+import '../../animation/show_right.dart';
 
 class DataModel {
   final String title;
   final String imageName;
   final double price;
+
   DataModel(
     this.title,
     this.imageName,
     this.price,
   );
 }
-
-List<DataModel> dataList = [
-  DataModel(
-      "Đại Nội Huế",
-      "https://localvietnam.com/wp-content/uploads/2021/04/hue-imperial-gate-1024x683.jpg",
-      300.8),
-  DataModel(
-      "Lăng Tự Đức",
-      "https://baothuathienhue.vn/image/fckeditor/upload/2019/20191219/images/yeu%20hue%203.jpg",
-      245.2),
-  DataModel(
-      "Núi Bạch Mã",
-      "https://statics.vinpearl.com/Bach%20Ma%20Hue_1624595212_1661326997.jpg",
-      168.2),
-  DataModel(
-      "Trường Quốc Học Huế",
-      "https://statics.vinpearl.com/dia-diem-du-lich-Hue-04_1632724613.jpg",
-      136.7),
-];
 
 class TouristAttraction extends StatefulWidget {
   const TouristAttraction({super.key});
@@ -51,7 +38,8 @@ class TouristAttraction extends StatefulWidget {
 class _TouristAttractionState extends State<TouristAttraction> {
   late PageController _pageController;
   final int _currentPage = 0;
-  bool isloading = true;
+  bool isLoading = true;
+
   @override
   void initState() {
     super.initState();
@@ -68,18 +56,18 @@ class _TouristAttractionState extends State<TouristAttraction> {
   @override
   Widget build(BuildContext context) {
     var productProvider = Provider.of<TouristAttractionProvider>(context);
-    if (isloading) {
+    if (productProvider.isloading) {
       (() async {
         await productProvider.getAll();
 
         setState(() {
-          isloading = false;
+          productProvider.isloading = false;
         });
       })();
     }
     return Scaffold(
       backgroundColor: color.backgroundColor,
-      body: isloading
+      body: productProvider.isloading
           ? Center(
               child: LoadingAnimationWidget.staggeredDotsWave(
                   color: color.primaryColor, size: 50),
@@ -88,97 +76,110 @@ class _TouristAttractionState extends State<TouristAttraction> {
               onTap: () {
                 FocusScope.of(context).requestFocus(FocusNode());
               },
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 100.0),
-                  child: Column(
-                    children: [
-                      header(context),
-                      AspectRatio(
-                        aspectRatio: 0.85,
-                        child: PageView.builder(
-                            itemCount: productProvider.list.length,
-                            physics: const ClampingScrollPhysics(),
-                            controller: _pageController,
-                            itemBuilder: (context, index) {
-                              return carouselView(index);
-                            }),
-                      ),
-                      categories(context)
-                    ],
+              child: Stack(children: [
+                SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 100.0),
+                    child: Column(
+                      children: [
+                        header(context),
+                        AspectRatio(
+                          aspectRatio: 0.85,
+                          child: PageView.builder(
+                              itemCount: productProvider.list.length,
+                              physics: const BouncingScrollPhysics(),
+                              controller: _pageController,
+                              itemBuilder: (context, index) {
+                                return carouselView(index);
+                              }),
+                        ),
+                        categories(context)
+                      ],
+                    ),
                   ),
                 ),
-              ),
+                Positioned(top: 35, left: 20, child: backButton())
+              ]),
             ),
     );
   }
 
   Widget header(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        children: [
-          Container(
-            width: MediaQuery.of(context).size.width,
-            height: 60,
-            decoration: const BoxDecoration(),
-            child: Center(
-                child: Text(
-              "HUE TOURIST ATTRACTION",
-              style: GoogleFonts.readexPro(
-                  fontSize: 20, fontWeight: FontWeight.bold),
-            )),
-          ),
-          TextField(
-            onSubmitted: (value) {
-              if (value != "") {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => FilterTourist(
-                              categoryId: 0,
-                              searchValue: value,
-                            )));
-              }
-            },
-            decoration: const InputDecoration(
-                filled: true,
-                fillColor: Color.fromARGB(255, 240, 237, 237),
-                hintText: "Search places to visit ...",
-                hintStyle: TextStyle(color: Color.fromARGB(255, 206, 205, 205)),
-                prefixIcon: Icon(Icons.search),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(25.0)),
-                  borderSide: BorderSide(
-                      width: 0.2, color: Color.fromARGB(255, 255, 255, 255)),
-                ),
-                focusedBorder: OutlineInputBorder(
+    return ShowUp(
+      delay: 0,
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            Container(
+              margin: const EdgeInsets.only(top: 10),
+              width: MediaQuery.of(context).size.width,
+              height: 60,
+              decoration: const BoxDecoration(),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "HUE ATTRACTIONS",
+                    style: GoogleFonts.readexPro(
+                        fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+            TextField(
+              onSubmitted: (value) {
+                if (value != "") {
+                  Navigator.of(context).push(SwipeablePageRoute(
+                      builder: (BuildContext context) => FilterTourist(
+                            categoryId: 0,
+                            searchValue: value,
+                          )));
+                }
+              },
+              decoration: const InputDecoration(
+                  filled: true,
+                  fillColor: Color.fromARGB(255, 240, 237, 237),
+                  hintText: "Search places to visit ...",
+                  hintStyle:
+                      TextStyle(color: Color.fromARGB(255, 206, 205, 205)),
+                  prefixIcon: Icon(Icons.search),
+                  enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(25.0)),
                     borderSide: BorderSide(
-                        width: 0.2,
-                        color: Color.fromARGB(255, 255, 255, 255)))),
-          )
-        ],
+                        width: 0.2, color: Color.fromARGB(255, 255, 255, 255)),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(25.0)),
+                      borderSide: BorderSide(
+                          width: 0.2,
+                          color: Color.fromARGB(255, 255, 255, 255)))),
+            )
+          ],
+        ),
       ),
     );
   }
 
   Widget carouselView(int index) {
-    return AnimatedBuilder(
-      animation: _pageController,
-      builder: (context, child) {
-        double value = 0.0;
-        if (_pageController.position.haveDimensions) {
-          value = index.toDouble() - (_pageController.page ?? 0);
-          value = (value * 0.038).clamp(-1, 1);
-        }
-        return Consumer<TouristAttractionProvider>(
-          builder: (context, value1, child) => Transform.rotate(
-            angle: pi * value,
-            child: carouselCard(value1.list[index]),
-          ),
-        );
-      },
+    return ShowUp(
+      delay: 0,
+      child: AnimatedBuilder(
+        animation: _pageController,
+        builder: (context, child) {
+          double value = 0.0;
+          if (_pageController.position.haveDimensions) {
+            value = index.toDouble() - (_pageController.page ?? 0);
+            value = (value * 0.038).clamp(-1, 1);
+          }
+          return Consumer<TouristAttractionProvider>(
+            builder: (context, value1, child) => Transform.rotate(
+              angle: pi * value,
+              child: carouselCard(value1.list[index]),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -193,27 +194,40 @@ class _TouristAttractionState extends State<TouristAttraction> {
               tag: data.title,
               child: GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => TouristAttractionDetail(
-                                item: data,
-                              )));
+                  Navigator.of(context).push(SwipeablePageRoute(
+                      builder: (BuildContext context) =>
+                          TouristAttractionDetail(
+                            item: data,
+                          )));
                 },
                 child: Container(
                   decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(30),
-                      image: DecorationImage(
-                          image: NetworkImage(
-                              "https://khamphahue.com.vn/${data.image}"),
-                          fit: BoxFit.cover),
                       boxShadow: const [
                         BoxShadow(
                             offset: Offset(0, 4),
                             blurRadius: 4,
                             color: Colors.black26)
                       ]),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(30),
+                    child: CachedNetworkImage(
+                      imageUrl: "https://khamphahue.com.vn/${data.image}",
+                      fit: BoxFit.cover,
+                      progressIndicatorBuilder:
+                          (context, url, downloadProgress) => Center(
+                        child: SizedBox(
+                          height: 50,
+                          width: 50,
+                          child: CircularProgressIndicator(
+                              value: downloadProgress.progress),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) =>
+                          const Icon(Icons.error),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -248,6 +262,25 @@ class _TouristAttractionState extends State<TouristAttraction> {
     );
   }
 
+  Widget backButton() {
+    return Container(
+      decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(15)),
+      child: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: const Icon(
+            Icons.arrow_back_outlined,
+            color: Colors.white,
+          ),
+          style: ButtonStyle(
+              shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15))))),
+    );
+  }
+
   Widget categories(BuildContext context) {
     return SizedBox(
       width: MediaQuery.of(context).size.width,
@@ -268,7 +301,7 @@ class _TouristAttractionState extends State<TouristAttraction> {
                 "Temples",
                 "https://sayhellovietnam.com/wp-content/uploads/2020/03/hue-pagoda.jpg",
                 "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/1b/23/9e/e2/pagoda.jpg?w=1200&h=900&s=1",
-                "https://sdl.thuathienhue.gov.vn/UploadFiles/TinTuc/2020/7/4/huetourism_thanh_pho_lang_mo_16.png",
+                "https://previews.agefotostock.com/previewimage/medibigoff/772edb9ede97b6e4987867951744a221/bep-bew1a4253e.jpg",
                 2),
             items(
                 context,
@@ -300,113 +333,116 @@ class _TouristAttractionState extends State<TouristAttraction> {
   Widget items(BuildContext context, String title, String image1, String image2,
       String image3, int categoryid) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => FilterTourist(
-                      categoryId: categoryid,
-                      searchValue: "",
-                    )));
-      },
-      child: Container(
-        margin: const EdgeInsets.only(top: 20),
-        padding:
-            const EdgeInsets.only(top: 15, bottom: 15, left: 30, right: 30),
-        width: double.infinity,
-        height: 175,
-        decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(0),
-            boxShadow: const [
-              BoxShadow(
-                  offset: Offset(0, 4),
-                  blurRadius: 4,
-                  color: Color.fromARGB(66, 216, 214, 214))
-            ]),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.readexPro(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black87),
-                ),
-                const Icon(
-                  Icons.arrow_forward_ios_outlined,
-                  size: 20,
-                  color: Colors.black54,
-                )
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  width: 105,
-                  height: 105,
-                  decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.network(
-                        image1,
-                        width: 90,
-                        height: 90,
-                        fit: BoxFit.cover,
+        onTap: () {
+          Navigator.of(context).push(SwipeablePageRoute(
+              builder: (BuildContext context) => FilterTourist(
+                    categoryId: categoryid,
+                    searchValue: "",
+                  )));
+        },
+        child: BounceInLeft(
+          child: Container(
+            margin: const EdgeInsets.only(top: 20),
+            padding:
+                const EdgeInsets.only(top: 15, bottom: 15, left: 30, right: 30),
+            width: double.infinity,
+            height: 175,
+            decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(0),
+                boxShadow: const [
+                  BoxShadow(
+                      offset: Offset(0, 4),
+                      blurRadius: 4,
+                      color: Color.fromARGB(66, 216, 214, 214))
+                ]),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        title,
+                        style: GoogleFonts.readexPro(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black87),
                       ),
-                    ),
+                      const Icon(
+                        Icons.arrow_forward_ios_outlined,
+                        size: 20,
+                        color: Colors.black54,
+                      )
+                    ],
                   ),
-                ),
-                Container(
-                  width: 105,
-                  height: 105,
-                  decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.network(
-                        image2,
-                        width: 90,
-                        height: 90,
-                        fit: BoxFit.cover,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        width: 105,
+                        height: 105,
+                        decoration: BoxDecoration(
+                            color: Colors.grey.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Center(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: CachedNetworkImage(
+                              imageUrl: image1,
+                              width: 90,
+                              height: 90,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ),
-                Container(
-                  width: 105,
-                  height: 105,
-                  decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.network(
-                        image3,
-                        width: 90,
-                        height: 90,
-                        fit: BoxFit.cover,
+                      ShowUp(
+                        delay: 200,
+                        child: Container(
+                          width: 105,
+                          height: 105,
+                          decoration: BoxDecoration(
+                              color: Colors.grey.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(10)),
+                          child: Center(
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: CachedNetworkImage(
+                                imageUrl: image2,
+                                width: 90,
+                                height: 90,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                      ShowUp(
+                          delay: 300,
+                          child: Container(
+                            width: 105,
+                            height: 105,
+                            decoration: BoxDecoration(
+                                color: Colors.grey.withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Center(
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: CachedNetworkImage(
+                                  imageUrl: image3,
+                                  width: 90,
+                                  height: 90,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          )),
+                    ],
                   ),
-                )
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
+                ]),
+          ),
+        ));
   }
 }

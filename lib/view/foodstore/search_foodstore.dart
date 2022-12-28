@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hue_t/animation/show_right.dart';
 import 'package:hue_t/view/Foodstore/foodstoredetail.dart';
 import 'package:hue_t/colors.dart' as color;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -12,6 +14,7 @@ import '../../providers/foodstore_provider.dart';
 class SearchFoodStore extends StatefulWidget {
   String value;
   String searchValue;
+
   SearchFoodStore({super.key, required this.value, required this.searchValue});
 
   @override
@@ -25,6 +28,7 @@ class _SearchFoodStoreState extends State<SearchFoodStore> {
   String? value;
   String? valueSearch;
   List<Restaurant> listsearch = [];
+
   @override
   Widget build(BuildContext context) {
     var productProvider = Provider.of<FoodstoreProvider>(context);
@@ -270,8 +274,8 @@ class _SearchFoodStoreState extends State<SearchFoodStore> {
                                           ClipRRect(
                                             borderRadius:
                                                 BorderRadius.circular(5),
-                                            child: Image.network(
-                                                e.image.toString(),
+                                            child: CachedNetworkImage(
+                                                imageUrl: e.image.toString(),
                                                 height: double.infinity,
                                                 width: 90,
                                                 fit: BoxFit.cover),
@@ -442,8 +446,8 @@ class _SearchFoodStoreState extends State<SearchFoodStore> {
                                           ClipRRect(
                                             borderRadius:
                                                 BorderRadius.circular(5),
-                                            child: Image.network(
-                                                e.image.toString(),
+                                            child: CachedNetworkImage(
+                                                imageUrl: e.image.toString(),
                                                 height: double.infinity,
                                                 width: 90,
                                                 fit: BoxFit.cover),
@@ -718,138 +722,141 @@ class _SearchFoodStoreState extends State<SearchFoodStore> {
   Widget items(BuildContext context, List<Restaurant> list) {
     return Column(
       children: [
-        ...list.map((e) => GestureDetector(
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => FoodstoreDetail(item: e)));
-              },
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                width: MediaQuery.of(context).size.width,
-                height: 120,
-                color: Colors.white,
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Row(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(5),
-                        child: Image.network(
-                            e.image == ""
-                                ? "https://media.istockphoto.com/id/1147544807/vector/thumbnail-image-vector-graphic.jpg?s=612x612&w=0&k=20&c=rnCKVbdxqkjlcs3xH87-9gocETqpspHFXu5dIGB4wuM="
-                                : e.image.toString(),
-                            height: double.infinity,
-                            width: 90,
-                            fit: BoxFit.cover),
-                      ),
-                      const SizedBox(
-                        width: 15,
-                      ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(e.title.toString(),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 2,
-                                style: GoogleFonts.readexPro(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w500,
-                                )),
-                            const SizedBox(
-                              height: 4,
-                            ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.star,
-                                      size: 17,
-                                      color: Colors.amber,
-                                    ),
-                                    const SizedBox(
-                                      width: 3,
-                                    ),
-                                    Text(
-                                        e.rating == 0
-                                            ? "No rate"
-                                            : (e.rating! - 5)
-                                                .toStringAsFixed(1),
-                                        style: GoogleFonts.readexPro(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.grey))
-                                  ],
-                                ),
-                                const Padding(
-                                  padding:
-                                      EdgeInsets.only(left: 10.0, right: 10),
-                                  child: Text(
-                                    "|",
-                                    style: TextStyle(
-                                        fontSize: 18, color: Colors.grey),
-                                  ),
-                                ),
-                                Row(
-                                  children: const [
-                                    Icon(Icons.location_on_outlined, size: 17),
-                                    SizedBox(
-                                      width: 3,
-                                    ),
-                                    Text("0.3km")
-                                  ],
-                                ),
-                                const Padding(
-                                  padding:
-                                      EdgeInsets.only(left: 10.0, right: 10),
-                                  child: Text(
-                                    "|",
-                                    style: TextStyle(
-                                        fontSize: 17, color: Colors.grey),
-                                  ),
-                                ),
-                                Text("Closing",
-                                    style: GoogleFonts.readexPro(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w600,
-                                        color: const Color.fromARGB(
-                                            255, 247, 69, 62)))
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 5,
-                            ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                const Icon(
-                                  Icons.person,
-                                  size: 25,
-                                  color: Colors.grey,
-                                ),
-                                const SizedBox(
-                                  width: 5,
-                                ),
-                                Text("Checkin: ${e.checkin}",
-                                    style: GoogleFonts.readexPro(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w400,
-                                        color: const Color.fromARGB(
-                                            255, 100, 99, 99)))
-                              ],
-                            )
-                          ],
+        ...list.map((e) => ShowRight(
+          delay: 100 * list.indexOf(e),
+          child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => FoodstoreDetail(item: e)));
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  width: MediaQuery.of(context).size.width,
+                  height: 120,
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(5),
+                          child: CachedNetworkImage(
+                              imageUrl: e.image == ""
+                                  ? "https://media.istockphoto.com/id/1147544807/vector/thumbnail-image-vector-graphic.jpg?s=612x612&w=0&k=20&c=rnCKVbdxqkjlcs3xH87-9gocETqpspHFXu5dIGB4wuM="
+                                  : e.image.toString(),
+                              height: double.infinity,
+                              width: 90,
+                              fit: BoxFit.cover),
                         ),
-                      )
-                    ],
+                        const SizedBox(
+                          width: 15,
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(e.title.toString(),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 2,
+                                  style: GoogleFonts.readexPro(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                  )),
+                              const SizedBox(
+                                height: 4,
+                              ),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.star,
+                                        size: 17,
+                                        color: Colors.amber,
+                                      ),
+                                      const SizedBox(
+                                        width: 3,
+                                      ),
+                                      Text(
+                                          e.rating == 0
+                                              ? "No rate"
+                                              : (e.rating! - 5)
+                                                  .toStringAsFixed(1),
+                                          style: GoogleFonts.readexPro(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.grey))
+                                    ],
+                                  ),
+                                  const Padding(
+                                    padding:
+                                        EdgeInsets.only(left: 10.0, right: 10),
+                                    child: Text(
+                                      "|",
+                                      style: TextStyle(
+                                          fontSize: 18, color: Colors.grey),
+                                    ),
+                                  ),
+                                  Row(
+                                    children: const [
+                                      Icon(Icons.location_on_outlined, size: 17),
+                                      SizedBox(
+                                        width: 3,
+                                      ),
+                                      Text("0.3km")
+                                    ],
+                                  ),
+                                  const Padding(
+                                    padding:
+                                        EdgeInsets.only(left: 10.0, right: 10),
+                                    child: Text(
+                                      "|",
+                                      style: TextStyle(
+                                          fontSize: 17, color: Colors.grey),
+                                    ),
+                                  ),
+                                  Text("Closing",
+                                      style: GoogleFonts.readexPro(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600,
+                                          color: const Color.fromARGB(
+                                              255, 247, 69, 62)))
+                                ],
+                              ),
+                              const SizedBox(
+                                height: 5,
+                              ),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  const Icon(
+                                    Icons.person,
+                                    size: 25,
+                                    color: Colors.grey,
+                                  ),
+                                  const SizedBox(
+                                    width: 5,
+                                  ),
+                                  Text("Checkin: ${e.checkin}",
+                                      style: GoogleFonts.readexPro(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color: const Color.fromARGB(
+                                              255, 100, 99, 99)))
+                                ],
+                              )
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ))
+        ))
       ],
     );
   }

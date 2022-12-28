@@ -14,6 +14,8 @@ class Weather {
 }
 
 class WeatherProvider extends ChangeNotifier {
+  bool isloading = true;
+
   Weather currentweather = Weather(weather: [
     {'main': '...'}
   ], main: {
